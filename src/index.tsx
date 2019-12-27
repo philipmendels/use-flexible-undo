@@ -56,5 +56,9 @@ export const useInfiniteUndo = () => {
     makeUndoable,
     undo,
     redo,
+    stack: {
+      past,
+      future,
+    },
   };
 };

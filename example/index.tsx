@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 
 const App = () => {
   const [count, setCount] = useState(0);
-  const { undo, redo, makeUndoable } = useInfiniteUndo();
+  const { undo, redo, makeUndoable, stack } = useInfiniteUndo();
   const increment = makeUndoable<number>({
     type: 'INCREMENT',
     do: n => setCount(count => count + n),
@@ -30,6 +30,18 @@ const App = () => {
       <button onClick={() => undo()}> undo </button>
       <button onClick={() => redo()}> redo </button>
       count: {count}
+      <br />
+      <br />
+      {stack.future.map(item => (
+        <div style={{ color: '#DDD' }}>
+          {item.type} payload: {item.payload}
+        </div>
+      ))}
+      {stack.past.reverse().map(item => (
+        <div>
+          {item.type} payload: {item.payload}
+        </div>
+      ))}
     </div>
   );
 };
