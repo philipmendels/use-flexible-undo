@@ -37,7 +37,7 @@ const App = () => {
           {item.type} payload: {item.payload}
         </div>
       ))}
-      {stack.past.reverse().map(item => (
+      {stack.past.map(item => (
         <div>
           {item.type} payload: {item.payload}
         </div>

@@ -21,21 +21,11 @@ export const useInfiniteUndo = () => {
   const [future, setFuture] = useState<StackItem[]>([]);
 
   const undo = useCallback(() => {
-    if (past.length) {
-      const item = past[past.length - 1];
-      actionsRef.current[item.type].undo(item.payload);
-      setPast(past.slice(0, past.length - 1));
-      setFuture(future => [item, ...future]);
-    }
+    shiftStack(past, setPast, setFuture, type => actionsRef.current[type].undo);
   }, [past]);
 
   const redo = useCallback(() => {
-    if (future.length) {
-      const [item, ...rest] = future;
-      actionsRef.current[item.type].do(item.payload);
-      setFuture(rest);
-      setPast(past => [...past, item]);
-    }
+    shiftStack(future, setFuture, setPast, type => actionsRef.current[type].do);
   }, [future]);
 
   const makeUndoable = useCallback(
@@ -45,7 +35,7 @@ export const useInfiniteUndo = () => {
       actionsRef.current[type] = action;
       return (payload: P) => {
         action.do(payload);
-        setPast(past => [...past, { type, payload }]);
+        setPast(past => [{ type, payload }, ...past]);
         setFuture([]);
       };
     },
@@ -56,9 +46,27 @@ export const useInfiniteUndo = () => {
     makeUndoable,
     undo,
     redo,
+    canUndo: () => Boolean(past.length),
+    canRedo: () => Boolean(future.length),
     stack: {
-      past,
-      future,
+      past: [...past],
+      future: [...future].reverse(),
     },
   };
+};
+
+type Setter = React.Dispatch<React.SetStateAction<StackItem[]>>;
+
+const shiftStack = (
+  from: StackItem[],
+  setFrom: Setter,
+  setTo: Setter,
+  action: (type: string) => (payload: any) => void
+) => {
+  if (from.length) {
+    const [item, ...rest] = from;
+    action(item.type)(item.payload);
+    setFrom(rest);
+    setTo(to => [item, ...to]);
+  }
 };
