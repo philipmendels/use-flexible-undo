@@ -5,6 +5,7 @@ import { useInfiniteUndo } from '../.';
 import { useState, useMemo } from 'react';
 
 const App = () => {
+  const [amount, setAmount] = useState(1);
   const [count, setCount] = useState(0);
   const { undo, redo, makeUndoable, stack } = useInfiniteUndo();
   const increment = makeUndoable<number>({
@@ -25,8 +26,16 @@ const App = () => {
 
   return (
     <div>
-      <button onClick={() => increment(3)}> increment </button>
-      <button onClick={() => decrement(2)}> decrement </button>
+      <label>
+        amount:{' '}
+        <input
+          type="number"
+          value={amount}
+          onChange={e => setAmount(Number(e.target.value))}
+        />
+      </label>
+      <button onClick={() => increment(amount)}> increment </button>
+      <button onClick={() => decrement(amount)}> decrement </button>
       <button onClick={() => undo()}> undo </button>
       <button onClick={() => redo()}> redo </button>
       count: {count}
