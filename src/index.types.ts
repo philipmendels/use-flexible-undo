@@ -1,20 +1,35 @@
+/**
+ * Base action map with unique type and do/undo actions.
+ */
 export interface UndoableAction<P> {
-  type: string;
+  type: string; //unique name
   do: (payload: P) => void;
   undo: (payload: P) => void;
 }
+
+/**
+ * Definition for extending the base action map
+ * with custom actions. Keys are mapped to
+ * action names and values to action return types.
+ */
+export interface CustomActionsDefinition {
+  [key: string]: any;
+}
+
+export type InferredAction<
+  P,
+  C extends CustomActionsDefinition | undefined
+> = C extends undefined
+  ? UndoableAction<P>
+  : UndoableAction<P> & CustomActions<P, C>;
 
 export interface CustomActions<
   P,
   C extends CustomActionsDefinition | undefined
 > {
   custom: {
-    [K in keyof C]: (payload: P, type: string) => C[K];
+    [K in keyof C]: CustomAction<P, C[K]>;
   };
-}
-
-export interface CustomActionsDefinition {
-  [key: string]: any;
 }
 
 export type CustomAction<P = any, R = any> = (payload: P, type: string) => R;
@@ -27,13 +42,6 @@ export interface UndoStackItem<P = any> {
   type: string;
   payload: P;
 }
-
-export type InferredAction<
-  P,
-  C extends CustomActionsDefinition | undefined
-> = C extends undefined
-  ? UndoableAction<P>
-  : UndoableAction<P> & CustomActions<P, C>;
 
 export type UndoStackSetter = React.Dispatch<
   React.SetStateAction<UndoStackItem[]>
