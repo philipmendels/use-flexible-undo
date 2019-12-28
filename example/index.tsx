@@ -4,14 +4,26 @@ import * as ReactDOM from 'react-dom';
 import { useInfiniteUndo } from '../.';
 import { useState, useMemo } from 'react';
 
+interface CustomActions {
+  describe: string;
+}
+
 const App = () => {
   const [amount, setAmount] = useState(1);
   const [count, setCount] = useState(0);
-  const { undo, redo, makeUndoable, stack } = useInfiniteUndo();
+
+  //prettier-ignore
+  const { 
+    undo, redo, makeUndoable, stack, getCustomActions 
+  } = useInfiniteUndo<CustomActions>();
+
   const increment = makeUndoable<number>({
     type: 'INCREMENT',
     do: n => setCount(count => count + n),
     undo: n => setCount(count => count - n),
+    custom: {
+      describe: n => `Incremented count by ${n}`,
+    },
   });
 
   const decrement = useMemo(
@@ -20,6 +32,9 @@ const App = () => {
         type: 'DECREMENT',
         do: n => setCount(count => count - n),
         undo: n => setCount(count => count + n),
+        custom: {
+          describe: n => `Removed ${n} from count`,
+        },
       }),
     [makeUndoable]
   );
@@ -41,15 +56,13 @@ const App = () => {
       count: {count}
       <br />
       <br />
-      {stack.future.map(item => (
-        <div style={{ color: '#DDD' }}>
-          {item.type} payload: {item.payload}
+      {stack.future.map((item, index) => (
+        <div key={index} style={{ color: '#DDD' }}>
+          {getCustomActions(item).describe()}
         </div>
       ))}
-      {stack.past.map(item => (
-        <div>
-          {item.type} payload: {item.payload}
-        </div>
+      {stack.past.map((item, index) => (
+        <div key={index}>{getCustomActions(item).describe()}</div>
       ))}
     </div>
   );

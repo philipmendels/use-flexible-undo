@@ -1,24 +1,20 @@
 import { useState, useCallback, useRef } from 'react';
+import {
+  CustomActionsDefinition,
+  InferredAction,
+  UndoStackItem,
+  CustomAction,
+  WrappedCustomActions,
+  UndoStackSetter,
+} from './index.types';
 
-export interface UndoableAction<P> {
-  type: string;
-  describe?: (payload: P) => string;
-  do: (payload: P) => void;
-  undo: (payload: P) => void;
-}
+export const useInfiniteUndo = <
+  C extends CustomActionsDefinition | undefined = undefined
+>() => {
+  const actionsRef = useRef<Record<string, InferredAction<any, C>>>({});
 
-type ActionsRecord = Record<string, UndoableAction<any>>;
-
-interface StackItem {
-  type: string;
-  payload: any;
-}
-
-export const useInfiniteUndo = () => {
-  const actionsRef = useRef<ActionsRecord>({});
-
-  const [past, setPast] = useState<StackItem[]>([]);
-  const [future, setFuture] = useState<StackItem[]>([]);
+  const [past, setPast] = useState<UndoStackItem[]>([]);
+  const [future, setFuture] = useState<UndoStackItem[]>([]);
 
   const undo = useCallback(() => {
     shiftStack(past, setPast, setFuture, type => actionsRef.current[type].undo);
@@ -29,7 +25,7 @@ export const useInfiniteUndo = () => {
   }, [future]);
 
   const makeUndoable = useCallback(
-    <P extends any>(action: UndoableAction<P>) => {
+    <P extends any>(action: InferredAction<P, C>) => {
       const { type } = action;
       console.log('MAKE UNDOABLE', type);
       actionsRef.current[type] = action;
@@ -42,6 +38,23 @@ export const useInfiniteUndo = () => {
     []
   );
 
+  //No need to infer the Payload here
+  const getCustomActions = useCallback((item: UndoStackItem) => {
+    //Use an empty object as C to let TypeScript infer action.custom
+    const action = actionsRef.current[item.type] as InferredAction<any, {}>;
+    if (!action.custom) {
+      throw new Error(
+        `You are getting custom actions for action ${item.type}, but none are registered.`
+      );
+    }
+    return Object.fromEntries(
+      Object.entries(action.custom).map(([key, value]) => [
+        key,
+        () => (value as CustomAction)(item.payload, item.type),
+      ])
+    ) as WrappedCustomActions<C>;
+  }, []);
+
   return {
     makeUndoable,
     undo,
@@ -52,15 +65,14 @@ export const useInfiniteUndo = () => {
       past: [...past],
       future: [...future].reverse(),
     },
+    getCustomActions,
   };
 };
 
-type Setter = React.Dispatch<React.SetStateAction<StackItem[]>>;
-
 const shiftStack = (
-  from: StackItem[],
-  setFrom: Setter,
-  setTo: Setter,
+  from: UndoStackItem[],
+  setFrom: UndoStackSetter,
+  setTo: UndoStackSetter,
   action: (type: string) => (payload: any) => void
 ) => {
   if (from.length) {
