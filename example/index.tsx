@@ -8,36 +8,63 @@ interface CustomActions {
   describe: string;
 }
 
+interface Actions {
+  increment: number;
+  decrement: number;
+}
+
 const App = () => {
   const [amount, setAmount] = useState(1);
   const [count, setCount] = useState(0);
 
   //prettier-ignore
   const { 
-    undo, redo, makeUndoable, stack, getCustomActions 
+    undo, redo, makeUndoables, stack, getCustomActions 
   } = useInfiniteUndo<CustomActions>();
 
-  const increment = makeUndoable<number>({
-    type: 'INCREMENT',
-    do: n => setCount(count => count + n),
-    undo: n => setCount(count => count - n),
-    custom: {
-      describe: n => `Incremented count by ${n}`,
-    },
-  });
-
-  const decrement = useMemo(
+  const { increment, decrement } = useMemo(
     () =>
-      makeUndoable<number>({
-        type: 'DECREMENT',
-        do: n => setCount(count => count - n),
-        undo: n => setCount(count => count + n),
-        custom: {
-          describe: n => `Removed ${n} from count`,
+      makeUndoables<Actions>({
+        increment: {
+          type: 'INCREMENT',
+          do: n => setCount(count => count + n),
+          undo: n => setCount(count => count - n),
+          custom: {
+            describe: n => `Incremented count by ${n}`,
+          },
+        },
+        decrement: {
+          do: n => setCount(count => count - n),
+          undo: n => setCount(count => count + n),
+          custom: {
+            describe: n => `Removed ${n} from count`,
+          },
         },
       }),
-    [makeUndoable]
+    [makeUndoables]
   );
+
+  // const increment = makeUndoable<number>({
+  //   type: 'INCREMENT',
+  //   do: n => setCount(count => count + n),
+  //   undo: n => setCount(count => count - n),
+  //   custom: {
+  //     describe: n => `Incremented count by ${n}`,
+  //   },
+  // });
+
+  // const decrement = useMemo(
+  //   () =>
+  //     makeUndoable<number>({
+  //       type: 'DECREMENT',
+  //       do: n => setCount(count => count - n),
+  //       undo: n => setCount(count => count + n),
+  //       custom: {
+  //         describe: n => `Removed ${n} from count`,
+  //       },
+  //     }),
+  //   [makeUndoable]
+  // );
 
   return (
     <div>

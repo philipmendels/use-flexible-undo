@@ -6,6 +6,7 @@ import {
   CustomAction,
   WrappedCustomActions,
   UndoStackSetter,
+  PartialBy,
 } from './index.types';
 
 export const useInfiniteUndo = <
@@ -38,6 +39,20 @@ export const useInfiniteUndo = <
     []
   );
 
+  const makeUndoables = useCallback(
+    <PR extends Record<string, any>>(
+      map: { [K in keyof PR]: PartialBy<InferredAction<PR[K], C>, 'type'> }
+    ) =>
+      Object.fromEntries(
+        Object.entries(map).map(([key, value]) => [
+          key,
+          //TODO: make this work without type casting
+          makeUndoable({ type: key, ...value } as InferredAction<any, C>),
+        ])
+      ) as { [K in keyof PR]: (p: PR[K]) => void },
+    [makeUndoable]
+  );
+
   //No need to infer the Payload here
   const getCustomActions = useCallback((item: UndoStackItem) => {
     //Use an empty object as C to let TypeScript infer action.custom
@@ -57,6 +72,7 @@ export const useInfiniteUndo = <
 
   return {
     makeUndoable,
+    makeUndoables,
     undo,
     redo,
     canUndo: () => Boolean(past.length),
