@@ -98,3 +98,47 @@ const shiftStack = (
     setTo(to => [item, ...to]);
   }
 };
+
+type Handler<P, S> = (payload: P) => (state: S) => S;
+
+interface UndoableActionHandler<P, S> {
+  do: Handler<P, S>;
+  undo: Handler<P, S>;
+}
+
+interface UAction<T, P> {
+  type: T;
+  payload: P;
+  undo?: boolean;
+}
+
+export const makeUndoableReducer = <
+  S extends any,
+  PR extends Record<string, any>
+>(
+  map: { [K in keyof PR]: UndoableActionHandler<PR[K], S> }
+) => ({
+  reducer: <T extends keyof PR>(
+    state: S,
+    { payload, type, undo }: UAction<T, PR[T]>
+  ) => {
+    const handler = map[type];
+    return handler
+      ? undo
+        ? handler.undo(payload)(state)
+        : handler.do(payload)(state)
+      : state; // TODO: when no handler found return state or throw error?
+  },
+  actions: Object.fromEntries(
+    Object.keys(map).map(<T extends keyof PR>(type: T) => [
+      type,
+      (payload: PR[T], undo?: boolean) => ({
+        type,
+        payload,
+        undo,
+      }),
+    ])
+  ) as {
+    [T in keyof PR]: (payload: PR[T], undo?: boolean) => UAction<T, PR[T]>;
+  },
+});

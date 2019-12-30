@@ -1,8 +1,8 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useInfiniteUndo } from '../.';
-import { useState, useMemo } from 'react';
+import { useInfiniteUndo, makeUndoableReducer } from '../.';
+import { useState, useMemo, useReducer } from 'react';
 
 interface CustomActions {
   describe: string;
@@ -13,9 +13,25 @@ interface Actions {
   decrement: number;
 }
 
+interface State {
+  count: number;
+}
+
+const { reducer, actions } = makeUndoableReducer<State, Actions>({
+  increment: {
+    do: n => state => ({ count: state.count + n }),
+    undo: n => state => ({ count: state.count - n }),
+  },
+  decrement: {
+    do: n => state => ({ count: state.count - n }),
+    undo: n => state => ({ count: state.count + n }),
+  },
+});
+
 const App = () => {
   const [amount, setAmount] = useState(1);
-  const [count, setCount] = useState(0);
+  // const [count, setCount] = useState(0);
+  const [state, dispatch] = useReducer(reducer, { count: 0 });
 
   //prettier-ignore
   const { 
@@ -26,16 +42,15 @@ const App = () => {
     () =>
       makeUndoables<Actions>({
         increment: {
-          type: 'INCREMENT',
-          do: n => setCount(count => count + n),
-          undo: n => setCount(count => count - n),
+          do: n => dispatch({ type: 'increment', payload: n }),
+          undo: n => dispatch(actions.increment(n, true)),
           custom: {
             describe: n => `Incremented count by ${n}`,
           },
         },
         decrement: {
-          do: n => setCount(count => count - n),
-          undo: n => setCount(count => count + n),
+          do: n => dispatch(actions.decrement(n)),
+          undo: n => dispatch(actions.decrement(n, true)),
           custom: {
             describe: n => `Removed ${n} from count`,
           },
@@ -43,6 +58,27 @@ const App = () => {
       }),
     [makeUndoables]
   );
+
+  // const { increment, decrement } = useMemo(
+  //   () =>
+  //     makeUndoables<Actions>({
+  //       increment: {
+  //         do: n => setCount(count => count + n),
+  //         undo: n => setCount(count => count - n),
+  //         custom: {
+  //           describe: n => `Incremented count by ${n}`,
+  //         },
+  //       },
+  //       decrement: {
+  //         do: n => setCount(count => count - n),
+  //         undo: n => setCount(count => count + n),
+  //         custom: {
+  //           describe: n => `Removed ${n} from count`,
+  //         },
+  //       },
+  //     }),
+  //   [makeUndoables]
+  // );
 
   // const increment = makeUndoable<number>({
   //   type: 'INCREMENT',
@@ -80,7 +116,7 @@ const App = () => {
       <button onClick={() => decrement(amount)}> decrement </button>
       <button onClick={() => undo()}> undo </button>
       <button onClick={() => redo()}> redo </button>
-      count: {count}
+      count: {state.count}
       <br />
       <br />
       {stack.future.map((item, index) => (
