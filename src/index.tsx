@@ -120,7 +120,9 @@ export const makeUndoableReducer = <
 ) => ({
   reducer: <T extends keyof PR>(
     state: S,
-    { payload, type, undo }: UAction<T, PR[T]>
+    // typing action param as UAction<T, PR[T]> in good enough for reducer but
+    // not good enough for inferring the types for dispatch from useReducer
+    { payload, type, undo }: { [K in T]: UAction<K, PR[K]> }[T]
   ) => {
     const handler = map[type];
     return handler
