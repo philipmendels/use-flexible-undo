@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, Dispatch } from 'react';
 import {
   CustomActionsDefinition,
   InferredAction,
@@ -144,3 +144,12 @@ export const makeUndoableReducer = <
     [T in keyof PR]: (payload: PR[T], undo?: boolean) => UAction<T, PR[T]>;
   },
 });
+
+export const useDispatchUndo = <D extends Dispatch<any>>(dispatch: D) =>
+  useCallback(
+    (action: Parameters<D>[0]) => {
+      dispatch({ ...action, undo: true });
+    },
+    // Dispatch is stable but linter does not know
+    [dispatch]
+  );

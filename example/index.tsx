@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useInfiniteUndo, makeUndoableReducer } from '../.';
+import { useInfiniteUndo, makeUndoableReducer, useDispatchUndo } from '../.';
 import { useState, useMemo, useReducer } from 'react';
 
 interface CustomActions {
@@ -32,6 +32,7 @@ const App = () => {
   const [amount, setAmount] = useState(1);
   // const [count, setCount] = useState(0);
   const [state, dispatch] = useReducer(reducer, { count: 0 });
+  const dispatchUndo = useDispatchUndo(dispatch);
 
   //prettier-ignore
   const { 
@@ -43,7 +44,7 @@ const App = () => {
       makeUndoables<Actions>({
         increment: {
           do: n => dispatch({ type: 'increment', payload: n }),
-          undo: n => dispatch(actions.increment(n, true)),
+          undo: n => dispatchUndo(actions.increment(n)),
           custom: {
             describe: n => `Incremented count by ${n}`,
           },
@@ -56,7 +57,7 @@ const App = () => {
           },
         },
       }),
-    [makeUndoables]
+    [makeUndoables, dispatchUndo]
   );
 
   // const { increment, decrement } = useMemo(
