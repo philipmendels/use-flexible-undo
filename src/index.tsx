@@ -7,6 +7,11 @@ import {
   WrappedCustomActions,
   UndoStackSetter,
   PartialBy,
+  PayloadByType,
+  UActions,
+  UActionCreatorsByType,
+  UAction,
+  InferredActionHandler,
 } from './index.types';
 
 export const useInfiniteUndo = <
@@ -125,34 +130,12 @@ const shiftStack = (
   }
 };
 
-type Handler<P, S> = (payload: P) => (state: S) => S;
-
-interface UndoableActionHandler<P, S> {
-  do: Handler<P, S>;
-  undo: Handler<P, S>;
-}
-
-interface UAction<T, P> {
-  type: T;
-  payload: P;
-  undo?: boolean;
-}
-
-type PayloadByType<T extends string = string, P = any> = Record<T, P>;
-
-// typing action param as UAction<T, PBT[T]> is good enough for
-// directly calling the reducer but not good enough for calling the
-// dispatch function that is returned from useReducer.
-type UActions<PBT extends PayloadByType> = {
-  [T in keyof PBT]: UAction<T, PBT[T]>;
-}[keyof PBT];
-
-type UActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: (payload: PBT[T], undo?: boolean) => UAction<T, PBT[T]>;
-};
-
-export const makeUndoableReducer = <S, PBT extends PayloadByType>(
-  map: { [K in keyof PBT]: UndoableActionHandler<PBT[K], S> }
+export const makeUndoableReducer = <
+  S,
+  PBT extends PayloadByType,
+  MBN extends CustomActionsDefinition | undefined = undefined
+>(
+  map: { [K in keyof PBT]: InferredActionHandler<PBT[K], S, MBN> }
 ) => ({
   reducer: (state: S, { payload, type, undo }: UActions<PBT>) => {
     const handler = map[type];
@@ -172,6 +155,20 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
       }),
     ])
   ) as UActionCreatorsByType<PBT>,
+  ...({
+    metaActions: Object.fromEntries(
+      Object.keys(map).map(<T extends keyof PBT>(type: T) => [
+        type,
+        (map[type] as InferredActionHandler<any, any, {}>).custom,
+      ])
+    ),
+  } as MBN extends undefined
+    ? {}
+    : {
+        metaActions: {
+          [T in keyof PBT]: { [N in keyof MBN]: CustomAction<PBT[T], MBN[N]> };
+        };
+      }),
 });
 
 export const useDispatchUndo = <D extends Dispatch<UAction<string, any>>>(

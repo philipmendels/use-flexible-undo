@@ -17,14 +17,24 @@ interface State {
   count: number;
 }
 
-const { reducer, actions } = makeUndoableReducer<State, PayloadByActionType>({
+const { reducer, actions, metaActions } = makeUndoableReducer<
+  State,
+  PayloadByActionType,
+  MetaActionReturnTypeByName
+>({
   increment: {
     do: n => state => ({ count: state.count + n }),
     undo: n => state => ({ count: state.count - n }),
+    custom: {
+      describe: n => `Incremented count by ${n}`,
+    },
   },
   decrement: {
     do: n => state => ({ count: state.count - n }),
     undo: n => state => ({ count: state.count + n }),
+    custom: {
+      describe: n => `Removed ${n} from count`,
+    },
   },
 });
 
@@ -41,16 +51,26 @@ const App = () => {
 
   const { increment, decrement } = useMemo(
     () =>
-      makeUndoablesFromDispatch<PayloadByActionType>(dispatch, actions, {
-        decrement: {
-          describe: n => `Incremented count by ${n}`,
-        },
-        increment: {
-          describe: n => `Removed ${n} from count`,
-        },
-      }),
+      makeUndoablesFromDispatch<PayloadByActionType>(
+        dispatch,
+        actions,
+        metaActions
+      ),
     [makeUndoablesFromDispatch]
   );
+
+  // const { increment, decrement } = useMemo(
+  //   () =>
+  //     makeUndoablesFromDispatch<PayloadByActionType>(dispatch, actions, {
+  //       decrement: {
+  //         describe: n => `Incremented count by ${n}`,
+  //       },
+  //       increment: {
+  //         describe: n => `Removed ${n} from count`,
+  //       },
+  //     }),
+  //   [makeUndoablesFromDispatch]
+  // );
 
   // const { increment, decrement } = useMemo(
   //   () =>

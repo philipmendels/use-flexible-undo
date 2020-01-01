@@ -23,6 +23,14 @@ export type InferredAction<
   ? UndoableAction<P>
   : UndoableAction<P> & CustomActions<P, C>;
 
+export type InferredActionHandler<
+  P,
+  S,
+  C extends CustomActionsDefinition | undefined
+> = C extends undefined
+  ? UndoableActionHandler<P, S>
+  : UndoableActionHandler<P, S> & CustomActions<P, C>;
+
 export interface CustomActions<
   P,
   C extends CustomActionsDefinition | undefined
@@ -48,3 +56,29 @@ export type UndoStackSetter = React.Dispatch<
 >;
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type Handler<P, S> = (payload: P) => (state: S) => S;
+
+export interface UndoableActionHandler<P, S> {
+  do: Handler<P, S>;
+  undo: Handler<P, S>;
+}
+
+export interface UAction<T, P> {
+  type: T;
+  payload: P;
+  undo?: boolean;
+}
+
+export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
+
+// typing action param as UAction<T, PBT[T]> is good enough for
+// directly calling the reducer but not good enough for calling the
+// dispatch function that is returned from useReducer.
+export type UActions<PBT extends PayloadByType> = {
+  [T in keyof PBT]: UAction<T, PBT[T]>;
+}[keyof PBT];
+
+export type UActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in keyof PBT]: (payload: PBT[T], undo?: boolean) => UAction<T, PBT[T]>;
+};
