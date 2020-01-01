@@ -1,14 +1,14 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useInfiniteUndo, makeUndoableReducer, useDispatchUndo } from '../.';
+import { useInfiniteUndo, makeUndoableReducer } from '../.';
 import { useState, useMemo, useReducer } from 'react';
 
-interface CustomActions {
+interface MetaActionReturnTypeByName {
   describe: string;
 }
 
-interface Actions {
+interface PayloadByActionType {
   increment: number;
   decrement: number;
 }
@@ -17,7 +17,7 @@ interface State {
   count: number;
 }
 
-const { reducer, actions } = makeUndoableReducer<State, Actions>({
+const { reducer, actions } = makeUndoableReducer<State, PayloadByActionType>({
   increment: {
     do: n => state => ({ count: state.count + n }),
     undo: n => state => ({ count: state.count - n }),
@@ -32,33 +32,46 @@ const App = () => {
   const [amount, setAmount] = useState(1);
   // const [count, setCount] = useState(0);
   const [state, dispatch] = useReducer(reducer, { count: 0 });
-  const dispatchUndo = useDispatchUndo(dispatch);
+  // const dispatchUndo = useDispatchUndo(dispatch);
 
   //prettier-ignore
   const { 
-    undo, redo, makeUndoables, stack, getCustomActions 
-  } = useInfiniteUndo<CustomActions>();
+    undo, redo, makeUndoablesFromDispatch, stack, getCustomActions 
+  } = useInfiniteUndo<MetaActionReturnTypeByName>();
 
   const { increment, decrement } = useMemo(
     () =>
-      makeUndoables<Actions>({
-        increment: {
-          do: n => dispatch({ type: 'increment', payload: n }),
-          undo: n => dispatchUndo(actions.increment(n)),
-          custom: {
-            describe: n => `Incremented count by ${n}`,
-          },
-        },
+      makeUndoablesFromDispatch<PayloadByActionType>(dispatch, actions, {
         decrement: {
-          do: n => dispatch(actions.decrement(n)),
-          undo: n => dispatch(actions.decrement(n, true)),
-          custom: {
-            describe: n => `Removed ${n} from count`,
-          },
+          describe: n => `Incremented count by ${n}`,
+        },
+        increment: {
+          describe: n => `Removed ${n} from count`,
         },
       }),
-    [makeUndoables, dispatchUndo]
+    [makeUndoablesFromDispatch]
   );
+
+  // const { increment, decrement } = useMemo(
+  //   () =>
+  //     makeUndoables<Actions>({
+  //       increment: {
+  //         do: n => dispatch({ type: 'increment', payload: n }),
+  //         undo: n => dispatchUndo(actions.increment(n)),
+  //         custom: {
+  //           describe: n => `Incremented count by ${n}`,
+  //         },
+  //       },
+  //       decrement: {
+  //         do: n => dispatch(actions.decrement(n)),
+  //         undo: n => dispatch(actions.decrement(n, true)),
+  //         custom: {
+  //           describe: n => `Removed ${n} from count`,
+  //         },
+  //       },
+  //     }),
+  //   [makeUndoables, dispatchUndo]
+  // );
 
   // const { increment, decrement } = useMemo(
   //   () =>

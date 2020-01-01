@@ -53,6 +53,31 @@ export const useInfiniteUndo = <
     [makeUndoable]
   );
 
+  const makeUndoablesFromDispatch = useCallback(
+    <PBT extends PayloadByType>(
+      dispatch: Dispatch<UActions<PBT>>,
+      actionsByType: UActionCreatorsByType<PBT>,
+      ...metaActionsByType: C extends undefined
+        ? []
+        : [{ [T in keyof PBT]: { [N in keyof C]: CustomAction<PBT[T], C[N]> } }]
+    ) =>
+      Object.fromEntries(
+        Object.entries(actionsByType).map(([type, action]) => [
+          type,
+          //TODO: make this work without type casting
+          makeUndoable({
+            type,
+            do: payload => dispatch(action(payload)),
+            undo: payload => dispatch(action(payload, true)),
+            ...(metaActionsByType
+              ? { custom: metaActionsByType[0]![type] }
+              : {}),
+          } as InferredAction<any, C>),
+        ])
+      ) as { [K in keyof PBT]: (p: PBT[K]) => void },
+    [makeUndoable]
+  );
+
   //No need to infer the Payload here
   const getCustomActions = useCallback((item: UndoStackItem) => {
     //Use an empty object as C to let TypeScript infer action.custom
@@ -73,6 +98,7 @@ export const useInfiniteUndo = <
   return {
     makeUndoable,
     makeUndoables,
+    makeUndoablesFromDispatch,
     undo,
     redo,
     canUndo: () => Boolean(past.length),
@@ -112,18 +138,23 @@ interface UAction<T, P> {
   undo?: boolean;
 }
 
-export const makeUndoableReducer = <
-  S extends any,
-  PR extends Record<string, any>
->(
-  map: { [K in keyof PR]: UndoableActionHandler<PR[K], S> }
+type PayloadByType<T extends string = string, P = any> = Record<T, P>;
+
+// typing action param as UAction<T, PBT[T]> is good enough for
+// directly calling the reducer but not good enough for calling the
+// dispatch function that is returned from useReducer.
+type UActions<PBT extends PayloadByType> = {
+  [T in keyof PBT]: UAction<T, PBT[T]>;
+}[keyof PBT];
+
+type UActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in keyof PBT]: (payload: PBT[T], undo?: boolean) => UAction<T, PBT[T]>;
+};
+
+export const makeUndoableReducer = <S, PBT extends PayloadByType>(
+  map: { [K in keyof PBT]: UndoableActionHandler<PBT[K], S> }
 ) => ({
-  reducer: <T extends keyof PR>(
-    state: S,
-    // typing action param as UAction<T, PR[T]> in good enough for reducer but
-    // not good enough for inferring the types for dispatch from useReducer
-    { payload, type, undo }: { [K in T]: UAction<K, PR[K]> }[T]
-  ) => {
+  reducer: (state: S, { payload, type, undo }: UActions<PBT>) => {
     const handler = map[type];
     return handler
       ? undo
@@ -132,20 +163,20 @@ export const makeUndoableReducer = <
       : state; // TODO: when no handler found return state or throw error?
   },
   actions: Object.fromEntries(
-    Object.keys(map).map(<T extends keyof PR>(type: T) => [
+    Object.keys(map).map(<T extends keyof PBT>(type: T) => [
       type,
-      (payload: PR[T], undo?: boolean) => ({
+      (payload: PBT[T], undo?: boolean) => ({
         type,
         payload,
         undo,
       }),
     ])
-  ) as {
-    [T in keyof PR]: (payload: PR[T], undo?: boolean) => UAction<T, PR[T]>;
-  },
+  ) as UActionCreatorsByType<PBT>,
 });
 
-export const useDispatchUndo = <D extends Dispatch<any>>(dispatch: D) =>
+export const useDispatchUndo = <D extends Dispatch<UAction<string, any>>>(
+  dispatch: D
+) =>
   useCallback(
     (action: Parameters<D>[0]) => {
       dispatch({ ...action, undo: true });
