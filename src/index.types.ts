@@ -1,49 +1,53 @@
-/**
- * Base action map with unique type and do/undo actions.
- */
-export interface UndoableAction<P> {
-  type: string; //unique name
-  do: (payload: P) => void;
-  undo: (payload: P) => void;
-}
+export type PayloadEffect<P> = (payload: P) => void;
+type PayloadHandler<P, S> = (payload: P) => (state: S) => S;
 
-/**
- * Definition for extending the base action map
- * with custom actions. Keys are mapped to
- * action names and values to action return types.
- */
-export interface CustomActionsDefinition {
-  [key: string]: any;
-}
+type Undoable<T> = {
+  do: T;
+  undo: T;
+};
 
-export type InferredAction<
+export type UndoableEffect<P> = Undoable<PayloadEffect<P>>;
+
+export type UndoableHandler<P, S> = Undoable<PayloadHandler<P, S>>;
+
+export type WithType<O extends object> = O & {
+  type: string;
+};
+
+export type WithOptionalType<O extends object> = O & {
+  type?: string;
+};
+
+// export type UndoableEffectWithType<P> = WithType<UndoableEffect<P>>;
+// export type UndoableHandlerWithType<P, S> = WithType<UndoableHandler<P, S>>;
+
+export type MetaAction<P = any, R = any> = (payload: P, type: string) => R;
+
+export type MetaActionReturnTypes = Record<string, any> | undefined;
+
+type WithMeta<
+  O extends object,
   P,
-  C extends CustomActionsDefinition | undefined
-> = C extends undefined
-  ? UndoableAction<P>
-  : UndoableAction<P> & CustomActions<P, C>;
+  MR extends MetaActionReturnTypes
+> = MR extends undefined
+  ? O
+  : O & {
+      meta: { [K in keyof MR]: MetaAction<P, MR[K]> };
+    };
 
-export type InferredActionHandler<
+export type UndoableEffectWithMeta<
+  P,
+  MR extends MetaActionReturnTypes
+> = WithMeta<UndoableEffect<P>, P, MR>;
+
+export type UndoableHandlerWithMeta<
   P,
   S,
-  C extends CustomActionsDefinition | undefined
-> = C extends undefined
-  ? UndoableActionHandler<P, S>
-  : UndoableActionHandler<P, S> & CustomActions<P, C>;
+  MR extends MetaActionReturnTypes
+> = WithMeta<UndoableHandler<P, S>, P, MR>;
 
-export interface CustomActions<
-  P,
-  C extends CustomActionsDefinition | undefined
-> {
-  custom: {
-    [K in keyof C]: CustomAction<P, C[K]>;
-  };
-}
-
-export type CustomAction<P = any, R = any> = (payload: P, type: string) => R;
-
-export type WrappedCustomActions<C> = {
-  [K in keyof C]: () => C[K];
+export type LinkedMetaActions<MR extends MetaActionReturnTypes> = {
+  [K in keyof MR]: () => MR[K];
 };
 
 export interface UndoStackItem<P = any> {
@@ -55,16 +59,7 @@ export type UndoStackSetter = React.Dispatch<
   React.SetStateAction<UndoStackItem[]>
 >;
 
-export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-export type Handler<P, S> = (payload: P) => (state: S) => S;
-
-export interface UndoableActionHandler<P, S> {
-  do: Handler<P, S>;
-  undo: Handler<P, S>;
-}
-
-export interface UAction<T, P> {
+export interface UndoableAction<T, P> {
   type: T;
   payload: P;
   undo?: boolean;
@@ -76,9 +71,16 @@ export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 // directly calling the reducer but not good enough for calling the
 // dispatch function that is returned from useReducer.
 export type UActions<PBT extends PayloadByType> = {
-  [T in keyof PBT]: UAction<T, PBT[T]>;
+  [T in keyof PBT]: UndoableAction<T, PBT[T]>;
 }[keyof PBT];
 
 export type UActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: (payload: PBT[T], undo?: boolean) => UAction<T, PBT[T]>;
+  [T in keyof PBT]: (
+    payload: PBT[T],
+    undo?: boolean
+  ) => UndoableAction<T, PBT[T]>;
+};
+
+export type EffectsByType<PBT extends PayloadByType> = {
+  [K in keyof PBT]: PayloadEffect<PBT[K]>;
 };
