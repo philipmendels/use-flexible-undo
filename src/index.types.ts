@@ -1,4 +1,11 @@
-export type PayloadEffect<P> = (payload: P) => void;
+export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
+
+type PayloadEffect<P> = (payload: P) => void;
+
+export type EffectsByType<PBT extends PayloadByType> = {
+  [K in keyof PBT]: PayloadEffect<PBT[K]>;
+};
+
 type PayloadHandler<P, S> = (payload: P) => (state: S) => S;
 
 type Undoable<T> = {
@@ -6,24 +13,26 @@ type Undoable<T> = {
   undo: T;
 };
 
-export type UndoableEffect<P> = Undoable<PayloadEffect<P>>;
+type UndoableEffect<P> = Undoable<PayloadEffect<P>>;
 
-export type UndoableHandler<P, S> = Undoable<PayloadHandler<P, S>>;
+type UndoableHandler<P, S> = Undoable<PayloadHandler<P, S>>;
 
-export type WithType<O extends object> = O & {
+type WithType<O extends object> = O & {
   type: string;
 };
 
-export type WithOptionalType<O extends object> = O & {
-  type?: string;
-};
-
-// export type UndoableEffectWithType<P> = WithType<UndoableEffect<P>>;
-// export type UndoableHandlerWithType<P, S> = WithType<UndoableHandler<P, S>>;
+export type MetaActionReturnTypes = Record<string, any> | undefined;
 
 export type MetaAction<P = any, R = any> = (payload: P, type: string) => R;
 
-export type MetaActionReturnTypes = Record<string, any> | undefined;
+type MetaActions<P, MR extends MetaActionReturnTypes> = {
+  [K in keyof MR]: MetaAction<P, MR[K]>;
+};
+
+export type MetaActionsByType<
+  PBT extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> = { [K in keyof PBT]: MetaActions<PBT[K], MR> };
 
 type WithMeta<
   O extends object,
@@ -32,13 +41,18 @@ type WithMeta<
 > = MR extends undefined
   ? O
   : O & {
-      meta: { [K in keyof MR]: MetaAction<P, MR[K]> };
+      meta: MetaActions<P, MR>;
     };
 
 export type UndoableEffectWithMeta<
   P,
   MR extends MetaActionReturnTypes
 > = WithMeta<UndoableEffect<P>, P, MR>;
+
+export type UndoableEffectWithMetaAndType<
+  P,
+  MR extends MetaActionReturnTypes
+> = WithType<UndoableEffectWithMeta<P, MR>>;
 
 export type UndoableHandlerWithMeta<
   P,
@@ -65,8 +79,6 @@ export interface UndoableAction<T, P> {
   undo?: boolean;
 }
 
-export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
-
 // typing action param as UAction<T, PBT[T]> is good enough for
 // directly calling the reducer but not good enough for calling the
 // dispatch function that is returned from useReducer.
@@ -79,8 +91,4 @@ export type UActionCreatorsByType<PBT extends PayloadByType> = {
     payload: PBT[T],
     undo?: boolean
   ) => UndoableAction<T, PBT[T]>;
-};
-
-export type EffectsByType<PBT extends PayloadByType> = {
-  [K in keyof PBT]: PayloadEffect<PBT[K]>;
 };

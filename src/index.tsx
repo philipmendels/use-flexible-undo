@@ -3,7 +3,6 @@ import {
   MetaActionReturnTypes,
   UndoableEffectWithMeta,
   UndoStackItem,
-  WithType,
   PayloadByType,
   EffectsByType,
   UActions,
@@ -13,14 +12,16 @@ import {
   UndoStackSetter,
   UndoableHandlerWithMeta,
   UndoableAction,
+  MetaActionsByType,
+  UndoableEffectWithMetaAndType,
 } from './index.types';
 
 export const useInfiniteUndo = <
   MR extends MetaActionReturnTypes = undefined
 >() => {
-  const actionsRef = useRef<Record<string, UndoableEffectWithMeta<any, MR>>>(
-    {}
-  );
+  const actionsRef = useRef<
+    Record<string, UndoableEffectWithMetaAndType<any, MR>>
+  >({});
 
   const [past, setPast] = useState<UndoStackItem[]>([]);
   const [future, setFuture] = useState<UndoStackItem[]>([]);
@@ -34,7 +35,7 @@ export const useInfiniteUndo = <
   }, [future]);
 
   const makeUndoable = useCallback(
-    <P extends any>(effect: WithType<UndoableEffectWithMeta<P, MR>>) => {
+    <P extends any>(effect: UndoableEffectWithMetaAndType<P, MR>) => {
       const { type } = effect;
       console.log('MAKE UNDOABLE', type);
       actionsRef.current[type] = effect;
@@ -67,9 +68,7 @@ export const useInfiniteUndo = <
     <PBT extends PayloadByType>(
       dispatch: Dispatch<UActions<PBT>>,
       actions: UActionCreatorsByType<PBT>,
-      ...metaActions: MR extends undefined
-        ? []
-        : [{ [T in keyof PBT]: { [K in keyof MR]: MetaAction<PBT[T], MR[K]> } }]
+      ...metaActions: MR extends undefined ? [] : [MetaActionsByType<PBT, MR>]
     ) =>
       Object.fromEntries(
         Object.entries(actions).map(([type, action]) => [
@@ -173,9 +172,7 @@ export const makeUndoableReducer = <
   } as MR extends undefined
     ? {}
     : {
-        metaActions: {
-          [T in keyof PBT]: { [N in keyof MR]: MetaAction<PBT[T], MR[N]> };
-        };
+        metaActions: MetaActionsByType<PBT, MR>;
       }),
 });
 

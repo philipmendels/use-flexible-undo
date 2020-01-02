@@ -49,10 +49,10 @@ const App = () => {
     undo, redo, makeUndoables, makeUndoablesFromDispatch, stack, getMetaActions 
   } = useInfiniteUndo<MetaActionReturnTypeByName>();
 
-  // const { increment, decrement } = useMemo(
-  //   () => makeUndoablesFromDispatch(dispatch, actions, metaActions),
-  //   [makeUndoablesFromDispatch]
-  // );
+  const { increment, decrement } = useMemo(
+    () => makeUndoablesFromDispatch(dispatch, actions, metaActions),
+    [makeUndoablesFromDispatch]
+  );
 
   // const { increment, decrement } = useMemo(
   //   () =>
@@ -67,26 +67,26 @@ const App = () => {
   //   [makeUndoablesFromDispatch]
   // );
 
-  const { increment, decrement } = useMemo(
-    () =>
-      makeUndoables<PayloadByActionType>({
-        increment: {
-          do: n => dispatch({ type: 'increment', payload: n }),
-          undo: n => dispatchUndo(actions.increment(n)),
-          meta: {
-            describe: n => `Incremented count by ${n}`,
-          },
-        },
-        decrement: {
-          do: n => dispatch(actions.decrement(n)),
-          undo: n => dispatch(actions.decrement(n, true)),
-          meta: {
-            describe: n => `Removed ${n} from count`,
-          },
-        },
-      }),
-    [makeUndoables, dispatchUndo]
-  );
+  // const { increment, decrement } = useMemo(
+  //   () =>
+  //     makeUndoables<PayloadByActionType>({
+  //       increment: {
+  //         do: n => dispatch({ type: 'increment', payload: n }),
+  //         undo: n => dispatchUndo(actions.increment(n)),
+  //         meta: {
+  //           describe: n => `Incremented count by ${n}`,
+  //         },
+  //       },
+  //       decrement: {
+  //         do: n => dispatch(actions.decrement(n)),
+  //         undo: n => dispatch(actions.decrement(n, true)),
+  //         meta: {
+  //           describe: n => `Removed ${n} from count`,
+  //         },
+  //       },
+  //     }),
+  //   [makeUndoables, dispatchUndo]
+  // );
 
   // const { increment, decrement } = useMemo(
   //   () =>
