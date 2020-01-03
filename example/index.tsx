@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useInfiniteUndo, makeUndoableReducer, useDispatchUndo } from '../.';
+import { useInfiniteUndo, makeUndoableReducer, useUndoableReducer } from '../.';
 import { useState, useMemo, useReducer } from 'react';
 
 interface MetaActionReturnTypeByName {
@@ -17,7 +17,7 @@ interface State {
   count: number;
 }
 
-const { reducer, actions, metaActions } = makeUndoableReducer<
+const { reducer, actionCreators, metaActions } = makeUndoableReducer<
   State,
   PayloadByActionType,
   MetaActionReturnTypeByName
@@ -42,15 +42,19 @@ const App = () => {
   const [amount, setAmount] = useState(1);
   // const [count, setCount] = useState(0);
   const [state, dispatch] = useReducer(reducer, { count: 0 });
-  const dispatchUndo = useDispatchUndo(dispatch);
+  // const { state, boundActionCreators } = useUndoableReducer(
+  //   reducer,
+  //   { count: 0 },
+  //   actionCreators
+  // );
 
   //prettier-ignore
   const { 
-    undo, redo, makeUndoables, makeUndoablesFromDispatch, stack, getMetaActions 
+    undo, redo, makeUndoablesFromDispatch, stack, getMetaActions 
   } = useInfiniteUndo<MetaActionReturnTypeByName>();
 
   const { increment, decrement } = useMemo(
-    () => makeUndoablesFromDispatch(dispatch, actions, metaActions),
+    () => makeUndoablesFromDispatch(dispatch, actionCreators, metaActions),
     [makeUndoablesFromDispatch]
   );
 

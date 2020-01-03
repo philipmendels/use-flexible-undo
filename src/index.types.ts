@@ -1,3 +1,5 @@
+import { Dispatch } from 'react';
+
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
 type PayloadEffect<P> = (payload: P) => void;
@@ -69,9 +71,7 @@ export interface UndoStackItem<P = any> {
   payload: P;
 }
 
-export type UndoStackSetter = React.Dispatch<
-  React.SetStateAction<UndoStackItem[]>
->;
+export type UndoStackSetter = Dispatch<React.SetStateAction<UndoStackItem[]>>;
 
 export interface UndoableAction<T, P> {
   type: T;
@@ -82,13 +82,23 @@ export interface UndoableAction<T, P> {
 // typing action param as UAction<T, PBT[T]> is good enough for
 // directly calling the reducer but not good enough for calling the
 // dispatch function that is returned from useReducer.
-export type UActions<PBT extends PayloadByType> = {
+type UActions<PBT extends PayloadByType> = {
   [T in keyof PBT]: UndoableAction<T, PBT[T]>;
 }[keyof PBT];
 
+type UActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
+  payload: PBT[T]
+) => UndoableAction<T, PBT[T]>;
+
 export type UActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: (
-    payload: PBT[T],
-    undo?: boolean
-  ) => UndoableAction<T, PBT[T]>;
+  [T in keyof PBT]: Undoable<UActionCreator<PBT, T>>;
 };
+
+export type UndoableReducer<S, PBT extends PayloadByType> = (
+  state: S,
+  action: UActions<PBT>
+) => S;
+
+export type UndoableDispatch<PBT extends PayloadByType> = Dispatch<
+  UActions<PBT>
+>;

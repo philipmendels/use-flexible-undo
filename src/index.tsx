@@ -1,19 +1,19 @@
-import { useState, useCallback, useRef, Dispatch } from 'react';
+import { useState, useCallback, useRef, useReducer } from 'react';
 import {
   MetaActionReturnTypes,
   UndoableEffectWithMeta,
   UndoStackItem,
   PayloadByType,
   EffectsByType,
-  UActions,
   UActionCreatorsByType,
   MetaAction,
   LinkedMetaActions,
   UndoStackSetter,
   UndoableHandlerWithMeta,
-  UndoableAction,
   MetaActionsByType,
   UndoableEffectWithMetaAndType,
+  UndoableDispatch,
+  UndoableReducer,
 } from './index.types';
 
 export const useInfiniteUndo = <
@@ -66,7 +66,7 @@ export const useInfiniteUndo = <
 
   const makeUndoablesFromDispatch = useCallback(
     <PBT extends PayloadByType>(
-      dispatch: Dispatch<UActions<PBT>>,
+      dispatch: UndoableDispatch<PBT>,
       actions: UActionCreatorsByType<PBT>,
       ...metaActions: MR extends undefined ? [] : [MetaActionsByType<PBT, MR>]
     ) =>
@@ -76,8 +76,8 @@ export const useInfiniteUndo = <
           //TODO: make this work without type casting
           makeUndoable({
             type,
-            do: (payload: any) => dispatch(action(payload)),
-            undo: (payload: any) => dispatch(action(payload, true)),
+            do: (payload: any) => dispatch(action.do(payload)),
+            undo: (payload: any) => dispatch(action.undo(payload)),
             ...(metaActions ? { meta: metaActions[0]![type] } : {}),
           } as any),
         ])
@@ -144,22 +144,27 @@ export const makeUndoableReducer = <
     [K in keyof PBT]: UndoableHandlerWithMeta<PBT[K], S, MR>;
   }
 ) => ({
-  reducer: (state: S, { payload, type, undo }: UActions<PBT>) => {
+  reducer: ((state, { payload, type, undo }) => {
     const handler = handlers[type];
     return handler
       ? undo
         ? handler.undo(payload)(state)
         : handler.do(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
-  },
-  actions: Object.fromEntries(
-    Object.keys(handlers).map(<T extends keyof PBT>(type: T) => [
+  }) as UndoableReducer<S, PBT>,
+  actionCreators: Object.fromEntries(
+    Object.keys(handlers).map(type => [
       type,
-      (payload: PBT[T], undo?: boolean) => ({
-        type,
-        payload,
-        undo,
-      }),
+      {
+        do: payload => ({
+          type,
+          payload,
+        }),
+        undo: payload => ({
+          type,
+          payload,
+        }),
+      },
     ])
   ) as UActionCreatorsByType<PBT>,
   ...({
@@ -176,15 +181,23 @@ export const makeUndoableReducer = <
       }),
 });
 
-export const useDispatchUndo = <
-  D extends Dispatch<UndoableAction<string, any>>
->(
-  dispatch: D
-) =>
-  useCallback(
-    (action: Parameters<D>[0]) => {
-      dispatch({ ...action, undo: true });
-    },
-    // Dispatch is stable but linter does not know
-    [dispatch]
-  );
+export const useUndoableReducer = <S, PBT extends PayloadByType>(
+  reducer: UndoableReducer<S, PBT>,
+  initialState: S,
+  actionCreators: UActionCreatorsByType<PBT>
+) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const boundActionCreators = (Object.fromEntries(
+    Object.entries(actionCreators).map(([type, creator]) => [
+      type,
+      {
+        do: (payload: any) => dispatch(creator.do(payload)),
+        undo: (payload: any) => dispatch(creator.undo(payload)),
+      },
+    ])
+  ) as any) as EffectsByType<PBT>;
+  return {
+    state,
+    boundActionCreators,
+  };
+};
