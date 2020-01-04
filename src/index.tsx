@@ -1,16 +1,16 @@
-import { useState, useCallback, useRef, useReducer } from 'react';
+import { useState, useCallback, useRef, useReducer, useMemo } from 'react';
 import {
   MetaActionReturnTypes,
   UndoableEffectWithMeta,
-  UndoStackItem,
+  Action,
   PayloadByType,
-  EffectsByType,
-  UActionCreatorsByType,
-  MetaAction,
+  HandlersByType,
+  UndoableActionCreatorsByType,
+  MetaActionHandler,
   LinkedMetaActions,
-  UndoStackSetter,
-  UndoableHandlerWithMeta,
-  MetaActionsByType,
+  StackSetter,
+  UndoableStateUpdaterWithMeta,
+  MetaActionHandlersByType,
   UndoableEffectWithMetaAndType,
   UndoableDispatch,
   UndoableReducer,
@@ -23,8 +23,8 @@ export const useInfiniteUndo = <
     Record<string, UndoableEffectWithMetaAndType<any, MR>>
   >({});
 
-  const [past, setPast] = useState<UndoStackItem[]>([]);
-  const [future, setFuture] = useState<UndoStackItem[]>([]);
+  const [past, setPast] = useState<Action[]>([]);
+  const [future, setFuture] = useState<Action[]>([]);
 
   const undo = useCallback(() => {
     shiftStack(past, setPast, setFuture, type => actionsRef.current[type].undo);
@@ -60,33 +60,37 @@ export const useInfiniteUndo = <
           //TODO: make this work without type casting
           makeUndoable({ type, ...effect }),
         ])
-      ) as EffectsByType<PBT>,
+      ) as HandlersByType<PBT>,
     [makeUndoable]
   );
 
   const makeUndoablesFromDispatch = useCallback(
     <PBT extends PayloadByType>(
       dispatch: UndoableDispatch<PBT>,
-      actions: UActionCreatorsByType<PBT>,
-      ...metaActions: MR extends undefined ? [] : [MetaActionsByType<PBT, MR>]
+      actionCreators: UndoableActionCreatorsByType<PBT>,
+      ...metaActionHandlers: MR extends undefined
+        ? []
+        : [MetaActionHandlersByType<PBT, MR>]
     ) =>
       Object.fromEntries(
-        Object.entries(actions).map(([type, action]) => [
+        Object.entries(actionCreators).map(([type, action]) => [
           type,
           //TODO: make this work without type casting
           makeUndoable({
             type,
             do: (payload: any) => dispatch(action.do(payload)),
             undo: (payload: any) => dispatch(action.undo(payload)),
-            ...(metaActions ? { meta: metaActions[0]![type] } : {}),
+            ...(metaActionHandlers
+              ? { meta: metaActionHandlers[0]![type] }
+              : {}),
           } as any),
         ])
-      ) as EffectsByType<PBT>,
+      ) as HandlersByType<PBT>,
     [makeUndoable]
   );
 
   //No need to infer the Payload here
-  const getMetaActions = useCallback((item: UndoStackItem) => {
+  const getMetaActionHandlers = useCallback((item: Action) => {
     //Use an empty object as MR to let TypeScript infer action.custom
     const action = actionsRef.current[item.type] as UndoableEffectWithMeta<
       any,
@@ -94,13 +98,13 @@ export const useInfiniteUndo = <
     >;
     if (!action.meta) {
       throw new Error(
-        `You are getting meta actions for action ${item.type}, but none are registered.`
+        `You are getting metaActionHandlers for action '${item.type}', but none are registered.`
       );
     }
     return Object.fromEntries(
       Object.entries(action.meta).map(([key, value]) => [
         key,
-        () => (value as MetaAction)(item.payload, item.type),
+        () => (value as MetaActionHandler)(item.payload, item.type),
       ])
     ) as LinkedMetaActions<MR>;
   }, []);
@@ -117,14 +121,14 @@ export const useInfiniteUndo = <
       past: [...past],
       future: [...future].reverse(),
     },
-    getMetaActions,
+    getMetaActionHandlers,
   };
 };
 
 const shiftStack = (
-  from: UndoStackItem[],
-  setFrom: UndoStackSetter,
-  setTo: UndoStackSetter,
+  from: Action[],
+  setFrom: StackSetter,
+  setTo: StackSetter,
   action: (type: string) => (payload: any) => void
 ) => {
   if (from.length) {
@@ -140,20 +144,20 @@ export const makeUndoableReducer = <
   PBT extends PayloadByType,
   MR extends MetaActionReturnTypes = undefined
 >(
-  handlers: {
-    [K in keyof PBT]: UndoableHandlerWithMeta<PBT[K], S, MR>;
+  stateUpdaters: {
+    [K in keyof PBT]: UndoableStateUpdaterWithMeta<PBT[K], S, MR>;
   }
 ) => ({
-  reducer: ((state, { payload, type, undo }) => {
-    const handler = handlers[type];
-    return handler
-      ? undo
-        ? handler.undo(payload)(state)
-        : handler.do(payload)(state)
+  reducer: ((state, { payload, type, meta }) => {
+    const updater = stateUpdaters[type];
+    return updater
+      ? meta && meta.isUndo
+        ? updater.undo(payload)(state)
+        : updater.do(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
   }) as UndoableReducer<S, PBT>,
   actionCreators: Object.fromEntries(
-    Object.keys(handlers).map(type => [
+    Object.keys(stateUpdaters).map(type => [
       type,
       {
         do: payload => ({
@@ -166,28 +170,27 @@ export const makeUndoableReducer = <
         }),
       },
     ])
-  ) as UActionCreatorsByType<PBT>,
+  ) as UndoableActionCreatorsByType<PBT>,
   ...({
-    metaActions: Object.fromEntries(
-      Object.keys(handlers).map(<T extends keyof PBT>(type: T) => [
+    metaActionHandlers: Object.fromEntries(
+      Object.keys(stateUpdaters).map(<T extends keyof PBT>(type: T) => [
         type,
-        (handlers[type] as UndoableHandlerWithMeta<any, any, {}>).meta,
+        (stateUpdaters[type] as UndoableStateUpdaterWithMeta<any, any, {}>)
+          .meta,
       ])
     ),
   } as MR extends undefined
     ? {}
     : {
-        metaActions: MetaActionsByType<PBT, MR>;
+        metaActionHandlers: MetaActionHandlersByType<PBT, MR>;
       }),
 });
 
-export const useUndoableReducer = <S, PBT extends PayloadByType>(
-  reducer: UndoableReducer<S, PBT>,
-  initialState: S,
-  actionCreators: UActionCreatorsByType<PBT>
-) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const boundActionCreators = (Object.fromEntries(
+export const bindUndoableActionCreators = <PBT extends PayloadByType>(
+  dispatch: UndoableDispatch<PBT>,
+  actionCreators: UndoableActionCreatorsByType<PBT>
+) =>
+  (Object.fromEntries(
     Object.entries(actionCreators).map(([type, creator]) => [
       type,
       {
@@ -195,7 +198,20 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>(
         undo: (payload: any) => dispatch(creator.undo(payload)),
       },
     ])
-  ) as any) as EffectsByType<PBT>;
+  ) as any) as HandlersByType<PBT>;
+
+export const useUndoableReducer = <S, PBT extends PayloadByType>(
+  reducer: UndoableReducer<S, PBT>,
+  initialState: S,
+  actionCreators: UndoableActionCreatorsByType<PBT>
+) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  // Is it ok to memoize in a custom hook, i.e. to assume
+  // that the user does not mutate actionCreators?
+  const boundActionCreators = useMemo(
+    () => bindUndoableActionCreators(dispatch, actionCreators),
+    [actionCreators]
+  );
   return {
     state,
     boundActionCreators,

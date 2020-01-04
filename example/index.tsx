@@ -1,14 +1,14 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useInfiniteUndo, makeUndoableReducer, useUndoableReducer } from '../.';
+import { useInfiniteUndo, makeUndoableReducer } from '../.';
 import { useState, useMemo, useReducer } from 'react';
 
-interface MetaActionReturnTypeByName {
+interface MetaActionReturnTypes {
   describe: string;
 }
 
-interface PayloadByActionType {
+interface PayloadByType {
   increment: number;
   decrement: number;
 }
@@ -17,10 +17,10 @@ interface State {
   count: number;
 }
 
-const { reducer, actionCreators, metaActions } = makeUndoableReducer<
+const { reducer, actionCreators, metaActionHandlers } = makeUndoableReducer<
   State,
-  PayloadByActionType,
-  MetaActionReturnTypeByName
+  PayloadByType,
+  MetaActionReturnTypes
 >({
   increment: {
     do: n => state => ({ count: state.count + n }),
@@ -50,11 +50,12 @@ const App = () => {
 
   //prettier-ignore
   const { 
-    undo, redo, makeUndoablesFromDispatch, stack, getMetaActions 
-  } = useInfiniteUndo<MetaActionReturnTypeByName>();
+    undo, redo, makeUndoablesFromDispatch, stack, getMetaActionHandlers
+  } = useInfiniteUndo<MetaActionReturnTypes>();
 
   const { increment, decrement } = useMemo(
-    () => makeUndoablesFromDispatch(dispatch, actionCreators, metaActions),
+    () =>
+      makeUndoablesFromDispatch(dispatch, actionCreators, metaActionHandlers),
     [makeUndoablesFromDispatch]
   );
 
@@ -154,11 +155,11 @@ const App = () => {
       <br />
       {stack.future.map((item, index) => (
         <div key={index} style={{ color: '#DDD' }}>
-          {getMetaActions(item).describe()}
+          {getMetaActionHandlers(item).describe()}
         </div>
       ))}
       {stack.past.map((item, index) => (
-        <div key={index}>{getMetaActions(item).describe()}</div>
+        <div key={index}>{getMetaActionHandlers(item).describe()}</div>
       ))}
     </div>
   );
