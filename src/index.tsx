@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useReducer, useMemo } from 'react';
 import {
   MetaActionReturnTypes,
-  UndoableEffectWithMeta,
+  UndoableHandlerWithMeta,
   Action,
   PayloadByType,
   HandlersByType,
@@ -11,20 +11,29 @@ import {
   StackSetter,
   UndoableStateUpdaterWithMeta,
   MetaActionHandlersByType,
-  UndoableEffectWithMetaAndType,
+  UndoableHandlerWithMetaAndType,
   UndoableDispatch,
   UndoableReducer,
+  ActionUnion,
+  ValueOf,
+  UndoableHandlerWithMetaAndTypeByType,
+  PickByValue,
 } from './index.types';
 
 export const useInfiniteUndo = <
+  PBT_All extends PayloadByType | undefined = undefined,
   MR extends MetaActionReturnTypes = undefined
 >() => {
-  const actionsRef = useRef<
-    Record<string, UndoableEffectWithMetaAndType<any, MR>>
-  >({});
+  type PBT_Inferred = PBT_All extends undefined ? PayloadByType : PBT_All;
+  type PBT_Partial = Partial<PBT_Inferred>;
+  type P_All = ValueOf<PBT_Inferred>;
 
-  const [past, setPast] = useState<Action[]>([]);
-  const [future, setFuture] = useState<Action[]>([]);
+  const actionsRef = useRef<
+    UndoableHandlerWithMetaAndTypeByType<PBT_Inferred, MR>
+  >({} as any);
+
+  const [past, setPast] = useState<ActionUnion<PBT_Inferred>[]>([]);
+  const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
 
   const undo = useCallback(() => {
     shiftStack(past, setPast, setFuture, type => actionsRef.current[type].undo);
@@ -35,13 +44,19 @@ export const useInfiniteUndo = <
   }, [future]);
 
   const makeUndoable = useCallback(
-    <P extends any>(effect: UndoableEffectWithMetaAndType<P, MR>) => {
-      const { type } = effect;
+    <P extends P_All>(
+      handler: PBT_All extends undefined
+        ? UndoableHandlerWithMetaAndType<PayloadByType<string, P>, MR>
+        : UndoableHandlerWithMetaAndType<PickByValue<PBT_Inferred, P>, MR>
+    ) => {
+      const { type } = handler;
       console.log('MAKE UNDOABLE', type);
-      actionsRef.current[type] = effect;
+      actionsRef.current[type] = handler as any;
       return (payload: P) => {
-        effect.do(payload);
-        setPast(past => [{ type, payload }, ...past]);
+        handler.do(payload as any);
+        setPast(
+          past => [{ type, payload }, ...past] as ActionUnion<PBT_Inferred>[]
+        );
         setFuture([]);
       };
     },
@@ -49,23 +64,23 @@ export const useInfiniteUndo = <
   );
 
   const makeUndoables = useCallback(
-    <PBT extends PayloadByType>(
-      effects: {
-        [K in keyof PBT]: UndoableEffectWithMeta<PBT[K], MR>;
+    <PBT extends PBT_Partial>(
+      handlers: {
+        [K in keyof PBT]: UndoableHandlerWithMeta<PBT[K], MR>;
       }
     ) =>
       Object.fromEntries(
-        Object.entries(effects).map(([type, effect]) => [
+        Object.entries(handlers).map(([type, handler]) => [
           type,
           //TODO: make this work without type casting
-          makeUndoable({ type, ...effect }),
+          makeUndoable({ type, ...handler } as any),
         ])
       ) as HandlersByType<PBT>,
     [makeUndoable]
   );
 
   const makeUndoablesFromDispatch = useCallback(
-    <PBT extends PayloadByType>(
+    <PBT extends PBT_Partial>(
       dispatch: UndoableDispatch<PBT>,
       actionCreators: UndoableActionCreatorsByType<PBT>,
       ...metaActionHandlers: MR extends undefined
@@ -92,7 +107,7 @@ export const useInfiniteUndo = <
   //No need to infer the Payload here
   const getMetaActionHandlers = useCallback((item: Action) => {
     //Use an empty object as MR to let TypeScript infer action.custom
-    const action = actionsRef.current[item.type] as UndoableEffectWithMeta<
+    const action = actionsRef.current[item.type] as UndoableHandlerWithMeta<
       any,
       {}
     >;
@@ -125,15 +140,15 @@ export const useInfiniteUndo = <
   };
 };
 
-const shiftStack = (
-  from: Action[],
-  setFrom: StackSetter,
-  setTo: StackSetter,
-  action: (type: string) => (payload: any) => void
+const shiftStack = <A extends Action<any>>(
+  from: A[],
+  setFrom: StackSetter<A>,
+  setTo: StackSetter<A>,
+  handler: (type: string) => (payload: any) => void
 ) => {
   if (from.length) {
     const [item, ...rest] = from;
-    action(item.type)(item.payload);
+    handler(item.type)(item.payload);
     setFrom(rest);
     setTo(to => [item, ...to]);
   }

@@ -13,6 +13,17 @@ interface PayloadByType {
   decrement: number;
 }
 
+interface PayloadByType2 {
+  blaat: string;
+  bloop: boolean;
+}
+
+interface PayloadByTypeUnused {
+  bleep: object;
+}
+
+type PayloadByTypeFull = { blurb: boolean } & PayloadByType & PayloadByType2;
+
 interface State {
   count: number;
 }
@@ -48,16 +59,55 @@ const App = () => {
   //   actionCreators
   // );
 
-  //prettier-ignore
-  const { 
-    undo, redo, makeUndoablesFromDispatch, stack, getMetaActionHandlers
-  } = useInfiniteUndo<MetaActionReturnTypes>();
+  const {
+    undo,
+    redo,
+    makeUndoable,
+    makeUndoables,
+    makeUndoablesFromDispatch,
+    stack,
+    getMetaActionHandlers,
+  } = useInfiniteUndo<PayloadByTypeFull, MetaActionReturnTypes>();
 
   const { increment, decrement } = useMemo(
     () =>
       makeUndoablesFromDispatch(dispatch, actionCreators, metaActionHandlers),
     [makeUndoablesFromDispatch]
   );
+
+  const { blaat, bloop } = useMemo(
+    () =>
+      makeUndoables<PayloadByType2>({
+        blaat: {
+          do: n => {},
+          undo: n => {},
+          meta: {
+            describe: n => ``,
+          },
+        },
+        bloop: {
+          do: n => {},
+          undo: n => {},
+          meta: {
+            describe: n => ``,
+          },
+        },
+      }),
+    [makeUndoables]
+  );
+
+  console.log(blaat, bloop);
+
+  const blurb = makeUndoable<boolean>({
+    type: 'blurb',
+    do: n => {},
+    undo: n => {},
+    meta: {
+      describe: n => ``,
+    },
+  });
+
+  console.log(blurb);
 
   // const { increment, decrement } = useMemo(
   //   () =>
@@ -153,13 +203,13 @@ const App = () => {
       count: {state.count}
       <br />
       <br />
-      {stack.future.map((item, index) => (
+      {stack.future.map((action, index) => (
         <div key={index} style={{ color: '#DDD' }}>
-          {getMetaActionHandlers(item).describe()}
+          {getMetaActionHandlers(action).describe()}
         </div>
       ))}
-      {stack.past.map((item, index) => (
-        <div key={index}>{getMetaActionHandlers(item).describe()}</div>
+      {stack.past.map((action, index) => (
+        <div key={index}>{getMetaActionHandlers(action).describe()}</div>
       ))}
     </div>
   );

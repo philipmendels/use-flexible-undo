@@ -19,8 +19,8 @@ type UndoableHandler<P> = Undoable<PayloadHandler<P>>;
 
 type UndoableStateUpdater<P, S> = Undoable<StateUpdater<P, S>>;
 
-type WithType<O extends object> = O & {
-  type: string;
+type WithType<O extends object, T extends string | number | symbol> = O & {
+  type: T;
 };
 
 export type MetaActionReturnTypes = Record<string, any> | undefined;
@@ -49,15 +49,22 @@ type WithMeta<
       meta: MetaActionHandlers<P, MR>;
     };
 
-export type UndoableEffectWithMeta<
+export type UndoableHandlerWithMeta<
   P,
   MR extends MetaActionReturnTypes
 > = WithMeta<UndoableHandler<P>, P, MR>;
 
-export type UndoableEffectWithMetaAndType<
-  P,
+export type UndoableHandlerWithMetaAndTypeByType<
+  PBT extends PayloadByType,
   MR extends MetaActionReturnTypes
-> = WithType<UndoableEffectWithMeta<P, MR>>;
+> = {
+  [K in keyof PBT]: WithType<UndoableHandlerWithMeta<PBT[K], MR>, K>;
+};
+
+export type UndoableHandlerWithMetaAndType<
+  PBT extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> = UndoableHandlerWithMetaAndTypeByType<PBT, MR>[keyof PBT];
 
 export type UndoableStateUpdaterWithMeta<
   P,
@@ -74,7 +81,19 @@ export interface Action<T = string, P = any> {
   payload: P;
 }
 
-export type StackSetter = Dispatch<React.SetStateAction<Action[]>>;
+export type ActionUnion<PBT extends PayloadByType> = {
+  [T in keyof PBT]: Action<T, PBT[T]>;
+}[keyof PBT];
+
+// export type ActionUnion<
+//   PBT extends PayloadByType | undefined
+// > = PBT extends undefined
+//   ? Action
+//   : {
+//       [T in keyof PBT]: Action<T, PBT[T]>;
+//     }[keyof PBT];
+
+export type StackSetter<A extends Action> = Dispatch<React.SetStateAction<A[]>>;
 
 export type UndoableAction<T, P> = Action<T, P> & {
   meta?: {
@@ -101,4 +120,13 @@ export type UndoableReducer<S, PBT extends PayloadByType> = (
 
 export type UndoableDispatch<PBT extends PayloadByType> = Dispatch<
   UndoableActionUnion<PBT>
+>;
+
+export type ValueOf<T> = T[keyof T];
+
+export type PickByValue<T, V extends ValueOf<T>> = Pick<
+  T,
+  {
+    [K in keyof T]: T[K] extends V ? K : never;
+  }[keyof T]
 >;
