@@ -5,7 +5,7 @@ export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 type PayloadHandler<P> = (payload: P) => void;
 
 export type HandlersByType<PBT extends PayloadByType> = {
-  [K in keyof PBT]: PayloadHandler<PBT[K]>;
+  [K in StringOnlyKeyOf<PBT>]: PayloadHandler<PBT[K]>;
 };
 
 type StateUpdater<P, S> = (payload: P) => (state: S) => S;
@@ -19,7 +19,7 @@ type UndoableHandler<P> = Undoable<PayloadHandler<P>>;
 
 type UndoableStateUpdater<P, S> = Undoable<StateUpdater<P, S>>;
 
-type WithType<O extends object, T extends string | number | symbol> = O & {
+type WithType<O extends object, T extends string> = O & {
   type: T;
 };
 
@@ -31,13 +31,13 @@ export type MetaActionHandler<P = any, R = any> = (
 ) => R;
 
 type MetaActionHandlers<P, MR extends MetaActionReturnTypes> = {
-  [K in keyof MR]: MetaActionHandler<P, MR[K]>;
+  [K in StringOnlyKeyOf<MR>]: MetaActionHandler<P, MR[K]>;
 };
 
 export type MetaActionHandlersByType<
   PBT extends PayloadByType,
   MR extends MetaActionReturnTypes
-> = { [K in keyof PBT]: MetaActionHandlers<PBT[K], MR> };
+> = { [K in StringOnlyKeyOf<PBT>]: MetaActionHandlers<PBT[K], MR> };
 
 type WithMeta<
   O extends object,
@@ -58,13 +58,13 @@ export type UndoableHandlerWithMetaAndTypeByType<
   PBT extends PayloadByType,
   MR extends MetaActionReturnTypes
 > = {
-  [K in keyof PBT]: WithType<UndoableHandlerWithMeta<PBT[K], MR>, K>;
+  [K in StringOnlyKeyOf<PBT>]: WithType<UndoableHandlerWithMeta<PBT[K], MR>, K>;
 };
 
 export type UndoableHandlerWithMetaAndType<
   PBT extends PayloadByType,
   MR extends MetaActionReturnTypes
-> = UndoableHandlerWithMetaAndTypeByType<PBT, MR>[keyof PBT];
+> = UndoableHandlerWithMetaAndTypeByType<PBT, MR>[StringOnlyKeyOf<PBT>];
 
 export type UndoableStateUpdaterWithMeta<
   P,
@@ -73,7 +73,7 @@ export type UndoableStateUpdaterWithMeta<
 > = WithMeta<UndoableStateUpdater<P, S>, P, MR>;
 
 export type LinkedMetaActions<MR extends MetaActionReturnTypes> = {
-  [K in keyof MR]: () => MR[K];
+  [K in StringOnlyKeyOf<MR>]: () => MR[K];
 };
 
 export interface Action<T = string, P = any> {
@@ -82,45 +82,36 @@ export interface Action<T = string, P = any> {
 }
 
 export type ActionUnion<PBT extends PayloadByType> = {
-  [T in keyof PBT]: Action<T, PBT[T]>;
-}[keyof PBT];
-
-// export type ActionUnion<
-//   PBT extends PayloadByType | undefined
-// > = PBT extends undefined
-//   ? Action
-//   : {
-//       [T in keyof PBT]: Action<T, PBT[T]>;
-//     }[keyof PBT];
+  [T in StringOnlyKeyOf<PBT>]: Action<T, PBT[T]>;
+}[StringOnlyKeyOf<PBT>];
 
 export type StackSetter<A extends Action> = Dispatch<React.SetStateAction<A[]>>;
 
-export type UndoableAction<T, P> = Action<T, P> & {
+export type UAction<T, P> = Action<T, P> & {
   meta?: {
     isUndo?: boolean;
   };
 };
 
-type UndoableActionUnion<PBT extends PayloadByType> = {
-  [T in keyof PBT]: UndoableAction<T, PBT[T]>;
-}[keyof PBT];
+type UActionUnion<PBT extends PayloadByType> = {
+  [T in StringOnlyKeyOf<PBT>]: UAction<T, PBT[T]>;
+}[StringOnlyKeyOf<PBT>];
 
-type UndoableActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
-  payload: PBT[T]
-) => UndoableAction<T, PBT[T]>;
+type UActionCreator<
+  PBT extends PayloadByType,
+  T extends StringOnlyKeyOf<PBT>
+> = (payload: PBT[T]) => UAction<T, PBT[T]>;
 
-export type UndoableActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: Undoable<UndoableActionCreator<PBT, T>>;
+export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in StringOnlyKeyOf<PBT>]: Undoable<UActionCreator<PBT, T>>;
 };
 
-export type UndoableReducer<S, PBT extends PayloadByType> = (
+export type UReducer<S, PBT extends PayloadByType> = (
   state: S,
-  action: UndoableActionUnion<PBT>
+  action: UActionUnion<PBT>
 ) => S;
 
-export type UndoableDispatch<PBT extends PayloadByType> = Dispatch<
-  UndoableActionUnion<PBT>
->;
+export type UDispatch<PBT extends PayloadByType> = Dispatch<UActionUnion<PBT>>;
 
 export type ValueOf<T> = T[keyof T];
 
@@ -130,3 +121,5 @@ export type PickByValue<T, V extends ValueOf<T>> = Pick<
     [K in keyof T]: T[K] extends V ? K : never;
   }[keyof T]
 >;
+
+export type StringOnlyKeyOf<T> = Extract<keyof T, string>;
