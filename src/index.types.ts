@@ -17,6 +17,10 @@ type Undoable<T> = {
 
 type UndoableHandler<P> = Undoable<PayloadHandler<P>>;
 
+export type UndoableHandlersByType<PBT extends PayloadByType> = {
+  [K in StringOnlyKeyOf<PBT>]: UndoableHandler<PBT[K]>;
+};
+
 type UndoableStateUpdater<P, S> = Undoable<StateUpdater<P, S>>;
 
 type WithType<O extends object, T extends string> = O & {
@@ -123,3 +127,5 @@ export type PickByValue<T, V extends ValueOf<T>> = Pick<
 >;
 
 export type StringOnlyKeyOf<T> = Extract<keyof T, string>;
+
+export type Entry<O extends Object> = { [K in keyof O]: [K, O[K]] }[keyof O];

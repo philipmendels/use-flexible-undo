@@ -19,6 +19,8 @@ import {
   UndoableHandlerWithMetaAndTypeByType,
   PickByValue,
   StringOnlyKeyOf,
+  UndoableHandlersByType,
+  Entry,
 } from './index.types';
 
 export const useInfiniteUndo = <
@@ -70,13 +72,11 @@ export const useInfiniteUndo = <
         [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], MR>;
       }
     ): HandlersByType<PBT> =>
-      Object.fromEntries(
-        Object.entries(handlers).map(([type, handler]) => [
-          type,
-          //TODO: make this work without type casting
-          makeUndoable({ type, ...(handler as any) } as any),
-        ])
-      ) as any,
+      mapObject(handlers, ([type, handler]) => [
+        type,
+        //TODO: make this work without type casting
+        makeUndoable({ type, ...handler } as any),
+      ]) as any,
     [makeUndoable]
   );
 
@@ -171,29 +171,18 @@ export const makeUndoableReducer = <
         : updater.do(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
   }) as UReducer<S, PBT>,
-  actionCreators: Object.fromEntries(
-    Object.keys(stateUpdaters).map(type => [
-      type,
-      {
-        do: payload => ({
-          type,
-          payload,
-        }),
-        undo: payload => ({
-          type,
-          payload,
-        }),
-      },
-    ])
-  ) as UndoableUActionCreatorsByType<PBT>,
+  actionCreators: mapObject(stateUpdaters, ([type, _]) => [
+    type,
+    {
+      do: makeActionCreater(type),
+      undo: makeActionCreater(type),
+    },
+  ]) as UndoableUActionCreatorsByType<PBT>,
   ...({
-    metaActionHandlers: Object.fromEntries(
-      Object.keys(stateUpdaters).map(type => [
-        type,
-        (stateUpdaters[type] as UndoableStateUpdaterWithMeta<any, any, {}>)
-          .meta,
-      ])
-    ),
+    metaActionHandlers: mapObject(stateUpdaters, ([type, updater]) => [
+      type,
+      (updater as UndoableStateUpdaterWithMeta<any, any, {}>).meta,
+    ]),
   } as MR extends undefined
     ? {}
     : {
@@ -204,18 +193,14 @@ export const makeUndoableReducer = <
 export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   dispatch: UDispatch<PBT>,
   actionCreators: UndoableUActionCreatorsByType<PBT>
-): HandlersByType<PBT> =>
-  Object.fromEntries(
-    Object.entries(actionCreators).map(([type, creator]) => {
-      return [
-        type,
-        {
-          do: (payload: any) => dispatch((creator as any).do(payload)),
-          undo: (payload: any) => dispatch((creator as any).undo(payload)),
-        },
-      ];
-    })
-  ) as any;
+): UndoableHandlersByType<PBT> =>
+  mapObject(actionCreators, ([type, creator]) => [
+    type,
+    {
+      do: payload => dispatch(creator.do(payload)),
+      undo: payload => dispatch(creator.undo(payload)),
+    },
+  ]);
 
 export const useUndoableReducer = <S, PBT extends PayloadByType>(
   reducer: UReducer<S, PBT>,
@@ -234,3 +219,21 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>(
     boundActionCreators,
   };
 };
+
+const makeActionCreater = <T extends string>(type: T) => <P extends any>(
+  payload: P
+) => ({
+  type,
+  payload,
+});
+
+const mapObject = <O extends object, O2 extends object>(
+  obj: O,
+  mapFn: (e: Entry<O>) => Entry<O2>
+) => fromEntries<O2>(toEntries(obj).map(mapFn));
+
+const toEntries = <O extends object>(obj: O) =>
+  Object.entries(obj) as Entry<O>[];
+
+const fromEntries = <O extends object>(entries: Entry<O>[]) =>
+  Object.fromEntries(entries) as O;
