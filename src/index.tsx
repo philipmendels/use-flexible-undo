@@ -6,12 +6,11 @@ import {
   PayloadByType,
   HandlersByType,
   UndoableUActionCreatorsByType,
-  MetaActionHandler,
   LinkedMetaActions,
   StackSetter,
   UndoableStateUpdaterWithMeta,
   MetaActionHandlersByType,
-  UndoableHandlerWithMetaAndType,
+  UndoableHandlerWithMetaAndTypeUnion,
   UDispatch,
   UReducer,
   ActionUnion,
@@ -21,6 +20,9 @@ import {
   StringOnlyKeyOf,
   UndoableHandlersByType,
   Entry,
+  MetaActionHandlers,
+  UndoableHandlerWithMetaAndType,
+  PayloadHandler,
 } from './index.types';
 
 export const useInfiniteUndo = <
@@ -30,10 +32,11 @@ export const useInfiniteUndo = <
   type PBT_Inferred = PBT_All extends undefined ? PayloadByType : PBT_All;
   type PBT_Partial = Partial<PBT_Inferred>;
   type P_All = ValueOf<PBT_Inferred>;
+  type NMR = NonNullable<MR>;
 
   const actionsRef = useRef<
     UndoableHandlerWithMetaAndTypeByType<PBT_Inferred, MR>
-  >({} as any);
+  >({} as UndoableHandlerWithMetaAndTypeByType<PBT_Inferred, MR>);
 
   const [past, setPast] = useState<ActionUnion<PBT_Inferred>[]>([]);
   const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
@@ -49,14 +52,14 @@ export const useInfiniteUndo = <
   const makeUndoable = useCallback(
     <P extends P_All>(
       handler: PBT_All extends undefined
-        ? UndoableHandlerWithMetaAndType<PayloadByType<string, P>, MR>
-        : UndoableHandlerWithMetaAndType<PickByValue<PBT_Inferred, P>, MR>
-    ) => {
+        ? UndoableHandlerWithMetaAndType<P, string, MR>
+        : UndoableHandlerWithMetaAndTypeUnion<PickByValue<PBT_Inferred, P>, MR>
+    ): PayloadHandler<P> => {
       const { type } = handler;
       console.log('MAKE UNDOABLE', type);
       (actionsRef.current as any)[type] = handler;
       return (payload: P) => {
-        handler.do(payload as any);
+        handler.do(payload);
         setPast(
           past => [{ type, payload }, ...past] as ActionUnion<PBT_Inferred>[]
         );
@@ -69,7 +72,7 @@ export const useInfiniteUndo = <
   const makeUndoables = useCallback(
     <PBT extends PBT_Partial>(
       handlers: {
-        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], MR>;
+        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], MR, K>;
       }
     ): HandlersByType<PBT> =>
       mapObject(handlers, ([type, handler]) => [
@@ -86,43 +89,46 @@ export const useInfiniteUndo = <
       actionCreators: UndoableUActionCreatorsByType<PBT>,
       ...metaActionHandlers: MR extends undefined
         ? []
-        : [MetaActionHandlersByType<PBT, MR>]
+        : [MetaActionHandlersByType<PBT, NMR>]
     ): HandlersByType<PBT> =>
-      Object.fromEntries(
-        Object.entries(actionCreators).map(([type, action]) => [
+      mapObject(actionCreators, ([type, action]) => [
+        type,
+        //TODO: make this work without type casting
+        makeUndoable({
           type,
-          //TODO: make this work without type casting
-          makeUndoable({
-            type,
-            do: (payload: any) => dispatch((action as any).do(payload)),
-            undo: (payload: any) => dispatch((action as any).undo(payload)),
-            ...(metaActionHandlers
-              ? { meta: (metaActionHandlers[0] as any)[type] }
-              : {}),
-          } as any),
-        ])
-      ) as any,
+          do: (payload: any) => dispatch(action.do(payload)),
+          undo: (payload: any) => dispatch(action.undo(payload)),
+          ...(metaActionHandlers
+            ? { meta: (metaActionHandlers[0] as any)[type] }
+            : {}),
+        } as any),
+      ]) as any,
     [makeUndoable]
   );
 
-  //No need to infer the Payload here
-  const getMetaActionHandlers = useCallback((action: Action) => {
-    //Use an empty object as MR to let TypeScript infer action.custom
-    const storedAction = actionsRef.current[
-      action.type
-    ] as UndoableHandlerWithMeta<any, {}>;
-    if (!storedAction.meta) {
-      throw new Error(
-        `You are getting metaActionHandlers for action '${action.type}', but none are registered.`
+  const getMetaActionHandlers = useCallback(
+    <A extends ActionUnion<PBT_Inferred>>(
+      action: A
+    ): LinkedMetaActions<NMR> => {
+      type P = A['payload'];
+      type T = A['type'];
+      const storedAction = actionsRef.current[
+        action.type
+      ] as UndoableHandlerWithMetaAndType<P, T, NMR>;
+
+      if (!storedAction.meta) {
+        throw new Error(
+          `You are getting metaActionHandlers for action '${action.type}', but none are registered.`
+        );
+      }
+      // TODO: why is meta not properly inferred?
+      return mapObject(
+        storedAction.meta as MetaActionHandlers<P, NMR, T>,
+        ([key, value]) => [key, () => value(action.payload, action.type)]
       );
-    }
-    return Object.fromEntries(
-      Object.entries(storedAction.meta).map(([key, value]) => [
-        key,
-        () => (value as MetaActionHandler)(action.payload, action.type),
-      ])
-    ) as LinkedMetaActions<MR>;
-  }, []);
+    },
+    []
+  );
 
   return {
     makeUndoable,
@@ -160,7 +166,7 @@ export const makeUndoableReducer = <
   MR extends MetaActionReturnTypes = undefined
 >(
   stateUpdaters: {
-    [K in StringOnlyKeyOf<PBT>]: UndoableStateUpdaterWithMeta<PBT[K], S, MR>;
+    [K in StringOnlyKeyOf<PBT>]: UndoableStateUpdaterWithMeta<PBT[K], S, MR, K>;
   }
 ) => ({
   reducer: ((state, { payload, type, meta }) => {
@@ -181,12 +187,12 @@ export const makeUndoableReducer = <
   ...({
     metaActionHandlers: mapObject(stateUpdaters, ([type, updater]) => [
       type,
-      (updater as UndoableStateUpdaterWithMeta<any, any, {}>).meta,
+      (updater as UndoableStateUpdaterWithMeta<any, any, {}, string>).meta,
     ]),
   } as MR extends undefined
     ? {}
     : {
-        metaActionHandlers: MetaActionHandlersByType<PBT, MR>;
+        metaActionHandlers: MetaActionHandlersByType<PBT, NonNullable<MR>>;
       }),
 });
 

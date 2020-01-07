@@ -2,7 +2,7 @@ import { Dispatch } from 'react';
 
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
-type PayloadHandler<P> = (payload: P) => void;
+export type PayloadHandler<P> = (payload: P) => void;
 
 export type HandlersByType<PBT extends PayloadByType> = {
   [K in StringOnlyKeyOf<PBT>]: PayloadHandler<PBT[K]>;
@@ -29,43 +29,55 @@ type WithType<O extends object, T extends string> = O & {
 
 export type MetaActionReturnTypes = Record<string, any> | undefined;
 
-export type MetaActionHandler<P = any, R = any> = (
+export type MetaActionHandler<P = any, R = any, T extends string = string> = (
   payload: P,
-  type: string
+  type: T
 ) => R;
 
-type MetaActionHandlers<P, MR extends MetaActionReturnTypes> = {
-  [K in StringOnlyKeyOf<MR>]: MetaActionHandler<P, MR[K]>;
+export type MetaActionHandlers<
+  P,
+  MR extends NonNullable<MetaActionReturnTypes>,
+  T extends string
+> = {
+  [K in StringOnlyKeyOf<MR>]: MetaActionHandler<P, MR[K], T>;
 };
 
 export type MetaActionHandlersByType<
   PBT extends PayloadByType,
-  MR extends MetaActionReturnTypes
-> = { [K in StringOnlyKeyOf<PBT>]: MetaActionHandlers<PBT[K], MR> };
+  MR extends NonNullable<MetaActionReturnTypes>
+> = { [K in StringOnlyKeyOf<PBT>]: MetaActionHandlers<PBT[K], MR, K> };
 
 type WithMeta<
   O extends object,
   P,
-  MR extends MetaActionReturnTypes
+  MR extends MetaActionReturnTypes,
+  T extends string
 > = MR extends undefined
   ? O
   : O & {
-      meta: MetaActionHandlers<P, MR>;
+      meta: MetaActionHandlers<P, NonNullable<MR>, T>;
     };
 
 export type UndoableHandlerWithMeta<
   P,
-  MR extends MetaActionReturnTypes
-> = WithMeta<UndoableHandler<P>, P, MR>;
+  MR extends MetaActionReturnTypes,
+  T extends string
+> = WithMeta<UndoableHandler<P>, P, MR, T>;
 
 export type UndoableHandlerWithMetaAndTypeByType<
   PBT extends PayloadByType,
   MR extends MetaActionReturnTypes
 > = {
-  [K in StringOnlyKeyOf<PBT>]: WithType<UndoableHandlerWithMeta<PBT[K], MR>, K>;
+  [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMetaAndType<PBT[K], K, MR>;
 };
 
 export type UndoableHandlerWithMetaAndType<
+  P,
+  T extends string,
+  MR extends MetaActionReturnTypes
+> = WithType<UndoableHandlerWithMeta<P, MR, T>, T>;
+
+export type UndoableHandlerWithMetaAndTypeUnion<
   PBT extends PayloadByType,
   MR extends MetaActionReturnTypes
 > = UndoableHandlerWithMetaAndTypeByType<PBT, MR>[StringOnlyKeyOf<PBT>];
@@ -73,10 +85,11 @@ export type UndoableHandlerWithMetaAndType<
 export type UndoableStateUpdaterWithMeta<
   P,
   S,
-  MR extends MetaActionReturnTypes
-> = WithMeta<UndoableStateUpdater<P, S>, P, MR>;
+  MR extends MetaActionReturnTypes,
+  T extends string
+> = WithMeta<UndoableStateUpdater<P, S>, P, MR, T>;
 
-export type LinkedMetaActions<MR extends MetaActionReturnTypes> = {
+export type LinkedMetaActions<MR extends NonNullable<MetaActionReturnTypes>> = {
   [K in StringOnlyKeyOf<MR>]: () => MR[K];
 };
 
