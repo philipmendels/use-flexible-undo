@@ -60,8 +60,8 @@ type WithMeta<
 
 export type UndoableHandlerWithMeta<
   P,
-  MR extends MetaActionReturnTypes,
-  T extends string
+  T extends string,
+  MR extends MetaActionReturnTypes
 > = WithMeta<UndoableHandler<P>, P, MR, T>;
 
 export type UndoableHandlerWithMetaAndTypeByType<
@@ -75,7 +75,7 @@ export type UndoableHandlerWithMetaAndType<
   P,
   T extends string,
   MR extends MetaActionReturnTypes
-> = WithType<UndoableHandlerWithMeta<P, MR, T>, T>;
+> = WithType<UndoableHandlerWithMeta<P, T, MR>, T>;
 
 export type UndoableHandlerWithMetaAndTypeUnion<
   PBT extends PayloadByType,
@@ -131,6 +131,13 @@ export type UReducer<S, PBT extends PayloadByType> = (
 export type UDispatch<PBT extends PayloadByType> = Dispatch<UActionUnion<PBT>>;
 
 export type ValueOf<T> = T[keyof T];
+
+export type ExtractKeyByValue<T, V extends ValueOf<T>> = Extract<
+  StringOnlyKeyOf<T>,
+  {
+    [K in StringOnlyKeyOf<T>]: T[K] extends V ? K : never;
+  }[StringOnlyKeyOf<T>]
+>;
 
 export type PickByValue<T, V extends ValueOf<T>> = Pick<
   T,

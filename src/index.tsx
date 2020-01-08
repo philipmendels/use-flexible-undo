@@ -10,19 +10,18 @@ import {
   StackSetter,
   UndoableStateUpdaterWithMeta,
   MetaActionHandlersByType,
-  UndoableHandlerWithMetaAndTypeUnion,
   UDispatch,
   UReducer,
   ActionUnion,
   ValueOf,
   UndoableHandlerWithMetaAndTypeByType,
-  PickByValue,
   StringOnlyKeyOf,
   UndoableHandlersByType,
   Entry,
   MetaActionHandlers,
   UndoableHandlerWithMetaAndType,
   PayloadHandler,
+  ExtractKeyByValue,
 } from './index.types';
 
 export const useInfiniteUndo = <
@@ -34,7 +33,7 @@ export const useInfiniteUndo = <
   type P_All = ValueOf<PBT_Inferred>;
   type NMR = NonNullable<MR>;
 
-  const actionsRef = useRef<
+  const handlersRef = useRef<
     UndoableHandlerWithMetaAndTypeByType<PBT_Inferred, MR>
   >({} as UndoableHandlerWithMetaAndTypeByType<PBT_Inferred, MR>);
 
@@ -42,22 +41,34 @@ export const useInfiniteUndo = <
   const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
 
   const undo = useCallback(() => {
-    shiftStack(past, setPast, setFuture, type => actionsRef.current[type].undo);
+    shiftStack(
+      past,
+      setPast,
+      setFuture,
+      type => handlersRef.current[type].undo
+    );
   }, [past]);
 
   const redo = useCallback(() => {
-    shiftStack(future, setFuture, setPast, type => actionsRef.current[type].do);
+    shiftStack(
+      future,
+      setFuture,
+      setPast,
+      type => handlersRef.current[type].do
+    );
   }, [future]);
 
   const makeUndoable = useCallback(
     <P extends P_All>(
-      handler: PBT_All extends undefined
-        ? UndoableHandlerWithMetaAndType<P, string, MR>
-        : UndoableHandlerWithMetaAndTypeUnion<PickByValue<PBT_Inferred, P>, MR>
+      handler: UndoableHandlerWithMetaAndType<
+        P,
+        ExtractKeyByValue<PBT_Inferred, P>,
+        MR
+      >
     ): PayloadHandler<P> => {
       const { type } = handler;
       console.log('MAKE UNDOABLE', type);
-      (actionsRef.current as any)[type] = handler;
+      (handlersRef.current as any)[type] = handler;
       return (payload: P) => {
         handler.do(payload);
         setPast(
@@ -72,7 +83,7 @@ export const useInfiniteUndo = <
   const makeUndoables = useCallback(
     <PBT extends PBT_Partial>(
       handlers: {
-        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], MR, K>;
+        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR>;
       }
     ): HandlersByType<PBT> =>
       mapObject(handlers, ([type, handler]) => [
@@ -98,9 +109,7 @@ export const useInfiniteUndo = <
           type,
           do: (payload: any) => dispatch(action.do(payload)),
           undo: (payload: any) => dispatch(action.undo(payload)),
-          ...(metaActionHandlers
-            ? { meta: (metaActionHandlers[0] as any)[type] }
-            : {}),
+          ...(metaActionHandlers ? { meta: metaActionHandlers[0]![type] } : {}),
         } as any),
       ]) as any,
     [makeUndoable]
@@ -112,7 +121,7 @@ export const useInfiniteUndo = <
     ): LinkedMetaActions<NMR> => {
       type P = A['payload'];
       type T = A['type'];
-      const storedAction = actionsRef.current[
+      const storedAction = handlersRef.current[
         action.type
       ] as UndoableHandlerWithMetaAndType<P, T, NMR>;
 
