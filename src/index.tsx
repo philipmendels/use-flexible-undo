@@ -24,10 +24,35 @@ import {
   ValueOf,
 } from './index.types';
 
+type PBT_ALL_NN<
+  PBT_All extends PayloadByType | undefined
+> = PBT_All extends undefined ? PayloadByType : PBT_All;
+
+type EventName = 'do' | 'undo' | 'redo';
+
+export type CB<
+  PBT_Inferred extends PayloadByType = PayloadByType,
+  E extends EventName = EventName
+> = (action: ActionUnion<PBT_Inferred>, eventName: E) => any;
+
+interface Options<PBT_Inferred extends PayloadByType> {
+  onMakeUndoable?: (type: StringOnlyKeyOf<PBT_Inferred>) => any;
+  onDo?: CB<PBT_Inferred, 'do'>;
+  onReDo?: CB<PBT_Inferred, 'redo'>;
+  onUnDo?: CB<PBT_Inferred, 'undo'>;
+  onDoRedo?: CB<PBT_Inferred, 'do' | 'redo'>;
+}
+
 export const useInfiniteUndo = <
   PBT_All extends PayloadByType | undefined = undefined,
   MR extends MetaActionReturnTypes = undefined
->() => {
+>({
+  onMakeUndoable,
+  onDo,
+  onReDo,
+  onUnDo,
+  onDoRedo,
+}: Options<PBT_ALL_NN<PBT_All>>) => {
   type PBT_Inferred = PBT_All extends undefined ? PayloadByType : PBT_All;
   type PBT_Partial = Partial<PBT_Inferred>;
   type P_All = ValueOf<PBT_Inferred>;
@@ -41,22 +66,26 @@ export const useInfiniteUndo = <
   const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
 
   const undo = useCallback(() => {
+    onUnDo && onUnDo(past[0], 'undo');
     shiftStack(
       past,
       setPast,
       setFuture,
       type => handlersRef.current[type].undo
     );
-  }, [past]);
+  }, [past, onUnDo]);
 
   const redo = useCallback(() => {
+    const action = future[0];
+    onReDo && onReDo(action, 'redo');
+    onDoRedo && onDoRedo(action, 'redo');
     shiftStack(
       future,
       setFuture,
       setPast,
       type => handlersRef.current[type].do
     );
-  }, [future]);
+  }, [onReDo, onDoRedo, future]);
 
   // For internal use only. Loosely typed so that TS does not
   // complain when calling it from the makeUndoableX functions.
@@ -69,9 +98,14 @@ export const useInfiniteUndo = <
       type: T,
       handler: H
     ): PayloadHandler<P> => {
-      console.log('MAKE UNDOABLE', type);
       (handlersRef.current as Record<string, any>)[type] = handler;
+      const anyType = type as any;
+      onMakeUndoable && onMakeUndoable(anyType);
       return (payload: P) => {
+        const anyPayload = payload as any;
+        const action = { type: anyType, payload: anyPayload };
+        onDo && onDo(action, 'do');
+        onDoRedo && onDoRedo(action, 'do');
         handler.do(payload);
         setPast(
           past => [{ type, payload }, ...past] as ActionUnion<PBT_Inferred>[]
@@ -79,7 +113,7 @@ export const useInfiniteUndo = <
         setFuture([]);
       };
     },
-    []
+    [onMakeUndoable, onDo, onDoRedo]
   );
 
   const makeUndoable = useCallback(

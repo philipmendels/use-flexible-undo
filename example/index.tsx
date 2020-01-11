@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useInfiniteUndo, makeUndoableReducer } from '../.';
+import { useInfiniteUndo, makeUndoableReducer, CB } from '../.';
 import { useState, useMemo, useReducer } from 'react';
 
 interface MetaActionReturnTypes {
@@ -49,6 +49,9 @@ const { reducer, actionCreators, metaActionHandlers } = makeUndoableReducer<
   },
 });
 
+const callback: CB<PayloadByTypeFull> = (action, eventName) =>
+  console.log(`${eventName} ${action.type}`);
+
 const App = () => {
   const [amount, setAmount] = useState(1);
   // const [count, setCount] = useState(0);
@@ -67,7 +70,11 @@ const App = () => {
     makeUndoablesFromDispatch,
     stack,
     getMetaActionHandlers,
-  } = useInfiniteUndo<PayloadByTypeFull, MetaActionReturnTypes>();
+  } = useInfiniteUndo<PayloadByTypeFull, MetaActionReturnTypes>({
+    onMakeUndoable: type => console.log('make ', type),
+    onDoRedo: callback,
+    onUnDo: callback,
+  });
 
   const { increment, decrement } = useMemo(
     () =>
@@ -96,8 +103,6 @@ const App = () => {
     [makeUndoables]
   );
 
-  console.log(blaat, bloop);
-
   const blurb = makeUndoable<boolean>({
     type: 'blurb',
     do: n => {},
@@ -106,8 +111,6 @@ const App = () => {
       describe: n => ``,
     },
   });
-
-  console.log(blurb);
 
   // const { increment, decrement } = useMemo(
   //   () =>
