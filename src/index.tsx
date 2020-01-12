@@ -293,7 +293,7 @@ export const makeUndoableReducer = <
     type,
     {
       do: makeActionCreater(type),
-      undo: makeActionCreater(type),
+      undo: makeActionCreater(type, true),
     },
   ]) as UndoableUActionCreatorsByType<PBT>,
   ...({
@@ -338,11 +338,14 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>(
   };
 };
 
-const makeActionCreater = <T extends string>(type: T) => <P extends any>(
+const makeActionCreater = <T extends string>(type: T, isUndo?: boolean) => <
+  P extends any
+>(
   payload: P
 ) => ({
   type,
   payload,
+  ...(isUndo ? { meta: { isUndo } } : {}),
 });
 
 const mapObject = <O extends object, O2 extends object>(

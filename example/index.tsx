@@ -76,7 +76,7 @@ const App = () => {
   } = useInfiniteUndo<PayloadByTypeFull, MetaActionReturnTypes>({
     // onMakeUndoable: type => console.log('make ', type),
     onDoRedo: callback,
-    onUnDo: callback,
+    onUndo: callback,
   });
 
   const { increment, decrement } = useMemo(
