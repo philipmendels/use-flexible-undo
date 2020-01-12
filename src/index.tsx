@@ -1,4 +1,12 @@
-import { useState, useCallback, useRef, useReducer, useMemo } from 'react';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useReducer,
+  useMemo,
+  useEffect,
+} from 'react';
+
 import {
   Action,
   ActionUnion,
@@ -60,6 +68,14 @@ interface Options<
   onDoRedo?: CB<PBT_Inferred, MR, 'do' | 'redo'>;
 }
 
+const useSavedCallback = (callback?: (...args: any) => any) => {
+  const savedCallback = useRef(callback);
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+  return savedCallback;
+};
+
 export const useInfiniteUndo = <
   PBT_All extends PayloadByType | undefined = undefined,
   MR extends MetaActionReturnTypes = undefined
@@ -84,6 +100,12 @@ export const useInfiniteUndo = <
 
   const canUndo = useCallback(() => Boolean(past.length), [past]);
   const canRedo = useCallback(() => Boolean(future.length), [future]);
+
+  const onMakeUndoableRef = useSavedCallback(onMakeUndoable);
+  const onDoRef = useSavedCallback(onDo);
+  const onUndoRef = useSavedCallback(onUndo);
+  const onRedoRef = useSavedCallback(onRedo);
+  const onDoRedoRef = useSavedCallback(onDoRedo);
 
   // For internal use
   const getMAH = useCallback(
@@ -122,10 +144,10 @@ export const useInfiniteUndo = <
 
   const undo = useCallback(() => {
     if (canUndo()) {
-      if (onUndo) {
+      if (onUndoRef.current) {
         const action = past[0];
         const meta = getMAH(action);
-        onUndo({
+        onUndoRef.current({
           action,
           eventName: 'undo',
           ...(meta ? { meta } : {}),
@@ -138,11 +160,11 @@ export const useInfiniteUndo = <
         type => handlersRef.current[type].undo
       );
     }
-  }, [canUndo, past, onUndo, getMAH]);
+  }, [canUndo, past, onUndoRef, getMAH]);
 
   const redo = useCallback(() => {
     if (canRedo()) {
-      if (onRedo || onDoRedo) {
+      if (onRedoRef.current || onDoRedoRef.current) {
         const action = future[0];
         const meta = getMAH(action);
         const event = {
@@ -150,8 +172,8 @@ export const useInfiniteUndo = <
           eventName: 'redo',
           ...(meta ? { meta } : {}),
         } as CB_ArgsWithMeta<PBT_Inferred, MR, 'redo'>;
-        onRedo && onRedo(event);
-        onDoRedo && onDoRedo(event);
+        onRedoRef.current && onRedoRef.current(event);
+        onDoRedoRef.current && onDoRedoRef.current(event);
       }
       shiftStack(
         future,
@@ -160,7 +182,7 @@ export const useInfiniteUndo = <
         type => handlersRef.current[type].do
       );
     }
-  }, [canRedo, getMAH, onRedo, onDoRedo, future]);
+  }, [canRedo, getMAH, onRedoRef, onDoRedoRef, future]);
 
   // For internal use only. Loosely typed so that TS does not
   // complain when calling it from the makeUndoableX functions.
@@ -175,25 +197,25 @@ export const useInfiniteUndo = <
     ): PayloadHandler<P> => {
       (handlersRef.current as Record<string, any>)[type] = handler;
       const anyType = type as any;
-      onMakeUndoable && onMakeUndoable(anyType);
+      onMakeUndoableRef.current && onMakeUndoableRef.current(anyType);
       return (payload: P) => {
         const action = { type: anyType, payload: payload as any };
-        if (onDo || onDoRedo) {
+        if (onDoRef.current || onDoRedoRef.current) {
           const meta = getMAH(action);
           const event = {
             action,
             eventName: 'do',
             ...(meta ? { meta } : {}),
           } as CB_ArgsWithMeta<PBT_Inferred, MR, 'do'>;
-          onDo && onDo(event);
-          onDoRedo && onDoRedo(event);
+          onDoRef.current && onDoRef.current(event);
+          onDoRedoRef.current && onDoRedoRef.current(event);
         }
         handler.do(payload);
         setPast(past => [action, ...past]);
         setFuture([]);
       };
     },
-    [getMAH, onMakeUndoable, onDo, onDoRedo]
+    [getMAH, onMakeUndoableRef, onDoRef, onDoRedoRef]
   );
 
   const makeUndoable = useCallback(
