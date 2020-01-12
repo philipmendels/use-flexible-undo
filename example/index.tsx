@@ -49,8 +49,11 @@ const { reducer, actionCreators, metaActionHandlers } = makeUndoableReducer<
   },
 });
 
-const callback: CB<PayloadByTypeFull> = (action, eventName) =>
-  console.log(`${eventName} ${action.type}`);
+const callback: CB<PayloadByTypeFull, MetaActionReturnTypes> = ({
+  action,
+  eventName,
+  meta,
+}) => console.log(`${eventName} ${action.type}: ${meta.describe()}`);
 
 const App = () => {
   const [amount, setAmount] = useState(1);
@@ -71,7 +74,7 @@ const App = () => {
     stack,
     getMetaActionHandlers,
   } = useInfiniteUndo<PayloadByTypeFull, MetaActionReturnTypes>({
-    onMakeUndoable: type => console.log('make ', type),
+    // onMakeUndoable: type => console.log('make ', type),
     onDoRedo: callback,
     onUnDo: callback,
   });

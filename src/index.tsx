@@ -30,17 +30,34 @@ type PBT_ALL_NN<
 
 type EventName = 'do' | 'undo' | 'redo';
 
+interface CB_Args<PBT_Inferred extends PayloadByType, E extends EventName> {
+  action: ActionUnion<PBT_Inferred>;
+  eventName: E;
+}
+
+type CB_ArgsWithMeta<
+  PBT_Inferred extends PayloadByType,
+  MR extends MetaActionReturnTypes,
+  E extends EventName
+> = MR extends undefined
+  ? CB_Args<PBT_Inferred, E>
+  : CB_Args<PBT_Inferred, E> & { meta: LinkedMetaActions<NonNullable<MR>> };
+
 export type CB<
   PBT_Inferred extends PayloadByType = PayloadByType,
+  MR extends MetaActionReturnTypes = undefined,
   E extends EventName = EventName
-> = (action: ActionUnion<PBT_Inferred>, eventName: E) => any;
+> = (args: CB_ArgsWithMeta<PBT_Inferred, MR, E>) => any;
 
-interface Options<PBT_Inferred extends PayloadByType> {
+interface Options<
+  PBT_Inferred extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> {
   onMakeUndoable?: (type: StringOnlyKeyOf<PBT_Inferred>) => any;
-  onDo?: CB<PBT_Inferred, 'do'>;
-  onReDo?: CB<PBT_Inferred, 'redo'>;
-  onUnDo?: CB<PBT_Inferred, 'undo'>;
-  onDoRedo?: CB<PBT_Inferred, 'do' | 'redo'>;
+  onDo?: CB<PBT_Inferred, MR, 'do'>;
+  onRedo?: CB<PBT_Inferred, MR, 'redo'>;
+  onUndo?: CB<PBT_Inferred, MR, 'undo'>;
+  onDoRedo?: CB<PBT_Inferred, MR, 'do' | 'redo'>;
 }
 
 export const useInfiniteUndo = <
@@ -49,10 +66,10 @@ export const useInfiniteUndo = <
 >({
   onMakeUndoable,
   onDo,
-  onReDo,
-  onUnDo,
+  onRedo,
+  onUndo,
   onDoRedo,
-}: Options<PBT_ALL_NN<PBT_All>>) => {
+}: Options<PBT_ALL_NN<PBT_All>, MR>) => {
   type PBT_Inferred = PBT_All extends undefined ? PayloadByType : PBT_All;
   type PBT_Partial = Partial<PBT_Inferred>;
   type P_All = ValueOf<PBT_Inferred>;
@@ -65,27 +82,78 @@ export const useInfiniteUndo = <
   const [past, setPast] = useState<ActionUnion<PBT_Inferred>[]>([]);
   const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
 
+  // For internal use
+  const getMAH = useCallback(
+    <A extends ActionUnion<PBT_Inferred>>(action: A) => {
+      type P = A['payload'];
+      type T = A['type'];
+      const storedAction = handlersRef.current[
+        action.type
+      ] as UndoableHandlerWithMeta<P, T, NMR>;
+
+      if (!storedAction.meta) {
+        return undefined;
+      }
+      return mapObject(
+        storedAction.meta as MetaActionHandlers<P, NMR, T>,
+        ([key, value]) => [key, () => value(action.payload, action.type)]
+      ) as LinkedMetaActions<NMR>;
+    },
+    []
+  );
+
+  const getMetaActionHandlers = useCallback(
+    <A extends ActionUnion<PBT_Inferred>>(
+      action: A
+    ): LinkedMetaActions<NMR> => {
+      const meta = getMAH(action);
+      if (!meta) {
+        throw new Error(
+          `You are getting metaActionHandlers for action '${action.type}', but none are registered.`
+        );
+      }
+      return meta;
+    },
+    [getMAH]
+  );
+
   const undo = useCallback(() => {
-    onUnDo && onUnDo(past[0], 'undo');
+    if (onUndo) {
+      const action = past[0];
+      const meta = getMAH(action);
+      onUndo({
+        action,
+        eventName: 'undo',
+        ...(meta ? { meta } : {}),
+      } as CB_ArgsWithMeta<PBT_Inferred, MR, 'undo'>);
+    }
     shiftStack(
       past,
       setPast,
       setFuture,
       type => handlersRef.current[type].undo
     );
-  }, [past, onUnDo]);
+  }, [past, onUndo, getMAH]);
 
   const redo = useCallback(() => {
-    const action = future[0];
-    onReDo && onReDo(action, 'redo');
-    onDoRedo && onDoRedo(action, 'redo');
+    if (onRedo || onDoRedo) {
+      const action = future[0];
+      const meta = getMAH(action);
+      const event = {
+        action,
+        eventName: 'redo',
+        ...(meta ? { meta } : {}),
+      } as CB_ArgsWithMeta<PBT_Inferred, MR, 'redo'>;
+      onRedo && onRedo(event);
+      onDoRedo && onDoRedo(event);
+    }
     shiftStack(
       future,
       setFuture,
       setPast,
       type => handlersRef.current[type].do
     );
-  }, [onReDo, onDoRedo, future]);
+  }, [getMAH, onRedo, onDoRedo, future]);
 
   // For internal use only. Loosely typed so that TS does not
   // complain when calling it from the makeUndoableX functions.
@@ -102,18 +170,23 @@ export const useInfiniteUndo = <
       const anyType = type as any;
       onMakeUndoable && onMakeUndoable(anyType);
       return (payload: P) => {
-        const anyPayload = payload as any;
-        const action = { type: anyType, payload: anyPayload };
-        onDo && onDo(action, 'do');
-        onDoRedo && onDoRedo(action, 'do');
+        const action = { type: anyType, payload: payload as any };
+        if (onDo || onDoRedo) {
+          const meta = getMAH(action);
+          const event = {
+            action,
+            eventName: 'do',
+            ...(meta ? { meta } : {}),
+          } as CB_ArgsWithMeta<PBT_Inferred, MR, 'do'>;
+          onDo && onDo(event);
+          onDoRedo && onDoRedo(event);
+        }
         handler.do(payload);
-        setPast(
-          past => [{ type, payload }, ...past] as ActionUnion<PBT_Inferred>[]
-        );
+        setPast(past => [action, ...past]);
         setFuture([]);
       };
     },
-    [onMakeUndoable, onDo, onDoRedo]
+    [getMAH, onMakeUndoable, onDo, onDoRedo]
   );
 
   const makeUndoable = useCallback(
@@ -167,29 +240,6 @@ export const useInfiniteUndo = <
         } as UndoableHandlerWithMeta<PBT[typeof type], typeof type, MR>),
       ]),
     [registerHandler]
-  );
-
-  const getMetaActionHandlers = useCallback(
-    <A extends ActionUnion<PBT_Inferred>>(
-      action: A
-    ): LinkedMetaActions<NMR> => {
-      type P = A['payload'];
-      type T = A['type'];
-      const storedAction = handlersRef.current[
-        action.type
-      ] as UndoableHandlerWithMeta<P, T, NMR>;
-
-      if (!storedAction.meta) {
-        throw new Error(
-          `You are getting metaActionHandlers for action '${action.type}', but none are registered.`
-        );
-      }
-      return mapObject(
-        storedAction.meta as MetaActionHandlers<P, NMR, T>,
-        ([key, value]) => [key, () => value(action.payload, action.type)]
-      );
-    },
-    []
   );
 
   return {
