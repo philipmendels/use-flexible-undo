@@ -82,6 +82,9 @@ export const useInfiniteUndo = <
   const [past, setPast] = useState<ActionUnion<PBT_Inferred>[]>([]);
   const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
 
+  const canUndo = useCallback(() => Boolean(past.length), [past]);
+  const canRedo = useCallback(() => Boolean(future.length), [future]);
+
   // For internal use
   const getMAH = useCallback(
     <A extends ActionUnion<PBT_Inferred>>(action: A) => {
@@ -118,42 +121,46 @@ export const useInfiniteUndo = <
   );
 
   const undo = useCallback(() => {
-    if (onUndo) {
-      const action = past[0];
-      const meta = getMAH(action);
-      onUndo({
-        action,
-        eventName: 'undo',
-        ...(meta ? { meta } : {}),
-      } as CB_ArgsWithMeta<PBT_Inferred, MR, 'undo'>);
+    if (canUndo()) {
+      if (onUndo) {
+        const action = past[0];
+        const meta = getMAH(action);
+        onUndo({
+          action,
+          eventName: 'undo',
+          ...(meta ? { meta } : {}),
+        } as CB_ArgsWithMeta<PBT_Inferred, MR, 'undo'>);
+      }
+      shiftStack(
+        past,
+        setPast,
+        setFuture,
+        type => handlersRef.current[type].undo
+      );
     }
-    shiftStack(
-      past,
-      setPast,
-      setFuture,
-      type => handlersRef.current[type].undo
-    );
-  }, [past, onUndo, getMAH]);
+  }, [canUndo, past, onUndo, getMAH]);
 
   const redo = useCallback(() => {
-    if (onRedo || onDoRedo) {
-      const action = future[0];
-      const meta = getMAH(action);
-      const event = {
-        action,
-        eventName: 'redo',
-        ...(meta ? { meta } : {}),
-      } as CB_ArgsWithMeta<PBT_Inferred, MR, 'redo'>;
-      onRedo && onRedo(event);
-      onDoRedo && onDoRedo(event);
+    if (canRedo()) {
+      if (onRedo || onDoRedo) {
+        const action = future[0];
+        const meta = getMAH(action);
+        const event = {
+          action,
+          eventName: 'redo',
+          ...(meta ? { meta } : {}),
+        } as CB_ArgsWithMeta<PBT_Inferred, MR, 'redo'>;
+        onRedo && onRedo(event);
+        onDoRedo && onDoRedo(event);
+      }
+      shiftStack(
+        future,
+        setFuture,
+        setPast,
+        type => handlersRef.current[type].do
+      );
     }
-    shiftStack(
-      future,
-      setFuture,
-      setPast,
-      type => handlersRef.current[type].do
-    );
-  }, [getMAH, onRedo, onDoRedo, future]);
+  }, [canRedo, getMAH, onRedo, onDoRedo, future]);
 
   // For internal use only. Loosely typed so that TS does not
   // complain when calling it from the makeUndoableX functions.
@@ -242,18 +249,23 @@ export const useInfiniteUndo = <
     [registerHandler]
   );
 
+  const stack = useMemo(
+    () => ({
+      past: [...past],
+      future: [...future].reverse(),
+    }),
+    [past, future]
+  );
+
   return {
     makeUndoable,
     makeUndoables,
     makeUndoablesFromDispatch,
     undo,
     redo,
-    canUndo: () => Boolean(past.length),
-    canRedo: () => Boolean(future.length),
-    stack: {
-      past: [...past],
-      future: [...future].reverse(),
-    },
+    canUndo,
+    canRedo,
+    stack,
     getMetaActionHandlers,
   };
 };
