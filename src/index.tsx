@@ -86,14 +86,17 @@ const useLatest = <T extends any>(value?: T) => {
 export const useInfiniteUndo = <
   PBT_All extends PayloadByType | undefined = undefined,
   MR extends MetaActionReturnTypes = undefined
->({
-  onMakeUndoable,
-  onDo,
-  onRedo,
-  onUndo,
-  onDoRedo,
-  escapeClosure,
-}: Options<PBT_ALL_NN<PBT_All>, MR>) => {
+>(
+  options: Options<PBT_ALL_NN<PBT_All>, MR> = {}
+) => {
+  const {
+    onMakeUndoable,
+    onDo,
+    onRedo,
+    onUndo,
+    onDoRedo,
+    escapeClosure,
+  } = options;
   type PBT_Inferred = PBT_All extends undefined ? PayloadByType : PBT_All;
   type PBT_Partial = Partial<PBT_Inferred>;
   type P_All = ValueOf<PBT_Inferred>;
