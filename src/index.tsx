@@ -109,8 +109,8 @@ export const useInfiniteUndo = <
   const [past, setPast] = useState<ActionUnion<PBT_Inferred>[]>([]);
   const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
 
-  const canUndo = useCallback(() => Boolean(past.length), [past]);
-  const canRedo = useCallback(() => Boolean(future.length), [future]);
+  const canUndo = useMemo(() => Boolean(past.length), [past]);
+  const canRedo = useMemo(() => Boolean(future.length), [future]);
 
   const callbacksRef = useLatest(escapeClosure);
 
@@ -150,7 +150,7 @@ export const useInfiniteUndo = <
   );
 
   const undo = useCallback(() => {
-    if (canUndo()) {
+    if (canUndo) {
       const onUndoLatest = callbacksRef.current?.onUndo;
       if (onUndo || onUndoLatest) {
         const action = past[0];
@@ -173,7 +173,7 @@ export const useInfiniteUndo = <
   }, [canUndo, past, onUndo, getMAH, callbacksRef]);
 
   const redo = useCallback(() => {
-    if (canRedo()) {
+    if (canRedo) {
       const onRedoLatest = callbacksRef.current?.onRedo;
       const onDoRedoLatest = callbacksRef.current?.onDoRedo;
       if (onRedo || onDoRedo || onRedoLatest || onDoRedoLatest) {
