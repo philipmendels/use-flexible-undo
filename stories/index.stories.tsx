@@ -9,8 +9,8 @@ import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
 
 storiesOf('useInfiniteUndo', module)
   .add('makeUndoable-delta', () => <MakeUndoableDelta />)
-  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />)
-  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
   .add('makeUndoable-multi', () => <MakeUndoableMulti />)
   .add('makeUndoables', () => <MakeUndoables />)
+  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />)
+  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
   .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />);

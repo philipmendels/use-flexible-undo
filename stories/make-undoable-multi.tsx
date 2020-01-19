@@ -4,7 +4,9 @@ import { btnContainerStyle } from './styles';
 
 export const MakeUndoableMulti: React.FC = () => {
   const [count, setCount] = useState(0);
+
   const { makeUndoable, canUndo, undo, canRedo, redo } = useInfiniteUndo();
+
   const add = makeUndoable<number>({
     type: 'add',
     do: amount => setCount(prev => prev + amount),
@@ -15,6 +17,7 @@ export const MakeUndoableMulti: React.FC = () => {
     do: amount => setCount(prev => prev - amount),
     undo: amount => setCount(prev => prev + amount),
   });
+
   return (
     <>
       <div>count = {count}</div>

@@ -4,31 +4,29 @@ import { btnContainerStyle } from './styles';
 import { PayloadFromTo } from '../src/index.types';
 import { makeFromToHandler } from '../src/util';
 
-interface PayloadByType {
-  multiply: PayloadFromTo<number>;
-  divide: PayloadFromTo<number>;
-}
+type Payload = PayloadFromTo<number>;
 
 export const MakeUndoablesFromToHandler: React.FC = () => {
   const [count, setCount] = useState(1);
-  const { makeUndoables, canUndo, undo, canRedo, redo } = useInfiniteUndo();
 
-  const handler = makeFromToHandler(setCount);
+  const { makeUndoable, canUndo, undo, canRedo, redo } = useInfiniteUndo();
 
-  const { multiply, divide } = makeUndoables<PayloadByType>({
-    multiply: handler,
-    divide: handler,
+  const updateCount = makeUndoable<Payload>({
+    type: 'updateCount',
+    ...makeFromToHandler(setCount),
   });
+
+  const multiply = (amount: number) =>
+    updateCount({ from: count, to: count * amount });
+  const divide = (amount: number) =>
+    updateCount({ from: count, to: count / amount });
+
   return (
     <>
       <div>count = {count}</div>
       <div style={btnContainerStyle}>
-        <button onClick={() => multiply({ from: count, to: count * Math.PI })}>
-          multiPI
-        </button>
-        <button onClick={() => divide({ from: count, to: count / Math.PI })}>
-          diPide
-        </button>
+        <button onClick={() => multiply(Math.PI)}>multiPI</button>
+        <button onClick={() => divide(Math.PI)}>diPIde</button>
         <button disabled={!canUndo} onClick={() => undo()}>
           undo
         </button>
