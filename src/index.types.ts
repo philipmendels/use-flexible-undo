@@ -15,7 +15,7 @@ type Undoable<T> = {
   undo: T;
 };
 
-type UndoableHandler<P> = Undoable<PayloadHandler<P>>;
+export type UndoableHandler<P> = Undoable<PayloadHandler<P>>;
 
 export type UndoableHandlersByType<PBT extends PayloadByType> = {
   [K in StringOnlyKeyOf<PBT>]: UndoableHandler<PBT[K]>;
