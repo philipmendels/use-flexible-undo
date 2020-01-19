@@ -144,3 +144,6 @@ export interface PayloadFromTo<T> {
 }
 
 export type PayloadTupleFromTo<T> = [T, T];
+
+export type Updater<T> = (prev: T) => T;
+export type CurriedUpdater<T> = (amount: T) => Updater<T>;

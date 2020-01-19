@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerStyle } from './styles';
 import { PayloadFromTo } from '../src/index.types';
-import { makeFromToHandler } from '../src/util';
+import { makeUndoableFromToHandler } from '../src/util';
 
 type Payload = PayloadFromTo<number>;
 
@@ -13,7 +13,7 @@ export const MakeUndoablesFromToHandler: React.FC = () => {
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',
-    ...makeFromToHandler(setCount),
+    ...makeUndoableFromToHandler(setCount),
   });
 
   const multiply = (amount: number) =>
