@@ -137,3 +137,10 @@ export type ExtractKeyByValue<T, V extends ValueOf<T>> = Extract<
 export type StringOnlyKeyOf<T> = Extract<keyof T, string>;
 
 export type Entry<O extends Object> = { [K in keyof O]: [K, O[K]] }[keyof O];
+
+export interface PayloadFromTo<T> {
+  from: T;
+  to: T;
+}
+
+export type PayloadTupleFromTo<T> = [T, T];
