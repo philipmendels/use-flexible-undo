@@ -4,6 +4,7 @@ import {
   CurriedUpdater,
   PayloadHandler,
   UndoableHandler,
+  Undoable,
 } from './index.types';
 
 export const makeUndoableFromToHandler = <T>(handler: (payload: T) => any) => ({
@@ -21,9 +22,7 @@ export const makeHandler = <T extends any>(
   setter(createUpdater(val));
 };
 
-export const invertUndoableHandler = <T>(
-  handler: UndoableHandler<T>
-): UndoableHandler<T> => ({
-  do: handler.undo,
-  undo: handler.do,
+export const invertUndoable = <T>(undoable: Undoable<T>): Undoable<T> => ({
+  do: undoable.undo,
+  undo: undoable.do,
 });

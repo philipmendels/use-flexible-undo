@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerStyle } from './styles';
-import { makeHandler, invertUndoableHandler } from '../src/util';
+import { makeHandler, invertUndoable } from '../src/util';
 import { CurriedUpdater, UndoableHandler } from '../src/index.types';
 
 interface PayloadByType {
@@ -24,7 +24,7 @@ export const MakeUndoablesInvert: React.FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: undoableAddHandler,
-    subtract: invertUndoableHandler(undoableAddHandler),
+    subtract: invertUndoable(undoableAddHandler),
   });
 
   return (
