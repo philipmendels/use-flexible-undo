@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useReducer } from 'react';
 import {
   useInfiniteUndo,
   makeUndoableReducer,
-  useUndoableReducer,
+  bindUndoableActionCreators,
 } from '../src';
 import { btnContainerStyle } from './styles';
 
@@ -26,10 +26,10 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   },
 });
 
-export const UseUndoableReducer: React.FC = () => {
-  const { state, boundActionCreators } = useUndoableReducer(
-    reducer,
-    { count: 0 },
+export const BindUndoableActionCreators: React.FC = () => {
+  const [{ count }, dispatch] = useReducer(reducer, { count: 0 });
+  const boundActionCreators = bindUndoableActionCreators(
+    dispatch,
     actionCreators
   );
 
@@ -39,7 +39,7 @@ export const UseUndoableReducer: React.FC = () => {
 
   return (
     <>
-      <div>count = {state.count}</div>
+      <div>count = {count}</div>
       <div style={btnContainerStyle}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>

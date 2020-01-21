@@ -3,7 +3,6 @@ import {
   Updater,
   CurriedUpdater,
   PayloadHandler,
-  UndoableHandler,
   Undoable,
 } from './index.types';
 
