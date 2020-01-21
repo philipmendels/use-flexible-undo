@@ -9,9 +9,7 @@ interface PayloadByType {
 
 export const MakeUndoables: React.FC = () => {
   const [count, setCount] = useState(0);
-
   const { makeUndoables, canUndo, undo, canRedo, redo } = useInfiniteUndo();
-
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
       do: amount => setCount(prev => prev + amount),
@@ -22,7 +20,6 @@ export const MakeUndoables: React.FC = () => {
       undo: amount => setCount(prev => prev + amount),
     },
   });
-
   return (
     <>
       <div>count = {count}</div>

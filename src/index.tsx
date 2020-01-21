@@ -284,7 +284,9 @@ export const useInfiniteUndo = <
         registerHandler(type, {
           do: payload => dispatch(action.do(payload)),
           undo: payload => dispatch(action.undo(payload)),
-          ...(metaActionHandlers ? { meta: metaActionHandlers[0]![type] } : {}),
+          ...(metaActionHandlers.length
+            ? { meta: metaActionHandlers[0]![type] }
+            : {}),
         } as UndoableHandlerWithMeta<PBT[typeof type], typeof type, MR>),
       ]),
     [registerHandler]

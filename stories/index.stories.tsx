@@ -8,6 +8,7 @@ import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
 import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
 import { MakeUndoablesUtil } from './make-undoables-util';
 import { MakeUndoablesInvert } from './make-undoables-invert';
+import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
 
 storiesOf('useInfiniteUndo', module)
   .add('makeUndoable-delta', () => <MakeUndoableDelta />)
@@ -17,4 +18,5 @@ storiesOf('useInfiniteUndo', module)
   .add('makeUndoables-invert', () => <MakeUndoablesInvert />)
   .add('makeUndoable-from-to', () => <MakeUndoableFromTo />)
   .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
-  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />);
+  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
+  .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />);
