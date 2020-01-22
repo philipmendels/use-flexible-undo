@@ -11,6 +11,7 @@ import { MakeUndoablesInvert } from './make-undoables-invert';
 import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
 import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
+import { MakeUndoablesMeta } from './make-undoables-meta';
 
 storiesOf('useInfiniteUndo', module)
   .add('makeUndoable-delta', () => <MakeUndoableDelta />)
@@ -23,4 +24,5 @@ storiesOf('useInfiniteUndo', module)
   .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
-  .add('useUndoableReducer', () => <UseUndoableReducer />);
+  .add('useUndoableReducer', () => <UseUndoableReducer />)
+  .add('makeUndoables-meta', () => <MakeUndoablesMeta />);
