@@ -8,7 +8,14 @@ type Payload = PayloadTupleFromTo<number>;
 export const MakeUndoableFromToTuple: React.FC = () => {
   const [count, setCount] = useState(1);
 
-  const { makeUndoable, canUndo, undo, canRedo, redo } = useInfiniteUndo();
+  const {
+    makeUndoable,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    stack,
+  } = useInfiniteUndo();
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',
@@ -32,6 +39,14 @@ export const MakeUndoableFromToTuple: React.FC = () => {
           redo
         </button>
       </div>
+      {stack.future.map((action, index) => (
+        <div key={index} style={{ color: '#CCC' }}>
+          <div key={index}>{JSON.stringify(action)}</div>
+        </div>
+      ))}
+      {stack.past.map((action, index) => (
+        <div key={index}>{JSON.stringify(action)}</div>
+      ))}
     </>
   );
 };
