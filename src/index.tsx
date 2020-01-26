@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import {
-  Action,
   ActionUnion,
   Entry,
   ExtractKeyByValue,
@@ -19,7 +18,6 @@ import {
   MetaActionReturnTypes,
   PayloadByType,
   PayloadHandler,
-  StackSetter,
   StringOnlyKeyOf,
   UDispatch,
   UndoableHandlersByType,
@@ -30,6 +28,7 @@ import {
   UndoableStateUpdaterWithMeta,
   UReducer,
   ValueOf,
+  Stack,
 } from './index.types';
 
 type PBT_ALL_NN<
@@ -106,11 +105,19 @@ export const useInfiniteUndo = <
 
   const handlersRef = useRef<Handlers>({} as Handlers);
 
-  const [past, setPast] = useState<ActionUnion<PBT_Inferred>[]>([]);
-  const [future, setFuture] = useState<ActionUnion<PBT_Inferred>[]>([]);
+  //TODO: Think about tradeoffs of using a single list with present-index,
+  //versus past + future lists
+  const [stack, setStack] = useState<Stack<ActionUnion<PBT_Inferred>>>({
+    past: [],
+    future: [],
+  });
 
-  const canUndo = useMemo(() => Boolean(past.length), [past]);
-  const canRedo = useMemo(() => Boolean(future.length), [future]);
+  const canUndo = useMemo(() => Boolean(stack.past.length), [
+    stack.past.length,
+  ]);
+  const canRedo = useMemo(() => Boolean(stack.future.length), [
+    stack.future.length,
+  ]);
 
   const callbacksRef = useLatest(escapeClosure);
 
@@ -151,52 +158,55 @@ export const useInfiniteUndo = <
 
   const undo = useCallback(() => {
     if (canUndo) {
-      const onUndoLatest = callbacksRef.current?.onUndo;
-      if (onUndo || onUndoLatest) {
-        const action = past[0];
-        const meta = getMAH(action);
-        const event = {
-          action,
-          eventName: 'undo',
-          ...(meta ? { meta } : {}),
-        } as CB_ArgsWithMeta<PBT_Inferred, MR, 'undo'>;
-        onUndo?.(event);
-        onUndoLatest?.(event);
-      }
-      shiftStack(
-        past,
-        setPast,
-        setFuture,
-        type => handlersRef.current[type].undo
-      );
+      setStack(prev => {
+        const [action, ...rest] = prev.past;
+        const onUndoLatest = callbacksRef.current?.onUndo;
+        if (onUndo || onUndoLatest) {
+          const meta = getMAH(action);
+          const event = {
+            action,
+            eventName: 'undo',
+            ...(meta ? { meta } : {}),
+          } as CB_ArgsWithMeta<PBT_Inferred, MR, 'undo'>;
+          onUndo?.(event);
+          onUndoLatest?.(event);
+        }
+        handlersRef.current[action.type].undo(action.payload);
+        return {
+          past: rest,
+          future: [...prev.future, action],
+        };
+      });
     }
-  }, [canUndo, past, onUndo, getMAH, callbacksRef]);
+  }, [canUndo, onUndo, getMAH, callbacksRef]);
 
   const redo = useCallback(() => {
     if (canRedo) {
-      const onRedoLatest = callbacksRef.current?.onRedo;
-      const onDoRedoLatest = callbacksRef.current?.onDoRedo;
-      if (onRedo || onDoRedo || onRedoLatest || onDoRedoLatest) {
-        const action = future[0];
-        const meta = getMAH(action);
-        const event = {
-          action,
-          eventName: 'redo',
-          ...(meta ? { meta } : {}),
-        } as CB_ArgsWithMeta<PBT_Inferred, MR, 'redo'>;
-        onRedo?.(event);
-        onDoRedo?.(event);
-        onRedoLatest?.(event);
-        onDoRedoLatest?.(event);
-      }
-      shiftStack(
-        future,
-        setFuture,
-        setPast,
-        type => handlersRef.current[type].do
-      );
+      setStack(prev => {
+        const lastIndex = prev.future.length - 1;
+        const action = prev.future[lastIndex];
+        const onRedoLatest = callbacksRef.current?.onRedo;
+        const onDoRedoLatest = callbacksRef.current?.onDoRedo;
+        if (onRedo || onDoRedo || onRedoLatest || onDoRedoLatest) {
+          const meta = getMAH(action);
+          const event = {
+            action,
+            eventName: 'redo',
+            ...(meta ? { meta } : {}),
+          } as CB_ArgsWithMeta<PBT_Inferred, MR, 'redo'>;
+          onRedo?.(event);
+          onDoRedo?.(event);
+          onRedoLatest?.(event);
+          onDoRedoLatest?.(event);
+        }
+        handlersRef.current[action.type].do(action.payload);
+        return {
+          past: [action, ...prev.past],
+          future: prev.future.slice(0, lastIndex),
+        };
+      });
     }
-  }, [canRedo, getMAH, onRedo, onDoRedo, future, callbacksRef]);
+  }, [canRedo, getMAH, onRedo, onDoRedo, callbacksRef]);
 
   // For internal use only. Loosely typed so that TS does not
   // complain when calling it from the makeUndoableX functions.
@@ -214,7 +224,11 @@ export const useInfiniteUndo = <
       onMakeUndoable?.(anyType);
       callbacksRef.current?.onMakeUndoable?.(anyType);
       return (payload: P) => {
-        const action = { type: anyType, payload: payload as any };
+        const action = {
+          type: anyType,
+          payload: payload as any,
+          created: new Date(),
+        };
         const onDoLatest = callbacksRef.current?.onDo;
         const onDoRedoLatest = callbacksRef.current?.onDoRedo;
         if (onDo || onDoRedo || onDoLatest || onDoRedoLatest) {
@@ -230,8 +244,10 @@ export const useInfiniteUndo = <
           onDoRedoLatest?.(event);
         }
         handler.do(payload);
-        setPast(past => [action, ...past]);
-        setFuture([]);
+        setStack(prev => ({
+          past: [action, ...prev.past],
+          future: [],
+        }));
       };
     },
     [getMAH, onMakeUndoable, onDo, onDoRedo, callbacksRef]
@@ -292,12 +308,21 @@ export const useInfiniteUndo = <
     [registerHandler]
   );
 
-  const stack = useMemo(
-    () => ({
-      past: [...past],
-      future: [...future].reverse(),
-    }),
-    [past, future]
+  //TODO: Think about passing an action by ref / id / global index;
+  const timeTravel = useCallback(
+    (direction: 'past' | 'future', index: number) => {
+      if (direction === 'past') {
+        for (let i = 0; i <= index; i++) {
+          undo();
+        }
+      } else if (direction === 'future') {
+        const lastIndex = stack.future.length - 1;
+        for (let i = lastIndex; i >= index; i--) {
+          redo();
+        }
+      }
+    },
+    [undo, redo, stack.future.length]
   );
 
   return {
@@ -310,21 +335,8 @@ export const useInfiniteUndo = <
     canRedo,
     stack,
     getMetaActionHandlers,
+    timeTravel,
   };
-};
-
-const shiftStack = <A extends Action>(
-  from: A[],
-  setFrom: StackSetter<A>,
-  setTo: StackSetter<A>,
-  handler: (type: string) => (payload: any) => void
-) => {
-  if (from.length) {
-    const [item, ...rest] = from;
-    handler(item.type)(item.payload);
-    setFrom(rest);
-    setTo(to => [item, ...to]);
-  }
 };
 
 export const makeUndoableReducer = <

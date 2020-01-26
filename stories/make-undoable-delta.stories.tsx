@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerStyle } from './styles';
+import { Stack } from './components/stack';
 
 export const MakeUndoableDelta: React.FC = () => {
   const [count, setCount] = useState(0);
@@ -12,6 +13,7 @@ export const MakeUndoableDelta: React.FC = () => {
     canRedo,
     redo,
     stack,
+    timeTravel,
   } = useInfiniteUndo();
 
   const add = makeUndoable<number>({
@@ -32,14 +34,7 @@ export const MakeUndoableDelta: React.FC = () => {
           redo
         </button>
       </div>
-      {stack.future.map((action, index) => (
-        <div key={index} style={{ color: '#CCC' }}>
-          <div key={index}>{JSON.stringify(action)}</div>
-        </div>
-      ))}
-      {stack.past.map((action, index) => (
-        <div key={index}>{JSON.stringify(action)}</div>
-      ))}
+      <Stack stack={stack} timeTravel={timeTravel} />
     </>
   );
 };

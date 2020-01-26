@@ -91,6 +91,7 @@ export type LinkedMetaActions<MR extends NonNullable<MetaActionReturnTypes>> = {
 export interface Action<T = string, P = any> {
   type: T;
   payload: P;
+  created?: Date;
 }
 
 export type ActionUnion<PBT extends PayloadByType> = {
@@ -147,3 +148,10 @@ export type PayloadTupleFromTo<T> = [T, T];
 
 export type Updater<T> = (prev: T) => T;
 export type CurriedUpdater<T> = (amount: T) => Updater<T>;
+
+export type TimeTravelFn = (stack: 'past' | 'future', index: number) => void;
+
+export type Stack<T = Action> = {
+  past: T[];
+  future: T[];
+};

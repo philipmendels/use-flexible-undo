@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerStyle } from './styles';
+import { Stack } from './components/stack';
 
 interface PayloadByType {
   add: number;
@@ -9,7 +10,16 @@ interface PayloadByType {
 
 export const MakeUndoables: React.FC = () => {
   const [count, setCount] = useState(0);
-  const { makeUndoables, canUndo, undo, canRedo, redo } = useInfiniteUndo();
+  const {
+    makeUndoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    stack,
+    timeTravel,
+  } = useInfiniteUndo({ onUndo: ({ action }) => console.log('undo', action) });
+
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
       do: amount => setCount(prev => prev + amount),
@@ -33,6 +43,7 @@ export const MakeUndoables: React.FC = () => {
           redo
         </button>
       </div>
+      <Stack stack={stack} timeTravel={timeTravel} />
     </>
   );
 };
