@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import styled from '@emotion/styled';
 import { Action, TimeTravelFn } from '../../src/index.types';
 
 export const Stack: React.FC<{
@@ -8,16 +9,20 @@ export const Stack: React.FC<{
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 10000);
   return (
-    <>
+    <Root>
       {stack.future.map((action, index) => (
         <div
           key={index}
-          style={{ color: '#BBB', cursor: 'pointer' }}
+          style={{ cursor: 'pointer' }}
           onClick={() => timeTravel('future', index)}
         >
           <StackItem action={action} now={now} />
         </div>
       ))}
+      <Present>
+        undoable past &darr; &uarr; redoable future - click on an item to time
+        travel
+      </Present>
       {stack.past.map((action, index) => (
         <div
           key={index}
@@ -27,23 +32,41 @@ export const Stack: React.FC<{
           <StackItem action={action} now={now} />
         </div>
       ))}
-    </>
+    </Root>
   );
 };
+
+const Root = styled.div`
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 12px;
+`;
+
+const Present = styled.div`
+  color: #bbb;
+  padding: 8px 0px;
+`;
 
 const StackItem: React.FC<{ action: Action; now: Date }> = ({
   action: { type, payload, created },
   now,
 }) => (
-  <div style={{ padding: '6px 12px', display: 'flex' }}>
-    <div>{JSON.stringify({ type, payload })}</div>
+  <StackItemRoot>
     {Boolean(created) && (
-      <div style={{ marginLeft: '10px', color: '#BBB' }}>
+      <div style={{ color: '#BBB', width: '100px' }}>
         {formatTime(created!, now)}
       </div>
     )}
-  </div>
+    <div style={{ flex: 1 }}>{JSON.stringify({ type, payload })}</div>
+  </StackItemRoot>
 );
+
+const StackItemRoot = styled.div`
+  padding: 8px 0px;
+  display: flex;
+  &:hover {
+    background: #eee;
+  }
+`;
 
 // From: https://overreacted.io/making-setinterval-declarative-with-react-hooks/
 const useInterval = (callback: (...args: any[]) => any, delay: number) => {

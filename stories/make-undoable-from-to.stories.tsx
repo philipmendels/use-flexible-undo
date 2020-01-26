@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerStyle } from './styles';
 import { PayloadFromTo } from '../src/index.types';
+import { Stack } from './components/stack';
 
 type Payload = PayloadFromTo<number>;
 
@@ -15,6 +16,7 @@ export const MakeUndoableFromTo: React.FC = () => {
     canRedo,
     redo,
     stack,
+    timeTravel,
   } = useInfiniteUndo();
 
   const updateCount = makeUndoable<Payload>({
@@ -41,14 +43,7 @@ export const MakeUndoableFromTo: React.FC = () => {
           redo
         </button>
       </div>
-      {stack.future.map((action, index) => (
-        <div key={index} style={{ color: '#CCC' }}>
-          <div key={index}>{JSON.stringify(action)}</div>
-        </div>
-      ))}
-      {stack.past.map((action, index) => (
-        <div key={index}>{JSON.stringify(action)}</div>
-      ))}
+      <Stack stack={stack} timeTravel={timeTravel} />
     </>
   );
 };
