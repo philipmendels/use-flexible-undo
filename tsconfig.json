@@ -1,5 +1,6 @@
 {
-  "include": ["src", "types", "test"],
+  "include": ["src", "types", "test", "stories"],
+  "files": ["./index.d.ts"],
   "compilerOptions": {
     "target": "es5",
     "module": "esnext",

@@ -1,6 +1,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { MakeUndoableDelta } from './make-undoable-delta.stories';
+import MakeUndoableDeltaReadme from './make-undoable-delta.md';
 import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
 import { MakeUndoables } from './make-undoables';
 import { MakeUndoableMulti } from './make-undoable-multi';
@@ -14,7 +15,14 @@ import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import { MakeUndoablesMeta } from './make-undoables-meta';
 
 storiesOf('useInfiniteUndo', module)
-  .add('makeUndoable-delta', () => <MakeUndoableDelta />)
+  //@ts-ignore
+  .addParameters({ options: { theme: {} } })
+  .add('makeUndoable-delta', () => <MakeUndoableDelta />, {
+    readme: {
+      content: MakeUndoableDeltaReadme,
+      sidebar: MakeUndoableDeltaReadme,
+    },
+  })
   .add('makeUndoable-multi', () => <MakeUndoableMulti />)
   .add('makeUndoables', () => <MakeUndoables />)
   .add('makeUndoables-util', () => <MakeUndoablesUtil />)
