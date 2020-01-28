@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
-import { Action, TimeTravelFn } from '../../src/index.types';
+import { Action, TimeTravelFn, Stack } from '../../src/index.types';
 
-export const Stack: React.FC<{
-  stack: { past: Action[]; future: Action[] };
+export const ActionList: React.FC<{
+  stack: Stack;
   timeTravel: TimeTravelFn;
 }> = ({ stack, timeTravel }) => {
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 10000);
+  const hasPast = stack.past.length > 0;
+  const hasFuture = stack.future.length > 0;
   return (
     <Root>
       {stack.future.map((action, index) => (
@@ -20,8 +22,10 @@ export const Stack: React.FC<{
         </div>
       ))}
       <Present>
-        undoable past &darr; &uarr; redoable future - click on an item to time
-        travel
+        {hasPast && <>undoable past &darr;</>}
+        {hasPast && hasFuture && ' '}
+        {hasFuture && <>&uarr; redoable future</>}
+        {(hasPast || hasFuture) && ' - click on an item to time travel'}
       </Present>
       {stack.past.map((action, index) => (
         <div
@@ -37,12 +41,11 @@ export const Stack: React.FC<{
 };
 
 const Root = styled.div`
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 12px;
 `;
 
 const Present = styled.div`
-  color: #bbb;
+  color: #007acc;
   padding: 8px 0px;
 `;
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
-import { btnContainerStyle } from './styles';
+import { btnContainerClass } from './styles';
 import { PayloadFromTo } from '../src/index.types';
 import { makeUndoableFromToHandler } from '../src/util';
 
@@ -24,7 +24,7 @@ export const MakeUndoablesFromToHandler: React.FC = () => {
   return (
     <>
       <div>count = {count}</div>
-      <div style={btnContainerStyle}>
+      <div className={btnContainerClass}>
         <button onClick={() => multiply(Math.PI)}>multiPI</button>
         <button onClick={() => divide(Math.PI)}>diPIde</button>
         <button disabled={!canUndo} onClick={() => undo()}>

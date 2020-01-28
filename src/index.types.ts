@@ -149,7 +149,10 @@ export type PayloadTupleFromTo<T> = [T, T];
 export type Updater<T> = (prev: T) => T;
 export type CurriedUpdater<T> = (amount: T) => Updater<T>;
 
-export type TimeTravelFn = (stack: 'past' | 'future', index: number) => void;
+export type TimeTravelFn = (
+  direction: 'past' | 'future',
+  index: number
+) => void;
 
 export type Stack<T = Action> = {
   past: T[];

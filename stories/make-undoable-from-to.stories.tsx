@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
-import { btnContainerStyle } from './styles';
+import { btnContainerClass, rootClass } from './styles';
 import { PayloadFromTo } from '../src/index.types';
-import { Stack } from './components/stack';
+import { ActionList } from './components/stack';
 
 type Payload = PayloadFromTo<number>;
 
@@ -31,9 +31,9 @@ export const MakeUndoableFromTo: React.FC = () => {
     updateCount({ from: count, to: count / amount });
 
   return (
-    <>
+    <div className={rootClass}>
       <div>count = {count}</div>
-      <div style={btnContainerStyle}>
+      <div className={btnContainerClass}>
         <button onClick={() => multiply(Math.PI)}>multiPI</button>
         <button onClick={() => divide(Math.PI)}>diPIde</button>
         <button disabled={!canUndo} onClick={() => undo()}>
@@ -43,7 +43,7 @@ export const MakeUndoableFromTo: React.FC = () => {
           redo
         </button>
       </div>
-      <Stack stack={stack} timeTravel={timeTravel} />
-    </>
+      <ActionList stack={stack} timeTravel={timeTravel} />
+    </div>
   );
 };

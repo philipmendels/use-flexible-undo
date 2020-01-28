@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
-import { btnContainerStyle } from './styles';
-import { Stack } from './components/stack';
+import { btnContainerClass, rootClass } from './styles';
+import { ActionList } from './components/stack';
 
 export const MakeUndoableDelta: React.FC = () => {
   const [count, setCount] = useState(0);
@@ -23,9 +23,9 @@ export const MakeUndoableDelta: React.FC = () => {
   });
 
   return (
-    <>
+    <div className={rootClass}>
       <div>count = {count}</div>
-      <div style={btnContainerStyle}>
+      <div className={btnContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button disabled={!canUndo} onClick={() => undo()}>
           undo
@@ -34,7 +34,7 @@ export const MakeUndoableDelta: React.FC = () => {
           redo
         </button>
       </div>
-      <Stack stack={stack} timeTravel={timeTravel} />
-    </>
+      <ActionList stack={stack} timeTravel={timeTravel} />
+    </div>
   );
 };

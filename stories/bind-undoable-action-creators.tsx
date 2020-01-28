@@ -4,7 +4,7 @@ import {
   makeUndoableReducer,
   bindUndoableActionCreators,
 } from '../src';
-import { btnContainerStyle } from './styles';
+import { btnContainerClass } from './styles';
 
 interface State {
   count: number;
@@ -40,7 +40,7 @@ export const BindUndoableActionCreators: React.FC = () => {
   return (
     <>
       <div>count = {count}</div>
-      <div style={btnContainerStyle}>
+      <div className={btnContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

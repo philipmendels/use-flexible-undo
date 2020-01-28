@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
-import { btnContainerStyle } from './styles';
+import { btnContainerClass } from './styles';
 import { makeHandler } from '../src/util';
 import { CurriedUpdater } from '../src/index.types';
 
@@ -34,7 +34,7 @@ export const MakeUndoablesUtil: React.FC = () => {
   return (
     <>
       <div>count = {count}</div>
-      <div style={btnContainerStyle}>
+      <div className={btnContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

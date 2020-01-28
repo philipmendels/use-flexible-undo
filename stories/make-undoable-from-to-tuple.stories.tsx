@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
-import { btnContainerStyle } from './styles';
+import { btnContainerClass } from './styles';
 import { PayloadTupleFromTo } from '../src/index.types';
 
 type Payload = PayloadTupleFromTo<number>;
@@ -29,7 +29,7 @@ export const MakeUndoableFromToTuple: React.FC = () => {
   return (
     <>
       <div>count = {count}</div>
-      <div style={btnContainerStyle}>
+      <div className={btnContainerClass}>
         <button onClick={() => multiply(Math.PI)}>multiPI</button>
         <button onClick={() => divide(Math.PI)}>diPIde</button>
         <button disabled={!canUndo} onClick={() => undo()}>
