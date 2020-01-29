@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { useInfiniteUndo, makeUndoableReducer } from '../src';
+import { useFlexibleUndo, makeUndoableReducer } from '../src';
 import { btnContainerClass } from './styles';
 
 interface State {
@@ -31,7 +31,7 @@ export const MakeUndoablesFromDispatch: React.FC = () => {
     undo,
     canRedo,
     redo,
-  } = useInfiniteUndo();
+  } = useFlexibleUndo();
 
   const { add, subtract } = makeUndoablesFromDispatch(dispatch, actionCreators);
 

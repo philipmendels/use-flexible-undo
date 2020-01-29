@@ -82,7 +82,7 @@ const useLatest = <T extends any>(value?: T) => {
   return valueRef;
 };
 
-export const useInfiniteUndo = <
+export const useFlexibleUndo = <
   PBT_All extends PayloadByType | undefined = undefined,
   MR extends MetaActionReturnTypes = undefined
 >(

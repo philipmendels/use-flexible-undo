@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass } from './styles';
 
 export const MakeUndoableMulti: React.FC = () => {
@@ -12,7 +12,7 @@ export const MakeUndoableMulti: React.FC = () => {
     canRedo,
     redo,
     stack,
-  } = useInfiniteUndo();
+  } = useFlexibleUndo();
 
   const add = makeUndoable<number>({
     type: 'add',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass } from './styles';
 import { PayloadTupleFromTo } from '../src/index.types';
 
@@ -15,7 +15,7 @@ export const MakeUndoableFromToTuple: React.FC = () => {
     canRedo,
     redo,
     stack,
-  } = useInfiniteUndo();
+  } = useFlexibleUndo();
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',

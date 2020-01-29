@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass } from './styles';
 
 interface PayloadByType {
@@ -13,7 +13,7 @@ interface MetaActionReturnTypes {
 
 export const MakeUndoablesMeta: React.FC = () => {
   const [count, setCount] = useState(0);
-  const { makeUndoables, canUndo, undo, canRedo, redo } = useInfiniteUndo<
+  const { makeUndoables, canUndo, undo, canRedo, redo } = useFlexibleUndo<
     PayloadByType,
     MetaActionReturnTypes
   >({

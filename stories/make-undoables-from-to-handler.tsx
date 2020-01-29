@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass } from './styles';
 import { PayloadFromTo } from '../src/index.types';
 import { makeUndoableFromToHandler } from '../src/util';
@@ -9,7 +9,7 @@ type Payload = PayloadFromTo<number>;
 export const MakeUndoablesFromToHandler: React.FC = () => {
   const [count, setCount] = useState(1);
 
-  const { makeUndoable, canUndo, undo, canRedo, redo } = useInfiniteUndo();
+  const { makeUndoable, canUndo, undo, canRedo, redo } = useFlexibleUndo();
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',

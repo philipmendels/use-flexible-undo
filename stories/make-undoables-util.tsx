@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass } from './styles';
 import { makeHandler } from '../src/util';
 import { CurriedUpdater } from '../src/index.types';
@@ -15,7 +15,7 @@ const decr: CurriedUpdater<number> = n => prev => prev - n;
 export const MakeUndoablesUtil: React.FC = () => {
   const [count, setCount] = useState(0);
 
-  const { makeUndoables, canUndo, undo, canRedo, redo } = useInfiniteUndo();
+  const { makeUndoables, canUndo, undo, canRedo, redo } = useFlexibleUndo();
 
   const addHandler = makeHandler(setCount)(incr);
   const subtractHandler = makeHandler(setCount)(decr);

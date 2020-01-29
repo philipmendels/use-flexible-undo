@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass, rootClass } from './styles';
 import { ActionList } from './components/action-list';
 
@@ -18,7 +18,7 @@ export const MakeUndoables: React.FC = () => {
     redo,
     stack,
     timeTravel,
-  } = useInfiniteUndo({ onUndo: ({ action }) => console.log('undo', action) });
+  } = useFlexibleUndo({ onUndo: ({ action }) => console.log('undo', action) });
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {

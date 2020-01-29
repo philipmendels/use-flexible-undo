@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useInfiniteUndo } from '../.';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { btnContainerClass, rootClass } from './styles';
 
@@ -14,7 +14,7 @@ export const MakeUndoableDelta: FC = () => {
     redo,
     stack,
     timeTravel,
-  } = useInfiniteUndo();
+  } = useFlexibleUndo();
 
   const add = makeUndoable<number>({
     type: 'add',

@@ -1,4 +1,4 @@
-UseInfiniteUndo is a custom hook that that keeps a **history of undoable actions** - as opposed to a history of snapshots of (a slice of) application state or a history of snapshots of the state managed by a specific reducer. **How you manage your state is up to you** and independent of the undo mechanism.
+useFlexibleUndo is a custom hook that that keeps a **history of undoable actions** - as opposed to a history of snapshots of (a slice of) application state or a history of snapshots of the state managed by a specific reducer. **How you manage your state is up to you** and independent of the undo mechanism.
 
 Here we create a single undoable function **add** that generates an action with type "add" and a simple delta value of type number as payload.
 
@@ -14,7 +14,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { btnContainerClass, rootClass } from './styles';
 
@@ -29,7 +29,7 @@ export const MakeUndoableDelta: FC = () => {
     redo,
     stack,
     timeTravel,
-  } = useInfiniteUndo();
+  } = useFlexibleUndo();
 
   const add = makeUndoable<number>({
     type: 'add',

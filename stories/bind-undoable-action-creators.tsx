@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 import {
-  useInfiniteUndo,
+  useFlexibleUndo,
   makeUndoableReducer,
   bindUndoableActionCreators,
 } from '../src';
@@ -33,7 +33,7 @@ export const BindUndoableActionCreators: React.FC = () => {
     actionCreators
   );
 
-  const { makeUndoables, canUndo, undo, canRedo, redo } = useInfiniteUndo();
+  const { makeUndoables, canUndo, undo, canRedo, redo } = useFlexibleUndo();
 
   const { add, subtract } = makeUndoables<PayloadByType>(boundActionCreators);
 

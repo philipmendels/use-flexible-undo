@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import { useFlexibleUndo } from '../src';
 import { btnContainerClass, rootClass } from './styles';
 import { PayloadFromTo } from '../src/index.types';
 import { ActionList } from './components/action-list';
@@ -17,7 +17,7 @@ export const MakeUndoableFromTo: React.FC = () => {
     redo,
     stack,
     timeTravel,
-  } = useInfiniteUndo();
+  } = useFlexibleUndo();
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',
