@@ -8,7 +8,7 @@ export const btnContainerClass = css`
     padding: 4px 8px;
     border-radius: 2px;
     &:hover:not(:disabled) {
-      background: #eee;
+      background: #f7f8fa;
     }
     cursor: pointer;
     :disabled {

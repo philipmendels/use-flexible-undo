@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerClass, rootClass } from './styles';
-import { ActionList } from './components/stack';
+import { ActionList } from './components/action-list';
 
 interface PayloadByType {
   add: number;

@@ -7,7 +7,7 @@ export const ActionList: React.FC<{
   timeTravel: TimeTravelFn;
 }> = ({ stack, timeTravel }) => {
   const [now, setNow] = useState(new Date());
-  useInterval(() => setNow(new Date()), 10000);
+  useInterval(() => setNow(new Date()), 5000);
   const hasPast = stack.past.length > 0;
   const hasFuture = stack.future.length > 0;
   return (
@@ -41,11 +41,11 @@ export const ActionList: React.FC<{
 };
 
 const Root = styled.div`
-  font-size: 12px;
+  /* font-size: 12px; */
 `;
 
 const Present = styled.div`
-  color: #007acc;
+  color: #48a7f6;
   padding: 8px 0px;
 `;
 
@@ -55,11 +55,13 @@ const StackItem: React.FC<{ action: Action; now: Date }> = ({
 }) => (
   <StackItemRoot>
     {Boolean(created) && (
-      <div style={{ color: '#BBB', width: '100px' }}>
+      <div style={{ color: '#BBB', minWidth: '120px' }}>
         {formatTime(created!, now)}
       </div>
     )}
-    <div style={{ flex: 1 }}>{JSON.stringify({ type, payload })}</div>
+    <div style={{ flex: 1, whiteSpace: 'nowrap' }}>
+      {JSON.stringify({ type, payload })}
+    </div>
   </StackItemRoot>
 );
 
@@ -67,7 +69,7 @@ const StackItemRoot = styled.div`
   padding: 8px 0px;
   display: flex;
   &:hover {
-    background: #eee;
+    background: #f7f8fa;
   }
 `;
 
@@ -93,11 +95,11 @@ const useInterval = (callback: (...args: any[]) => any, delay: number) => {
 
 const formatTime = (created: Date, now: Date): string => {
   const diffSecs = (now.getTime() - created.getTime()) / 1000;
-  if (diffSecs < 10) {
+  if (diffSecs < 5) {
     return `a moment ago`;
   }
-  if (diffSecs < 55) {
-    return `${Math.round(diffSecs / 10) * 10} seconds ago`;
+  if (diffSecs < 57.5) {
+    return `${Math.round(diffSecs / 5) * 5} seconds ago`;
   }
   const diffMinutes = diffSecs / 60;
   if (diffMinutes < 60) {

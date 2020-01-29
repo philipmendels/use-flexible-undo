@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useInfiniteUndo } from '../src';
+import React, { FC, useState } from 'react';
+import { useInfiniteUndo } from '../.';
+import { ActionList } from './components/action-list';
 import { btnContainerClass, rootClass } from './styles';
-import { ActionList } from './components/stack';
 
-export const MakeUndoableDelta: React.FC = () => {
+export const MakeUndoableDelta: FC = () => {
   const [count, setCount] = useState(0);
 
   const {

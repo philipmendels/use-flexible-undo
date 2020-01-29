@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useInfiniteUndo } from '../src';
 import { btnContainerClass, rootClass } from './styles';
 import { PayloadFromTo } from '../src/index.types';
-import { ActionList } from './components/stack';
+import { ActionList } from './components/action-list';
 
 type Payload = PayloadFromTo<number>;
 
