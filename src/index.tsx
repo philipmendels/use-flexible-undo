@@ -199,7 +199,7 @@ export const useFlexibleUndo = <
           onRedoLatest?.(event);
           onDoRedoLatest?.(event);
         }
-        handlersRef.current[action.type].do(action.payload);
+        handlersRef.current[action.type].redo(action.payload);
         return {
           past: [action, ...prev.past],
           future: prev.future.slice(0, lastIndex),
@@ -243,7 +243,7 @@ export const useFlexibleUndo = <
           onDoLatest?.(event);
           onDoRedoLatest?.(event);
         }
-        handler.do(payload);
+        handler.redo(payload);
         setStack(prev => ({
           past: [action, ...prev.past],
           future: [],
@@ -298,7 +298,7 @@ export const useFlexibleUndo = <
       mapObject(actionCreators, ([type, action]) => [
         type,
         registerHandler(type, {
-          do: payload => dispatch(action.do(payload)),
+          redo: payload => dispatch(action.redo(payload)),
           undo: payload => dispatch(action.undo(payload)),
           ...(metaActionHandlers.length
             ? { meta: metaActionHandlers[0]![type] }
@@ -353,13 +353,13 @@ export const makeUndoableReducer = <
     return updater
       ? meta && meta.isUndo
         ? updater.undo(payload)(state)
-        : updater.do(payload)(state)
+        : updater.redo(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
   }) as UReducer<S, PBT>,
   actionCreators: mapObject(stateUpdaters, ([type, _]) => [
     type,
     {
-      do: makeActionCreater(type),
+      redo: makeActionCreater(type),
       undo: makeActionCreater(type, true),
     },
   ]) as UndoableUActionCreatorsByType<PBT>,
@@ -382,7 +382,7 @@ export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   mapObject(actionCreators, ([type, creator]) => [
     type,
     {
-      do: payload => dispatch(creator.do(payload)),
+      redo: payload => dispatch(creator.redo(payload)),
       undo: payload => dispatch(creator.undo(payload)),
     },
   ]);

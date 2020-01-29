@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
-import { btnContainerClass, rootClass } from './styles';
+import { rootClass, btnContainerClass } from './styles';
 
 export const MakeUndoableDelta: FC = () => {
   const [count, setCount] = useState(0);
@@ -18,7 +18,7 @@ export const MakeUndoableDelta: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    do: amount => setCount(prev => prev + amount),
+    redo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
 

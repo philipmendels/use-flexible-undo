@@ -19,7 +19,7 @@ export const MakeUndoableFromToTuple: React.FC = () => {
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',
-    do: ([to]) => setCount(to),
+    redo: ([to]) => setCount(to),
     undo: ([_, from]) => setCount(from),
   });
 

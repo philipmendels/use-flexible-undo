@@ -22,11 +22,11 @@ export const MakeUndoablesUtil: React.FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
-      do: addHandler,
+      redo: addHandler,
       undo: subtractHandler,
     },
     subtract: {
-      do: subtractHandler,
+      redo: subtractHandler,
       undo: addHandler,
     },
   });

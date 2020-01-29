@@ -7,7 +7,7 @@ import {
 } from './index.types';
 
 export const makeUndoableFromToHandler = <T>(handler: (payload: T) => any) => ({
-  do: ({ to }: PayloadFromTo<T>) => {
+  redo: ({ to }: PayloadFromTo<T>) => {
     handler(to);
   },
   undo: ({ from }: PayloadFromTo<T>) => {
@@ -22,6 +22,6 @@ export const makeHandler = <T extends any>(
 };
 
 export const invertUndoable = <T>(undoable: Undoable<T>): Undoable<T> => ({
-  do: undoable.undo,
-  undo: undoable.do,
+  redo: undoable.undo,
+  undo: undoable.redo,
 });

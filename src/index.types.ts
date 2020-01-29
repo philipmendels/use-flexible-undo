@@ -11,7 +11,7 @@ export type HandlersByType<PBT extends PayloadByType> = {
 type StateUpdater<P, S> = (payload: P) => (state: S) => S;
 
 export type Undoable<T> = {
-  do: T;
+  redo: T;
   undo: T;
 };
 

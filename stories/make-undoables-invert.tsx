@@ -18,7 +18,7 @@ export const MakeUndoablesInvert: React.FC = () => {
   const { makeUndoables, canUndo, undo, canRedo, redo } = useFlexibleUndo();
 
   const undoableAddHandler: UndoableHandler<number> = {
-    do: makeHandler(setCount)(incr),
+    redo: makeHandler(setCount)(incr),
     undo: makeHandler(setCount)(decr),
   };
 

@@ -21,7 +21,7 @@ export const MakeUndoableFromTo: React.FC = () => {
 
   const updateCount = makeUndoable<Payload>({
     type: 'updateCount',
-    do: ({ to }) => setCount(to),
+    redo: ({ to }) => setCount(to),
     undo: ({ from }) => setCount(from),
   });
 

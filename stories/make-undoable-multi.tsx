@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../src';
-import { btnContainerClass } from './styles';
+import { rootClass, btnContainerClass } from './styles';
 
-export const MakeUndoableMulti: React.FC = () => {
+export const MakeUndoableMulti: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -16,17 +16,17 @@ export const MakeUndoableMulti: React.FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    do: amount => setCount(prev => prev + amount),
+    redo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
   const subtract = makeUndoable<number>({
     type: 'subtract',
-    do: amount => setCount(prev => prev - amount),
+    redo: amount => setCount(prev => prev - amount),
     undo: amount => setCount(prev => prev + amount),
   });
 
   return (
-    <>
+    <div className={rootClass}>
       <div>count = {count}</div>
       <div className={btnContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
@@ -46,6 +46,6 @@ export const MakeUndoableMulti: React.FC = () => {
       {stack.past.map((action, index) => (
         <div key={index}>{JSON.stringify(action)}</div>
       ))}
-    </>
+    </div>
   );
 };

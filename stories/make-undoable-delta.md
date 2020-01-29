@@ -1,11 +1,11 @@
-useFlexibleUndo is a custom hook that that keeps a **history of undoable actions** - as opposed to a history of snapshots of (a slice of) application state or a history of snapshots of the state managed by a specific reducer. **How you manage your state is up to you** and independent of the undo mechanism.
+useFlexibleUndo is a custom hook that that keeps a **history of undoable actions** - as opposed to a history of snapshots of (a slice of) state. **How you manage your state is up to you** and independent of the undo mechanism.
 
-Here we create a single undoable function **add** that generates an action with type "add" and a simple delta value of type number as payload.
+Here we create a single undoable function **add** that generates an action with type "add" and a simple delta value of type number as payload. The undo and redo handlers take the payload (here named "amount") as single argument.
 
 ```typescript
 const add = makeUndoable<number>({
   type: 'add',
-  do: amount => setCount(prev => prev + amount),
+  redo: amount => setCount(prev => prev + amount),
   undo: amount => setCount(prev => prev - amount),
 });
 ```
@@ -16,7 +16,7 @@ Full code:
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
-import { btnContainerClass, rootClass } from './styles';
+import { rootClass, btnContainerClass } from './styles';
 
 export const MakeUndoableDelta: FC = () => {
   const [count, setCount] = useState(0);
@@ -33,7 +33,7 @@ export const MakeUndoableDelta: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    do: amount => setCount(prev => prev + amount),
+    redo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
 

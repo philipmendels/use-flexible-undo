@@ -17,11 +17,11 @@ interface PayloadByType {
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: {
-    do: n => state => ({ count: state.count + n }),
+    redo: n => state => ({ count: state.count + n }),
     undo: n => state => ({ count: state.count - n }),
   },
   subtract: {
-    do: n => state => ({ count: state.count - n }),
+    redo: n => state => ({ count: state.count - n }),
     undo: n => state => ({ count: state.count + n }),
   },
 });

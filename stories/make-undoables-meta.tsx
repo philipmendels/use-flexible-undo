@@ -22,14 +22,14 @@ export const MakeUndoablesMeta: React.FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
-      do: amount => setCount(prev => prev + amount),
+      redo: amount => setCount(prev => prev + amount),
       undo: amount => setCount(prev => prev - amount),
       meta: {
         describe: amount => `Increase count by ${amount}`,
       },
     },
     subtract: {
-      do: amount => setCount(prev => prev - amount),
+      redo: amount => setCount(prev => prev - amount),
       undo: amount => setCount(prev => prev + amount),
       meta: {
         describe: amount => `Decrease count by ${amount}`,
