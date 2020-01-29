@@ -1,1 +1,1 @@
-In this example we create a single undoable function **add** that generates an action with type "add" and a simple delta value of type number as payload. See the readme 👉 of each example for more info and see the other examples 👈 for different ways of making undoables and managing state.
+Here we use the function **makeUndoable** returned by **useFlexibleUndo** to make make a single undoable function. See the readme 👉 of each example for more info and see the other examples 👈 for different ways of making undoables and managing state.

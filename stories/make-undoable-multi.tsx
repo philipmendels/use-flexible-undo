@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../src';
 import { rootClass, btnContainerClass } from './styles';
+import { ActionList } from './components/action-list';
 
 export const MakeUndoableMulti: FC = () => {
   const [count, setCount] = useState(0);
@@ -12,6 +13,7 @@ export const MakeUndoableMulti: FC = () => {
     canRedo,
     redo,
     stack,
+    timeTravel,
   } = useFlexibleUndo();
 
   const add = makeUndoable<number>({
@@ -38,14 +40,7 @@ export const MakeUndoableMulti: FC = () => {
           redo
         </button>
       </div>
-      {stack.future.map((action, index) => (
-        <div key={index} style={{ color: '#CCC' }}>
-          <div key={index}>{JSON.stringify(action)}</div>
-        </div>
-      ))}
-      {stack.past.map((action, index) => (
-        <div key={index}>{JSON.stringify(action)}</div>
-      ))}
+      <ActionList stack={stack} timeTravel={timeTravel} />
     </div>
   );
 };
