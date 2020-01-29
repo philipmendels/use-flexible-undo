@@ -21,4 +21,7 @@ export const btnContainerClass = css`
 export const rootClass = css`
   font-family: Verdana, sans-serif;
   font-size: 14px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 `;
