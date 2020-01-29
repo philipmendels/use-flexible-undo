@@ -1,3 +1,26 @@
+Instead of making multiple calls to **makeUndoable** you can make a single call to **makeUndoables**.
+
+```typescript
+interface PayloadByType {
+  add: number;
+  subtract: number;
+}
+
+const { add, subtract } = makeUndoables<PayloadByType>({
+  add: {
+    redo: amount => setCount(prev => prev + amount),
+    undo: amount => setCount(prev => prev - amount),
+  },
+  subtract: {
+    redo: amount => setCount(prev => prev - amount),
+    undo: amount => setCount(prev => prev + amount),
+  },
+});
+```
+
+Full code:
+
+```typescript
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../src';
 import { ActionList } from './components/action-list';
@@ -48,3 +71,4 @@ export const MakeUndoables: FC = () => {
     </div>
   );
 };
+```

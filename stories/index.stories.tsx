@@ -5,6 +5,8 @@ import MakeUndoableDeltaIntro from './make-undoable-delta-intro.md';
 import MakeUndoableDeltaReadme from './make-undoable-delta.md';
 import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
 import { MakeUndoables } from './make-undoables';
+import MakeUndoablesIntro from './make-undoables-intro.md';
+import MakeUndoablesReadme from './make-undoables.md';
 import { MakeUndoableMulti } from './make-undoable-multi';
 import MakeUndoableMultiIntro from './make-undoable-multi-intro.md';
 import MakeUndoableMultiReadme from './make-undoable-multi.md';
@@ -32,7 +34,12 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoableMultiReadme,
     },
   })
-  .add('makeUndoables', () => <MakeUndoables />)
+  .add('makeUndoables', () => <MakeUndoables />, {
+    readme: {
+      content: MakeUndoablesIntro,
+      sidebar: MakeUndoablesReadme,
+    },
+  })
   .add('makeUndoables-util', () => <MakeUndoablesUtil />)
   .add('makeUndoables-invert', () => <MakeUndoablesInvert />)
   .add('makeUndoable-from-to', () => <MakeUndoableFromTo />)
