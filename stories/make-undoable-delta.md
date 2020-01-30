@@ -1,6 +1,6 @@
 **useFlexibleUndo** is a custom hook that that keeps a **history of undoable actions** - as opposed to a history of snapshots of (a slice of) state. **How you manage your state is up to you** and independent of the undo mechanism.
 
-Here we make a single undoable function "add" that generates an action with type "add" and a simple delta value of type number as payload. The undo and redo handlers take the payload (here named "amount") as single argument and use it to update the state.
+**makeUndoable** takes an object with an action type and undo/redo handlers. The undo and redo handlers take the payload (here named "amount") as single argument and use it to update the state. Here we make a single undoable function "add". Each time we call "add" the redo handler will be called once immediately, and an action with type "add" and a simple delta value of type number as payload will be stored in the history, so we can undo/redo later.
 
 ```typescript
 const add = makeUndoable<number>({

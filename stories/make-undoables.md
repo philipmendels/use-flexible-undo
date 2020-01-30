@@ -1,4 +1,4 @@
-Instead of making multiple calls to **makeUndoable** you can make a single call to **makeUndoables**.
+Instead of making multiple calls to **makeUndoable** you can make a single call to **makeUndoables** in order to make multiple undoable functions at once. It takes an object of objects with undo/redo handlers by action type, and it returns an object with undoable functions by action type.
 
 ```typescript
 interface PayloadByType {

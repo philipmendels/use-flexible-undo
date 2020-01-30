@@ -1,4 +1,4 @@
-You can make multiple separate calls to **makeUndoable** (or any of its variations such as **makeUndoables** or **makeUndoablesFromDispatch**). It is not possible to have multiple undoables with the same type. Existing undoables with the same type (either created in a separate call in the same render, or from the same call in a previous render) will be overwritten. It is up to you to avoid conflicts in action types.
+You can make multiple separate calls to **makeUndoable** (or any of its variations such as **makeUndoables** or **makeUndoablesFromDispatch**). It is not possible to have multiple undoables with the same action type. Existing undoables with the same type (either created in a separate call in the same render, or from the same call in a previous render) will be overwritten. It is up to you to avoid conflicts in action types.
 
 ```typescript
 const add = makeUndoable<number>({
