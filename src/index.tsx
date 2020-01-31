@@ -30,6 +30,8 @@ import {
   ValueOf,
   Stack,
 } from './index.types';
+export * from './util';
+export * from './index.types';
 
 type PBT_ALL_NN<
   PBT_All extends PayloadByType | undefined

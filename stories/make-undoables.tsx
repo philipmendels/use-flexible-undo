@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../src';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, btnContainerClass } from './styles';
 

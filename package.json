@@ -29,9 +29,9 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "use-infinite-undo",
+  "name": "use-flexible-undo",
   "author": "Philip Mendels",
-  "module": "dist/use-infinite-undo.esm.js",
+  "module": "dist/use-flexible-undo.esm.js",
   "devDependencies": {
     "@babel/core": "^7.7.7",
     "@emotion/styled": "^10.0.27",
