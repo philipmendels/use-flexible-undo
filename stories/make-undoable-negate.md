@@ -1,9 +1,24 @@
+You do not necessarily need to call your undoables directly. They are just functions that you can use as you feel fit. For example by wrapping them in another function like we do here. A consequence of this example is that all actions in the history will have the type "add", which may or may not be a problem depending on your use case. Check out the next examples for alternative ways of code reuse.
+
+```typescript
+const add = makeUndoable<number>({
+  type: 'add',
+  redo: amount => setCount(prev => prev + amount),
+  undo: amount => setCount(prev => prev - amount),
+});
+
+const subtract = (amount: number) => add(-amount);
+```
+
+Full code:
+
+```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../src';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, btnContainerClass } from './styles';
 
-export const MakeUndoableMulti: FC = () => {
+export const MakeUndoableNegate: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -21,11 +36,8 @@ export const MakeUndoableMulti: FC = () => {
     redo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
-  const subtract = makeUndoable<number>({
-    type: 'subtract',
-    redo: amount => setCount(prev => prev - amount),
-    undo: amount => setCount(prev => prev + amount),
-  });
+
+  const subtract = (amount: number) => add(-amount);
 
   return (
     <div className={rootClass}>
@@ -44,3 +56,4 @@ export const MakeUndoableMulti: FC = () => {
     </div>
   );
 };
+```

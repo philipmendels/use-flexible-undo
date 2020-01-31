@@ -1,9 +1,9 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../src';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, btnContainerClass } from './styles';
 
-export const MakeUndoableMulti: FC = () => {
+export const MakeUndoableNegate: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -21,11 +21,8 @@ export const MakeUndoableMulti: FC = () => {
     redo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
-  const subtract = makeUndoable<number>({
-    type: 'subtract',
-    redo: amount => setCount(prev => prev - amount),
-    undo: amount => setCount(prev => prev + amount),
-  });
+
+  const subtract = (amount: number) => add(-amount);
 
   return (
     <div className={rootClass}>

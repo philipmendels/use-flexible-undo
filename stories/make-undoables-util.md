@@ -1,4 +1,4 @@
-It's up to you how you define you're undo/redo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa). You could also opt to only create one undoable function "add" and wrap it in a subtract function that negates the payload - but this would mean that you loose some of the user's intent as all the action types in the history will be "add".
+It's up to you how you define you're undo/redo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
 
 ```typescript
 const incr: CurriedUpdater<number> = amount => prev => prev + amount;

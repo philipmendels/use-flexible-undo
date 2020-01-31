@@ -3,19 +3,22 @@ import { storiesOf } from '@storybook/react';
 import { MakeUndoableDelta } from './make-undoable-delta.stories';
 import MakeUndoableDeltaIntro from './make-undoable-delta-intro.md';
 import MakeUndoableDeltaReadme from './make-undoable-delta.md';
-import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
-import { MakeUndoables } from './make-undoables';
-import MakeUndoablesIntro from './make-undoables-intro.md';
-import MakeUndoablesReadme from './make-undoables.md';
 import { MakeUndoableMulti } from './make-undoable-multi';
 import MakeUndoableMultiIntro from './make-undoable-multi-intro.md';
 import MakeUndoableMultiReadme from './make-undoable-multi.md';
-import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
-import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
+import { MakeUndoables } from './make-undoables';
+import MakeUndoablesIntro from './make-undoables-intro.md';
+import MakeUndoablesReadme from './make-undoables.md';
+import { MakeUndoableNegate } from './make-undoable-negate';
+import MakeUndoableNegateIntro from './make-undoable-negate-intro.md';
+import MakeUndoableNegateReadme from './make-undoable-negate.md';
 import { MakeUndoablesUtil } from './make-undoables-util';
 import MakeUndoablesUtilIntro from './make-undoables-util-intro.md';
 import MakeUndoablesUtilReadme from './make-undoables-util.md';
 import { MakeUndoablesInvert } from './make-undoables-invert';
+import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
+import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
+import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
 import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
 import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
@@ -40,6 +43,12 @@ storiesOf('useInfiniteUndo', module)
     readme: {
       content: MakeUndoablesIntro,
       sidebar: MakeUndoablesReadme,
+    },
+  })
+  .add('makeUndoable-negate', () => <MakeUndoableNegate />, {
+    readme: {
+      content: MakeUndoableNegateIntro,
+      sidebar: MakeUndoableNegateReadme,
     },
   })
   .add('makeUndoables-util', () => <MakeUndoablesUtil />, {
