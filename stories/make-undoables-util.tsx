@@ -26,15 +26,15 @@ export const MakeUndoablesUtil: FC = () => {
 
   const countHandler = makeHandler(setCount);
   const addHandler = countHandler(addAmount);
-  const subtractHandler = countHandler(subAmount);
+  const subHandler = countHandler(subAmount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
       redo: addHandler,
-      undo: subtractHandler,
+      undo: subHandler,
     },
     subtract: {
-      redo: subtractHandler,
+      redo: subHandler,
       undo: addHandler,
     },
   });

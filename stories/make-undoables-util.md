@@ -1,4 +1,4 @@
-Extracting functions outside of your function component is good for reusability, testability and possibly performance, but may add some cognitive load. And if the performance of code inside the render function concerns you: we will look at some of the memoization techniques that React offers in a later example.
+Extracting functions outside of your function component is good for reusability, testability and possibly performance - but some may find that the added indirection makes the code harder too follow. And if performance is your main reason for extraction: we will look at some of the memoization techniques that React offers in a later example.
 
 ```typescript
 //outside function component:
@@ -8,15 +8,15 @@ const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
 //inside function component:
 const countHandler = makeHandler(setCount);
 const addHandler = countHandler(addAmount);
-const subtractHandler = countHandler(subAmount);
+const subHandler = countHandler(subAmount);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: {
     redo: addHandler,
-    undo: subtractHandler,
+    undo: subHandler,
   },
   subtract: {
-    redo: subtractHandler,
+    redo: subHandler,
     undo: addHandler,
   },
 });
@@ -53,15 +53,15 @@ export const MakeUndoablesUtil: FC = () => {
 
   const countHandler = makeHandler(setCount);
   const addHandler = countHandler(addAmount);
-  const subtractHandler = countHandler(subAmount);
+  const subHandler = countHandler(subAmount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
       redo: addHandler,
-      undo: subtractHandler,
+      undo: subHandler,
     },
     subtract: {
-      redo: subtractHandler,
+      redo: subHandler,
       undo: addHandler,
     },
   });

@@ -1,20 +1,16 @@
 It's up to you how you define you're undo/redo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
 
 ```typescript
-const incr: CurriedUpdater<number> = amount => prev => prev + amount;
-const decr: CurriedUpdater<number> = amount => prev => prev - amount;
-
-const setCountHandler = makeHandler(setCount);
-const addHandler = setCountHandler(incr);
-const subtractHandler = setCountHandler(decr);
+const addHandler = (amount: number) => setCount(prev => prev + amount);
+const subHandler = (amount: number) => setCount(prev => prev - amount);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: {
     redo: addHandler,
-    undo: subtractHandler,
+    undo: subHandler,
   },
   subtract: {
-    redo: subtractHandler,
+    redo: subHandler,
     undo: addHandler,
   },
 });
@@ -33,7 +29,7 @@ interface PayloadByType {
   subtract: number;
 }
 
-export const MakeUndoablesUtil: FC = () => {
+export const MakeUndoablesExtract: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -47,15 +43,15 @@ export const MakeUndoablesUtil: FC = () => {
   } = useFlexibleUndo();
 
   const addHandler = (amount: number) => setCount(prev => prev + amount);
-  const subtractHandler = (amount: number) => setCount(prev => prev - amount);
+  const subHandler = (amount: number) => setCount(prev => prev - amount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
       redo: addHandler,
-      undo: subtractHandler,
+      undo: subHandler,
     },
     subtract: {
-      redo: subtractHandler,
+      redo: subHandler,
       undo: addHandler,
     },
   });

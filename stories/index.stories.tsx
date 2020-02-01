@@ -15,6 +15,9 @@ import MakeUndoableNegateReadme from './make-undoable-negate.md';
 import { MakeUndoablesUtil } from './make-undoables-util';
 import MakeUndoablesUtilIntro from './make-undoables-util-intro.md';
 import MakeUndoablesUtilReadme from './make-undoables-util.md';
+import { MakeUndoablesExtract } from './make-undoables-extract';
+import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
+import MakeUndoablesExtractReadme from './make-undoables-extract.md';
 import { MakeUndoablesInvert } from './make-undoables-invert';
 import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
 import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
@@ -49,6 +52,12 @@ storiesOf('useInfiniteUndo', module)
     readme: {
       content: MakeUndoableNegateIntro,
       sidebar: MakeUndoableNegateReadme,
+    },
+  })
+  .add('makeUndoables-extract', () => <MakeUndoablesExtract />, {
+    readme: {
+      content: MakeUndoablesExtractIntro,
+      sidebar: MakeUndoablesExtractReadme,
     },
   })
   .add('makeUndoables-util', () => <MakeUndoablesUtil />, {

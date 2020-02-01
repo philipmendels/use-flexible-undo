@@ -1,25 +1,29 @@
-import React, { useState } from 'react';
-import { useFlexibleUndo } from '../src';
-import { btnContainerClass } from './styles';
-import { makeHandler, invertUndoable } from '../src/util';
-import { CurriedUpdater, UndoableHandler } from '../src/index.types';
+import React, { FC, useState } from 'react';
+import { useFlexibleUndo, UndoableHandler, invertUndoable } from '../.';
+import { ActionList } from './components/action-list';
+import { rootClass, btnContainerClass } from './styles';
 
 interface PayloadByType {
   add: number;
   subtract: number;
 }
 
-const incr: CurriedUpdater<number> = n => prev => prev + n;
-const decr: CurriedUpdater<number> = n => prev => prev - n;
-
-export const MakeUndoablesInvert: React.FC = () => {
+export const MakeUndoablesInvert: FC = () => {
   const [count, setCount] = useState(0);
 
-  const { makeUndoables, canUndo, undo, canRedo, redo } = useFlexibleUndo();
+  const {
+    makeUndoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    stack,
+    timeTravel,
+  } = useFlexibleUndo();
 
   const undoableAddHandler: UndoableHandler<number> = {
-    redo: makeHandler(setCount)(incr),
-    undo: makeHandler(setCount)(decr),
+    redo: amount => setCount(prev => prev + amount),
+    undo: amount => setCount(prev => prev - amount),
   };
 
   const { add, subtract } = makeUndoables<PayloadByType>({
@@ -28,7 +32,7 @@ export const MakeUndoablesInvert: React.FC = () => {
   });
 
   return (
-    <>
+    <div className={rootClass}>
       <div>count = {count}</div>
       <div className={btnContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
@@ -40,6 +44,7 @@ export const MakeUndoablesInvert: React.FC = () => {
           redo
         </button>
       </div>
-    </>
+      <ActionList stack={stack} timeTravel={timeTravel} />
+    </div>
   );
 };
