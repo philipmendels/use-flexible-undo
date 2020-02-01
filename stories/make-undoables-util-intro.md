@@ -1,1 +1,1 @@
-Here we define our undo/redo handlers outside of **makeUndoables**, so that we can reuse them.
+Here we compose each undo/redo handler from a state updater function and a pure function that we can define outside of the function component.

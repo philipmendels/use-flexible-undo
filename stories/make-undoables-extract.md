@@ -1,14 +1,12 @@
-Extracting functions outside of your function component is good for reusability, testability and possibly performance, but may add some cognitive load. And if the performance of code inside the render function concerns you: we will look at some of the memoization techniques that React offers in a later example.
+It's up to you how you define you're undo/redo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
 
 ```typescript
-//outside function component:
-const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
-const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
+const incr: CurriedUpdater<number> = amount => prev => prev + amount;
+const decr: CurriedUpdater<number> = amount => prev => prev - amount;
 
-//inside function component:
-const countHandler = makeHandler(setCount);
-const addHandler = countHandler(addAmount);
-const subtractHandler = countHandler(subAmount);
+const setCountHandler = makeHandler(setCount);
+const addHandler = setCountHandler(incr);
+const subtractHandler = setCountHandler(decr);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: {
@@ -26,7 +24,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeHandler, CurriedUpdater } from '../.';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, btnContainerClass } from './styles';
 
@@ -34,9 +32,6 @@ interface PayloadByType {
   add: number;
   subtract: number;
 }
-
-const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
-const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
 
 export const MakeUndoablesUtil: FC = () => {
   const [count, setCount] = useState(0);
@@ -51,9 +46,8 @@ export const MakeUndoablesUtil: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(addAmount);
-  const subtractHandler = countHandler(subAmount);
+  const addHandler = (amount: number) => setCount(prev => prev + amount);
+  const subtractHandler = (amount: number) => setCount(prev => prev - amount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {

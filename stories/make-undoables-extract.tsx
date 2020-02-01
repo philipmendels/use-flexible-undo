@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeHandler, CurriedUpdater } from '../.';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, btnContainerClass } from './styles';
 
@@ -7,9 +7,6 @@ interface PayloadByType {
   add: number;
   subtract: number;
 }
-
-const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
-const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
 
 export const MakeUndoablesUtil: FC = () => {
   const [count, setCount] = useState(0);
@@ -24,9 +21,8 @@ export const MakeUndoablesUtil: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(addAmount);
-  const subtractHandler = countHandler(subAmount);
+  const addHandler = (amount: number) => setCount(prev => prev + amount);
+  const subtractHandler = (amount: number) => setCount(prev => prev - amount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
