@@ -1,18 +1,14 @@
-It's up to you how you define your undo/redo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
+As an alternative to manually inverting the undo/redo like in the previous example, you can use the utility **invertUndoable**. This function takes an object with "undo" and "redo" properties and switches the values of these properties.
 
 ```typescript
-const addHandler = (amount: number) => setCount(prev => prev + amount);
-const subHandler = (amount: number) => setCount(prev => prev - amount);
+const undoableAddHandler: UndoableHandler<number> = {
+  redo: amount => setCount(prev => prev + amount),
+  undo: amount => setCount(prev => prev - amount),
+};
 
 const { add, subtract } = makeUndoables<PayloadByType>({
-  add: {
-    redo: addHandler,
-    undo: subHandler,
-  },
-  subtract: {
-    redo: subHandler,
-    undo: addHandler,
-  },
+  add: undoableAddHandler,
+  subtract: invertUndoable(undoableAddHandler),
 });
 ```
 
@@ -20,7 +16,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo, UndoableHandler, invertUndoable } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, btnContainerClass } from './styles';
 
@@ -29,7 +25,7 @@ interface PayloadByType {
   subtract: number;
 }
 
-export const MakeUndoablesExtract: FC = () => {
+export const MakeUndoablesInvert: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -42,18 +38,14 @@ export const MakeUndoablesExtract: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const addHandler = (amount: number) => setCount(prev => prev + amount);
-  const subHandler = (amount: number) => setCount(prev => prev - amount);
+  const undoableAddHandler: UndoableHandler<number> = {
+    redo: amount => setCount(prev => prev + amount),
+    undo: amount => setCount(prev => prev - amount),
+  };
 
   const { add, subtract } = makeUndoables<PayloadByType>({
-    add: {
-      redo: addHandler,
-      undo: subHandler,
-    },
-    subtract: {
-      redo: subHandler,
-      undo: addHandler,
-    },
+    add: undoableAddHandler,
+    subtract: invertUndoable(undoableAddHandler),
   });
 
   return (

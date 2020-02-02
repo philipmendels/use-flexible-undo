@@ -1,3 +1,6 @@
+Full code:
+
+```typescript
 import React, { useState } from 'react';
 import { useFlexibleUndo, PayloadFromTo } from '../.';
 import { rootClass, btnContainerClass } from './styles';
@@ -44,3 +47,4 @@ export const MakeUndoableFromTo: React.FC = () => {
     </div>
   );
 };
+```

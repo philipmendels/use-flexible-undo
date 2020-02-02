@@ -17,9 +17,9 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../src';
-import { rootClass, btnContainerClass } from './styles';
+import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
+import { rootClass, btnContainerClass } from './styles';
 
 export const MakeUndoableMulti: FC = () => {
   const [count, setCount] = useState(0);

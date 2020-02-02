@@ -1,4 +1,4 @@
-You do not necessarily need to call your undoables directly. They are just functions that you can use as you feel fit. For example by wrapping them in another function like we do here. A consequence of this example is that all actions in the history will have the type "add", which may or may not be a problem depending on your use case. Check out the next examples for alternative ways of code reuse.
+You do not necessarily need to call your undoable functions directly. They are just functions that you can use as you feel fit. For example by wrapping them in another function like we do here. A consequence of this example is that all actions in the history will have the type "add", which may or may not be a problem depending on your use case. Check out the next examples for alternative ways of code reuse.
 
 ```typescript
 const add = makeUndoable<number>({

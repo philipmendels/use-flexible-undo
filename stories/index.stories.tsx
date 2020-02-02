@@ -19,7 +19,11 @@ import { MakeUndoablesExtract } from './make-undoables-extract';
 import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
 import MakeUndoablesExtractReadme from './make-undoables-extract.md';
 import { MakeUndoablesInvert } from './make-undoables-invert';
+import MakeUndoablesInvertIntro from './make-undoables-invert-intro.md';
+import MakeUndoablesInvertReadme from './make-undoables-invert.md';
 import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
+import MakeUndoableFromToIntro from './make-undoable-from-to-intro.md';
+import MakeUndoableFromToReadme from './make-undoable-from-to.md';
 import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
 import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
 import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
@@ -48,6 +52,14 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoablesReadme,
     },
   })
+  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />, {
+    readme: {
+      content: MakeUndoableFromToIntro,
+      sidebar: MakeUndoableFromToReadme,
+    },
+  })
+  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
+  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoable-negate', () => <MakeUndoableNegate />, {
     readme: {
       content: MakeUndoableNegateIntro,
@@ -60,16 +72,18 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoablesExtractReadme,
     },
   })
+  .add('makeUndoables-invert', () => <MakeUndoablesInvert />, {
+    readme: {
+      content: MakeUndoablesInvertIntro,
+      sidebar: MakeUndoablesInvertReadme,
+    },
+  })
   .add('makeUndoables-util', () => <MakeUndoablesUtil />, {
     readme: {
       content: MakeUndoablesUtilIntro,
       sidebar: MakeUndoablesUtilReadme,
     },
   })
-  .add('makeUndoables-invert', () => <MakeUndoablesInvert />)
-  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />)
-  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
-  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
   .add('useUndoableReducer', () => <UseUndoableReducer />)
