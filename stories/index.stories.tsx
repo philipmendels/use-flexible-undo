@@ -25,6 +25,8 @@ import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
 import MakeUndoableFromToIntro from './make-undoable-from-to-intro.md';
 import MakeUndoableFromToReadme from './make-undoable-from-to.md';
 import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
+import MakeUndoableFromToTupleIntro from './make-undoable-from-to-tuple-intro.md';
+import MakeUndoableFromToTupleReadme from './make-undoable-from-to-tuple.md';
 import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
 import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
 import { UseUndoableReducer } from './use-undoable-reducer';
@@ -46,7 +48,12 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoableFromToReadme,
     },
   })
-  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
+  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />, {
+    readme: {
+      content: MakeUndoableFromToTupleIntro,
+      sidebar: MakeUndoableFromToTupleReadme,
+    },
+  })
   .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoable-multi', () => <MakeUndoableMulti />, {
     readme: {
