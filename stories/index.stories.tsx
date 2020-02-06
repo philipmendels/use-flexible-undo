@@ -40,6 +40,14 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoableDeltaReadme,
     },
   })
+  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />, {
+    readme: {
+      content: MakeUndoableFromToIntro,
+      sidebar: MakeUndoableFromToReadme,
+    },
+  })
+  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
+  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoable-multi', () => <MakeUndoableMulti />, {
     readme: {
       content: MakeUndoableMultiIntro,
@@ -52,14 +60,6 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoablesReadme,
     },
   })
-  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />, {
-    readme: {
-      content: MakeUndoableFromToIntro,
-      sidebar: MakeUndoableFromToReadme,
-    },
-  })
-  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />)
-  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoable-negate', () => <MakeUndoableNegate />, {
     readme: {
       content: MakeUndoableNegateIntro,

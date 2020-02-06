@@ -1,3 +1,18 @@
+If you model the payload as a single (possibly) decimal number that represents the delta (state change), the resulting state after (multiple levels of) undo/redo may differ slightly from the original state due to (cumulative) floating point precision related rounding errors. Instead you can choose to store the previous state and the new state in the payload (or the previous state and the delta). This makes the payload a bit bigger, but it does give you the guarantee that you can restore the exact previous state.
+
+```typescript
+const updateCount = makeUndoable<PayloadFromTo<number>>({
+  type: 'updateCount',
+  redo: ({ to }) => setCount(to),
+  undo: ({ from }) => setCount(from),
+});
+
+const multiply = (amount: number) =>
+  updateCount({ from: count, to: count * amount });
+const divide = (amount: number) =>
+  updateCount({ from: count, to: count / amount });
+```
+
 Full code:
 
 ```typescript
