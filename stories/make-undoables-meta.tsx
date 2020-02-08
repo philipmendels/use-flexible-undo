@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFlexibleUndo } from '../src';
-import { btnContainerClass } from './styles';
+import { uiContainerClass } from './styles';
 
 interface PayloadByType {
   add: number;
@@ -39,7 +39,7 @@ export const MakeUndoablesMeta: React.FC = () => {
   return (
     <>
       <div>count = {count}</div>
-      <div className={btnContainerClass}>
+      <div className={uiContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

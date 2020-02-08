@@ -1,1 +1,1 @@
-Here we model the action payload as a tuple that stores the previous state and the new state.
+Here the action payload is modeled as a tuple that stores the previous state and the new state.

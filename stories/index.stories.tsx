@@ -27,7 +27,9 @@ import MakeUndoableFromToReadme from './make-undoable-from-to.md';
 import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
 import MakeUndoableFromToTupleIntro from './make-undoable-from-to-tuple-intro.md';
 import MakeUndoableFromToTupleReadme from './make-undoable-from-to-tuple.md';
-import { MakeUndoablesFromToHandler } from './make-undoables-from-to-handler';
+import { MakeUndoablesUtils } from './make-undoables-utils';
+import MakeUndoablesUtilsIntro from './make-undoables-utils-intro.md';
+import MakeUndoablesUtilsReadme from './make-undoables-utils.md';
 import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
 import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
@@ -54,7 +56,6 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoableFromToTupleReadme,
     },
   })
-  .add('makeUndoables-FromToHandler', () => <MakeUndoablesFromToHandler />)
   .add('makeUndoable-multi', () => <MakeUndoableMulti />, {
     readme: {
       content: MakeUndoableMultiIntro,
@@ -83,6 +84,12 @@ storiesOf('useInfiniteUndo', module)
     readme: {
       content: MakeUndoablesInvertIntro,
       sidebar: MakeUndoablesInvertReadme,
+    },
+  })
+  .add('makeUndoables-utils', () => <MakeUndoablesUtils />, {
+    readme: {
+      content: MakeUndoablesUtilsIntro,
+      sidebar: MakeUndoablesUtilsReadme,
     },
   })
   .add('makeUndoables-util', () => <MakeUndoablesUtil />, {

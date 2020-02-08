@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo, UndoableHandler, invertUndoable } from '../.';
 import { ActionList } from './components/action-list';
-import { rootClass, btnContainerClass } from './styles';
+import { rootClass, uiContainerClass } from './styles';
 
 interface PayloadByType {
   add: number;
@@ -34,7 +34,7 @@ export const MakeUndoablesInvert: FC = () => {
   return (
     <div className={rootClass}>
       <div>count = {count}</div>
-      <div className={btnContainerClass}>
+      <div className={uiContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

@@ -1,12 +1,28 @@
 import { css } from 'emotion';
 
-export const btnContainerClass = css`
+export const rootClass = css`
+  font-family: Verdana, sans-serif;
+  font-size: 14px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+`;
+
+export const uiContainerClass = css`
   margin: 20px 0;
-  > button {
+  button,
+  input[type='number'] {
     font-size: 14px;
     margin-right: 10px;
     padding: 4px 8px;
     border-radius: 2px;
+  }
+  input[type='number'] {
+    width: 30px;
+    border: 1px solid gray;
+  }
+  button {
+    border: 1px solid lightgray;
     &:hover:not(:disabled) {
       background: #f7f8fa;
     }
@@ -16,12 +32,4 @@ export const btnContainerClass = css`
       cursor: inherit;
     }
   }
-`;
-
-export const rootClass = css`
-  font-family: Verdana, sans-serif;
-  font-size: 14px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
 `;

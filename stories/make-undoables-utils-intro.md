@@ -1,0 +1,1 @@
+Here the utility **makeUndoableHandler** is used to make the redo/undo handlers for the undoable "add" and "subtract" functions, and the utility **makeUndoableFromToHandler** is used to make the redo/undo handlers for the undoable "updateAmount" function.

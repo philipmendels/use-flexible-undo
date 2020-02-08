@@ -1,4 +1,4 @@
-You can model the action payload anyway you like. Here we use a tuple instead of an object with "to" and "from" properties as in the previous example.
+You can model the action payload anyway you like. Here we use a tuple instead of an object.
 
 ```typescript
 const updateCount = makeUndoable<[number, number]>({
@@ -16,7 +16,7 @@ Full code:
 ```typescript
 import React, { useState } from 'react';
 import { useFlexibleUndo } from '../.';
-import { rootClass, btnContainerClass } from './styles';
+import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
 
 export const MakeUndoableFromToTuple: React.FC = () => {
@@ -44,9 +44,9 @@ export const MakeUndoableFromToTuple: React.FC = () => {
   return (
     <div className={rootClass}>
       <div>count = {count}</div>
-      <div className={btnContainerClass}>
-        <button onClick={() => multiply(Math.PI)}>multiPI</button>
-        <button onClick={() => divide(Math.PI)}>diPIde</button>
+      <div className={uiContainerClass}>
+        <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
+        <button onClick={() => divide(Math.PI)}>di&pi;de</button>
         <button disabled={!canUndo} onClick={() => undo()}>
           undo
         </button>

@@ -1,4 +1,4 @@
-You can make multiple separate calls to **makeUndoable** (or any of its variations such as **makeUndoables** or **makeUndoablesFromDispatch**). It is not possible to have multiple undoables with the same action type. Existing undoables with the same type (either created in a separate call in the same render, or from the same call in a previous render) will be overwritten. It is up to you to avoid conflicts in action types.
+You can make multiple calls to **makeUndoable** or to any of its variations such as **makeUndoables** or **makeUndoablesFromDispatch**. It is however not possible to have multiple undoable functions with the same action type. Previously made undoable functions with the same type (either the same function in a previous render or a different function in the same render) will be overwritten. It is up to you to avoid conflicts in action types.
 
 ```typescript
 const add = makeUndoable<number>({
@@ -19,7 +19,7 @@ Full code:
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
-import { rootClass, btnContainerClass } from './styles';
+import { rootClass, uiContainerClass } from './styles';
 
 export const MakeUndoableMulti: FC = () => {
   const [count, setCount] = useState(0);
@@ -48,7 +48,7 @@ export const MakeUndoableMulti: FC = () => {
   return (
     <div className={rootClass}>
       <div>count = {count}</div>
-      <div className={btnContainerClass}>
+      <div className={uiContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

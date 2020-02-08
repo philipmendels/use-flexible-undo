@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 import { useFlexibleUndo, makeUndoableReducer } from '../src';
-import { btnContainerClass } from './styles';
+import { uiContainerClass } from './styles';
 
 interface State {
   count: number;
@@ -38,7 +38,7 @@ export const MakeUndoablesFromDispatch: React.FC = () => {
   return (
     <>
       <div>count = {count}</div>
-      <div className={btnContainerClass}>
+      <div className={uiContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

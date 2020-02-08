@@ -1,7 +1,12 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeHandler, CurriedUpdater } from '../.';
+import {
+  CurriedUpdater,
+  useFlexibleUndo,
+  makeHandler,
+  makeUndoableHandler,
+} from '../.';
 import { ActionList } from './components/action-list';
-import { rootClass, btnContainerClass } from './styles';
+import { rootClass, uiContainerClass } from './styles';
 
 interface PayloadByType {
   add: number;
@@ -29,20 +34,14 @@ export const MakeUndoablesUtil: FC = () => {
   const subHandler = countHandler(subAmount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
-    add: {
-      redo: addHandler,
-      undo: subHandler,
-    },
-    subtract: {
-      redo: subHandler,
-      undo: addHandler,
-    },
+    add: makeUndoableHandler(addHandler, subHandler),
+    subtract: makeUndoableHandler(subHandler, addHandler),
   });
 
   return (
     <div className={rootClass}>
       <div>count = {count}</div>
-      <div className={btnContainerClass}>
+      <div className={uiContainerClass}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>
