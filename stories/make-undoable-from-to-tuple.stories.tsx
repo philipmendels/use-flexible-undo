@@ -18,8 +18,8 @@ export const MakeUndoableFromToTuple: React.FC = () => {
 
   const updateCount = makeUndoable<[number, number]>({
     type: 'updateCount',
-    redo: ([to]) => setCount(to),
-    undo: ([_, from]) => setCount(from),
+    redo: ([_, to]) => setCount(to),
+    undo: ([from]) => setCount(from),
   });
 
   const multiply = (amount: number) => updateCount([count, count * amount]);
