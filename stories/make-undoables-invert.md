@@ -1,4 +1,4 @@
-As an alternative to manually inverting the undo/redo handlers like in the previous example, you can use the utility **invertUndoable**. This function takes an object with "undo" and "redo" properties and switches the values of these properties.
+As an alternative to manually inverting the redo/undo handlers like in the previous two examples, you can use the utility **invertUndoable**. This function takes an object with "redo" and "undo" properties and switches the values of these properties.
 
 ```typescript
 const undoableAddHandler: UndoableHandler<number> = {

@@ -1,4 +1,4 @@
-It's up to you how you define your undo/redo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
+It's up to you how you define your redo/undo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
 
 ```typescript
 const addHandler = (amount: number) => setCount(prev => prev + amount);

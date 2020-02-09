@@ -34,6 +34,9 @@ import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
 import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import { MakeUndoablesMeta } from './make-undoables-meta';
+import { UsingReducer } from './use-reducer';
+import { NoPayload } from './no-payload';
+import { NoPayload2 } from './no-payload-2';
 
 storiesOf('useInfiniteUndo', module)
   //@ts-ignore
@@ -68,16 +71,22 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoablesReadme,
     },
   })
-  .add('makeUndoable-negate', () => <MakeUndoableNegate />, {
+  .add('Negate the payload', () => <MakeUndoableNegate />, {
     readme: {
       content: MakeUndoableNegateIntro,
       sidebar: MakeUndoableNegateReadme,
     },
   })
-  .add('makeUndoables-extract', () => <MakeUndoablesExtract />, {
+  .add('Extract redo/undo handlers', () => <MakeUndoablesExtract />, {
     readme: {
       content: MakeUndoablesExtractIntro,
       sidebar: MakeUndoablesExtractReadme,
+    },
+  })
+  .add('Extract pure functions', () => <MakeUndoablesUtil />, {
+    readme: {
+      content: MakeUndoablesUtilIntro,
+      sidebar: MakeUndoablesUtilReadme,
     },
   })
   .add('makeUndoables-invert', () => <MakeUndoablesInvert />, {
@@ -92,11 +101,23 @@ storiesOf('useInfiniteUndo', module)
       sidebar: MakeUndoablesUtilsReadme,
     },
   })
-  .add('makeUndoables-util', () => <MakeUndoablesUtil />, {
-    readme: {
-      content: MakeUndoablesUtilIntro,
-      sidebar: MakeUndoablesUtilReadme,
-    },
+  .add('dependent state: WRONG', () => <NoPayload />, {
+    // readme: {
+    //   content: MakeUndoablesUtilsIntro,
+    //   sidebar: MakeUndoablesUtilsReadme,
+    // },
+  })
+  .add('dependent state: RIGHT', () => <NoPayload2 />, {
+    // readme: {
+    //   content: MakeUndoablesUtilsIntro,
+    //   sidebar: MakeUndoablesUtilsReadme,
+    // },
+  })
+  .add('Extracting state: useReducer', () => <UsingReducer />, {
+    // readme: {
+    //   content: MakeUndoablesUtilIntro,
+    //   sidebar: MakeUndoablesUtilReadme,
+    // },
   })
   .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
