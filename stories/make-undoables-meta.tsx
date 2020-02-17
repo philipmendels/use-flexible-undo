@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo } from '../src';
+import { useFlexibleUndo } from '../.';
 import { uiContainerClass } from './styles';
 
 interface PayloadByType {
@@ -17,7 +17,9 @@ export const MakeUndoablesMeta: React.FC = () => {
     PayloadByType,
     MetaActionReturnTypes
   >({
-    onDo: ({ meta }) => console.log(meta.describe()),
+    callbacks: {
+      onDo: ({ meta }) => console.log(meta.describe()),
+    },
   });
 
   const { add, subtract } = makeUndoables<PayloadByType>({

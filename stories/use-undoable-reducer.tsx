@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  useFlexibleUndo,
-  makeUndoableReducer,
-  useUndoableReducer,
-} from '../src';
+import { useFlexibleUndo, makeUndoableReducer, useUndoableReducer } from '../.';
 import { uiContainerClass } from './styles';
 
 interface State {

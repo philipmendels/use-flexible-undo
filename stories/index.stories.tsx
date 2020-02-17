@@ -37,8 +37,26 @@ import { MakeUndoablesMeta } from './make-undoables-meta';
 import { UsingReducer } from './use-reducer';
 import { NoPayload } from './no-payload';
 import { NoPayload2 } from './no-payload-2';
+import { NoPayloadLight } from './no-payload-light';
+import { NoPayload2Light } from './no-payload-2-light';
 
-storiesOf('useInfiniteUndo', module)
+storiesOf('useFlexibleUndoLight', module)
+  //@ts-ignore
+  .addParameters({ options: { theme: {} } })
+  .add('dependent state: WRONG', () => <NoPayloadLight />, {
+    // readme: {
+    //   content: MakeUndoablesUtilsIntro,
+    //   sidebar: MakeUndoablesUtilsReadme,
+    // },
+  })
+  .add('dependent state: RIGHT', () => <NoPayload2Light />, {
+    // readme: {
+    //   content: MakeUndoablesUtilsIntro,
+    //   sidebar: MakeUndoablesUtilsReadme,
+    // },
+  });
+
+storiesOf('useFlexibleUndo', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('makeUndoable-delta', () => <MakeUndoableDelta />, {

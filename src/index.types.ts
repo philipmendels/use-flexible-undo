@@ -158,3 +158,74 @@ export type Stack<T = Action> = {
   past: T[];
   future: T[];
 };
+
+export type PBT_ALL_NN<
+  PBT_All extends PayloadByType | undefined
+> = PBT_All extends undefined ? PayloadByType : PBT_All;
+
+export type EventName = 'do' | 'undo' | 'redo';
+
+export interface CB_Args<
+  PBT_Inferred extends PayloadByType,
+  E extends EventName
+> {
+  action: ActionUnion<PBT_Inferred>;
+  eventName: E;
+}
+
+export type CB_ArgsWithMeta<
+  PBT_Inferred extends PayloadByType,
+  MR extends MetaActionReturnTypes,
+  E extends EventName
+> = MR extends undefined
+  ? CB_Args<PBT_Inferred, E>
+  : CB_Args<PBT_Inferred, E> & { meta: LinkedMetaActions<NonNullable<MR>> };
+
+export type CB<
+  PBT_Inferred extends PayloadByType = PayloadByType,
+  MR extends MetaActionReturnTypes = undefined,
+  E extends EventName = EventName
+> = (args: CB_ArgsWithMeta<PBT_Inferred, MR, E>) => any;
+
+export interface CallbacksLight<
+  PBT_Inferred extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> {
+  onDo?: CB<PBT_Inferred, MR, 'do'>;
+  onRedo?: CB<PBT_Inferred, MR, 'redo'>;
+  onUndo?: CB<PBT_Inferred, MR, 'undo'>;
+  onDoRedo?: CB<PBT_Inferred, MR, 'do' | 'redo'>;
+}
+
+export type Callbacks<
+  PBT_Inferred extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> = CallbacksLight<PBT_Inferred, MR> & {
+  onMakeUndoable?: (type: StringOnlyKeyOf<PBT_Inferred>) => any;
+};
+
+export interface UFUOptions {
+  callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
+  storeActionCreatedDate?: boolean;
+}
+
+export interface UFUProps<
+  PBT extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> {
+  callbacks?: Callbacks<PBT, MR> & {
+    latest?: Callbacks<PBT, MR>;
+  };
+  options?: UFUOptions;
+}
+
+export interface UFULightProps<
+  PBT extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> {
+  handlers: UndoableHandlerWithMetaByType<PBT, MR>;
+  callbacks?: CallbacksLight<PBT, MR> & {
+    latest?: CallbacksLight<PBT, MR>;
+  };
+  options?: UFUOptions;
+}

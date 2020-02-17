@@ -3,7 +3,7 @@ import {
   useFlexibleUndo,
   makeUndoableReducer,
   bindUndoableActionCreators,
-} from '../src';
+} from '../.';
 import { uiContainerClass } from './styles';
 
 interface State {
