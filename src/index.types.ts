@@ -4,8 +4,16 @@ export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
 export type PayloadHandler<P> = (payload: P) => void;
 
+export type PayloadHandlerWithUndefined<P> = (
+  ...payload: P extends undefined ? [] : [P]
+) => void;
+
 export type HandlersByType<PBT extends PayloadByType> = {
   [K in StringOnlyKeyOf<PBT>]: PayloadHandler<PBT[K]>;
+};
+
+export type HandlersWithUndefinedByType<PBT extends PayloadByType> = {
+  [K in StringOnlyKeyOf<PBT>]: PayloadHandlerWithUndefined<PBT[K]>;
 };
 
 type StateUpdater<P, S> = (payload: P) => (state: S) => S;

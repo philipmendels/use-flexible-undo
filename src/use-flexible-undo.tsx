@@ -7,11 +7,9 @@ import { makeUndoableHandlersFromDispatch } from './util';
 
 import {
   ExtractKeyByValue,
-  HandlersByType,
   MetaActionHandlersByType,
   MetaActionReturnTypes,
   PayloadByType,
-  PayloadHandler,
   StringOnlyKeyOf,
   UDispatch,
   UndoableHandlerWithMeta,
@@ -20,6 +18,8 @@ import {
   UndoableUActionCreatorsByType,
   ValueOf,
   UFUProps,
+  HandlersWithUndefinedByType,
+  PayloadHandlerWithUndefined,
 } from './index.types';
 
 export const useFlexibleUndo = <
@@ -48,12 +48,12 @@ export const useFlexibleUndo = <
       handlers: {
         [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR>;
       }
-    ): HandlersByType<PBT> => {
+    ): HandlersWithUndefinedByType<PBT> => {
       handlersRef.current = { ...handlersRef.current, ...handlers };
       const types = Object.keys(handlers) as StringOnlyKeyOf<PBT_All>[];
       onMakeUndoables?.(types);
       onMakeUndoablesLatestRef.current?.(types);
-      return createUndoables(handlers) as HandlersByType<PBT>;
+      return createUndoables(handlers) as HandlersWithUndefinedByType<PBT>;
     },
     [onMakeUndoables, onMakeUndoablesLatestRef, createUndoables]
   );
@@ -65,9 +65,9 @@ export const useFlexibleUndo = <
         ExtractKeyByValue<PBT_Inferred, P>,
         MR
       >
-    ): PayloadHandler<P> => {
+    ): PayloadHandlerWithUndefined<P> => {
       const { type, ...rest } = handler;
-      return makeUndoables({ [type as any]: rest } as any)[type as any];
+      return makeUndoables({ [type]: rest } as any)[type as any];
     },
     [makeUndoables]
   );
@@ -79,7 +79,7 @@ export const useFlexibleUndo = <
       ...metaActionHandlers: MR extends undefined
         ? []
         : [MetaActionHandlersByType<PBT, NMR>]
-    ): HandlersByType<PBT> =>
+    ): HandlersWithUndefinedByType<PBT> =>
       makeUndoables(
         makeUndoableHandlersFromDispatch(
           dispatch,

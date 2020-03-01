@@ -71,13 +71,10 @@ export const NoPayload2: FC = () => {
             }
           />
         </label>
-        <button disabled={!amount} onClick={() => amount && add(undefined)}>
+        <button disabled={!amount} onClick={() => amount && add()}>
           add
         </button>
-        <button
-          disabled={!amount}
-          onClick={() => amount && subtract(undefined)}
-        >
+        <button disabled={!amount} onClick={() => amount && subtract()}>
           subtract
         </button>
         <button disabled={!canUndo} onClick={() => undo()}>

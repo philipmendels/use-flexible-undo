@@ -76,13 +76,10 @@ export const NoPayload2Light: FC = () => {
             }
           />
         </label>
-        <button disabled={!amount} onClick={() => amount && add(undefined)}>
+        <button disabled={!amount} onClick={() => amount && add()}>
           add
         </button>
-        <button
-          disabled={!amount}
-          onClick={() => amount && subtract(undefined)}
-        >
+        <button disabled={!amount} onClick={() => amount && subtract()}>
           subtract
         </button>
         <button disabled={!canUndo} onClick={() => undo()}>
@@ -91,12 +88,6 @@ export const NoPayload2Light: FC = () => {
         <button disabled={!canRedo} onClick={() => redo()}>
           redo
         </button>
-        {/* <button disabled={!canUndo} onClick={() => setTimeout(undo, 1000)}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => setTimeout(redo, 1000)}>
-          redo
-        </button> */}
       </div>
       <ActionList stack={stack} timeTravel={timeTravel} />
     </div>
