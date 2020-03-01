@@ -1,8 +1,9 @@
 import { useCallback, useRef } from 'react';
 
 import { useLatest } from './hooks/use-latest';
-import { mapObject } from './util-internal';
 import { useUndoRedo } from './hooks/use-undo-redo';
+
+import { makeUndoableHandlersFromDispatch } from './util';
 
 import {
   ExtractKeyByValue,
@@ -66,8 +67,7 @@ export const useFlexibleUndo = <
       >
     ): PayloadHandler<P> => {
       const { type, ...rest } = handler;
-      const anyType = type as any;
-      return makeUndoables({ [anyType]: rest } as any)[anyType];
+      return makeUndoables({ [type as any]: rest } as any)[type as any];
     },
     [makeUndoables]
   );
@@ -81,16 +81,11 @@ export const useFlexibleUndo = <
         : [MetaActionHandlersByType<PBT, NMR>]
     ): HandlersByType<PBT> =>
       makeUndoables(
-        mapObject(actionCreators, ([type, action]) => [
-          type,
-          {
-            redo: payload => dispatch(action.redo(payload)),
-            undo: payload => dispatch(action.undo(payload)),
-            ...(metaActionHandlers.length
-              ? { meta: metaActionHandlers[0]![type] }
-              : {}),
-          } as UndoableHandlerWithMeta<PBT[typeof type], typeof type, MR>,
-        ])
+        makeUndoableHandlersFromDispatch(
+          dispatch,
+          actionCreators,
+          ...metaActionHandlers
+        )
       ),
     [makeUndoables]
   );

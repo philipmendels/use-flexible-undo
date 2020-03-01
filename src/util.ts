@@ -13,6 +13,7 @@ import {
   MetaActionHandlersByType,
   UDispatch,
   UndoableHandlersByType,
+  UndoableHandlerWithMeta,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
 
@@ -87,4 +88,25 @@ export const bindUndoableActionCreators = <PBT extends PayloadByType>(
       redo: payload => dispatch(creator.redo(payload)),
       undo: payload => dispatch(creator.undo(payload)),
     },
+  ]);
+
+export const makeUndoableHandlersFromDispatch = <
+  PBT extends PayloadByType,
+  MR extends MetaActionReturnTypes
+>(
+  dispatch: UDispatch<PBT>,
+  actionCreators: UndoableUActionCreatorsByType<PBT>,
+  ...metaActionHandlers: MR extends undefined
+    ? []
+    : [MetaActionHandlersByType<PBT, NonNullable<MR>>]
+): { [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR> } =>
+  mapObject(actionCreators, ([type, action]) => [
+    type,
+    {
+      redo: payload => dispatch(action.redo(payload)),
+      undo: payload => dispatch(action.undo(payload)),
+      ...(metaActionHandlers.length
+        ? { meta: metaActionHandlers[0]![type] }
+        : {}),
+    } as UndoableHandlerWithMeta<PBT[typeof type], typeof type, MR>,
   ]);
