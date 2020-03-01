@@ -201,12 +201,12 @@ export type Callbacks<
   PBT_Inferred extends PayloadByType,
   MR extends MetaActionReturnTypes
 > = CallbacksLight<PBT_Inferred, MR> & {
-  onMakeUndoable?: (type: StringOnlyKeyOf<PBT_Inferred>) => any;
+  onMakeUndoables?: (types: StringOnlyKeyOf<PBT_Inferred>[]) => any;
 };
 
 export interface UFUOptions {
-  callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
   storeActionCreatedDate?: boolean;
+  callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
 }
 
 export interface UFUProps<
@@ -224,6 +224,19 @@ export interface UFULightProps<
   MR extends MetaActionReturnTypes
 > {
   handlers: UndoableHandlerWithMetaByType<PBT, MR>;
+  callbacks?: CallbacksLight<PBT, MR> & {
+    latest?: CallbacksLight<PBT, MR>;
+  };
+  options?: UFUOptions;
+}
+
+export interface UseUndoRedoProps<
+  PBT extends PayloadByType,
+  MR extends MetaActionReturnTypes
+> {
+  handlers: {
+    current: UndoableHandlerWithMetaByType<PBT, MR>;
+  };
   callbacks?: CallbacksLight<PBT, MR> & {
     latest?: CallbacksLight<PBT, MR>;
   };
