@@ -49,8 +49,8 @@
     "react-dom": "^16.12.0",
     "storybook-readme": "^5.0.8",
     "ts-loader": "^6.2.1",
-    "tsdx": "^0.12.0",
+    "tsdx": "^0.12.3",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.8.2"
   }
 }
