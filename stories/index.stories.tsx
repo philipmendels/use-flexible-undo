@@ -35,26 +35,14 @@ import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import { MakeUndoablesMeta } from './make-undoables-meta';
 import { UsingReducer } from './use-reducer';
-import { NoPayload } from './no-payload';
-import { NoPayload2 } from './no-payload-2';
+import { DependentStateWrong } from './dependent-state-wrong';
+import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
+import DependentStateWrongReadme from './dependent-state-wrong.md';
+import { DependentStateRight } from './dependent-state-right';
+import DependentStateRightIntro from './dependent-state-right-intro.md';
+import DependentStateRightReadme from './dependent-state-right.md';
 import { NoPayloadLight } from './no-payload-light';
 import { NoPayload2Light } from './no-payload-2-light';
-
-storiesOf('useFlexibleUndoLight', module)
-  //@ts-ignore
-  .addParameters({ options: { theme: {} } })
-  .add('dependent state: WRONG', () => <NoPayloadLight />, {
-    // readme: {
-    //   content: MakeUndoablesUtilsIntro,
-    //   sidebar: MakeUndoablesUtilsReadme,
-    // },
-  })
-  .add('dependent state: RIGHT', () => <NoPayload2Light />, {
-    // readme: {
-    //   content: MakeUndoablesUtilsIntro,
-    //   sidebar: MakeUndoablesUtilsReadme,
-    // },
-  });
 
 storiesOf('useFlexibleUndo', module)
   //@ts-ignore
@@ -119,17 +107,17 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoablesUtilsReadme,
     },
   })
-  .add('dependent state: WRONG', () => <NoPayload />, {
-    // readme: {
-    //   content: MakeUndoablesUtilsIntro,
-    //   sidebar: MakeUndoablesUtilsReadme,
-    // },
+  .add('dependent state: WRONG', () => <DependentStateWrong />, {
+    readme: {
+      content: DependentStateWrongIntro,
+      sidebar: DependentStateWrongReadme,
+    },
   })
-  .add('dependent state: RIGHT', () => <NoPayload2 />, {
-    // readme: {
-    //   content: MakeUndoablesUtilsIntro,
-    //   sidebar: MakeUndoablesUtilsReadme,
-    // },
+  .add('dependent state: RIGHT', () => <DependentStateRight />, {
+    readme: {
+      content: DependentStateRightIntro,
+      sidebar: DependentStateRightReadme,
+    },
   })
   .add('Extracting state: useReducer', () => <UsingReducer />, {
     // readme: {
@@ -141,3 +129,19 @@ storiesOf('useFlexibleUndo', module)
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
   .add('useUndoableReducer', () => <UseUndoableReducer />)
   .add('makeUndoables-meta', () => <MakeUndoablesMeta />);
+
+storiesOf('useFlexibleUndoLight', module)
+  //@ts-ignore
+  .addParameters({ options: { theme: {} } })
+  .add('dependent state: WRONG', () => <NoPayloadLight />, {
+    // readme: {
+    //   content: MakeUndoablesUtilsIntro,
+    //   sidebar: MakeUndoablesUtilsReadme,
+    // },
+  })
+  .add('dependent state: RIGHT', () => <NoPayload2Light />, {
+    // readme: {
+    //   content: MakeUndoablesUtilsIntro,
+    //   sidebar: MakeUndoablesUtilsReadme,
+    // },
+  });

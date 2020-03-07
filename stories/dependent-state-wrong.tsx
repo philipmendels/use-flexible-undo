@@ -10,22 +10,15 @@ import { ActionList } from './components/action-list';
 
 type Nullber = number | null;
 
-interface State {
-  count: number;
-  amount: Nullber;
-}
-
 interface PayloadByType {
   add: undefined;
   subtract: undefined;
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-export const NoPayload2: FC = () => {
-  const [{ count, amount }, setState] = useState<State>({
-    count: 0,
-    amount: 1,
-  });
+export const DependentStateWrong: FC = () => {
+  const [count, setCount] = useState(0);
+  const [amount, setAmount] = useState<Nullber>(1);
 
   const {
     makeUndoables,
@@ -37,21 +30,15 @@ export const NoPayload2: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const addHandler = () =>
-    setState(prev =>
-      prev.amount ? { ...prev, count: prev.count + prev.amount } : prev
-    );
-  const subHandler = () =>
-    setState(prev =>
-      prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
-    );
+  //Do NOT do this! Move 'amount' to the action payload or combine it
+  //with the 'count' state so that you can get it from the prev state.
+  const addHandler = () => amount && setCount(prev => prev + amount);
+  const subHandler = () => amount && setCount(prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: makeUndoableHandler(addHandler, subHandler),
     subtract: makeUndoableHandler(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(amount =>
-      setState(prev => ({ ...prev, amount }))
-    ),
+    updateAmount: makeUndoableFromToHandler(setAmount),
   });
 
   return (
