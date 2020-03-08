@@ -35,6 +35,8 @@ import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import { MakeUndoablesMeta } from './make-undoables-meta';
 import { UsingReducer } from './use-reducer';
+import UsingReducerIntro from './use-reducer-intro.md';
+import UsingReducerReadme from './use-reducer.md';
 import { DependentStateWrong } from './dependent-state-wrong';
 import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
 import DependentStateWrongReadme from './dependent-state-wrong.md';
@@ -120,10 +122,10 @@ storiesOf('useFlexibleUndo', module)
     },
   })
   .add('Extracting state: useReducer', () => <UsingReducer />, {
-    // readme: {
-    //   content: MakeUndoablesUtilIntro,
-    //   sidebar: MakeUndoablesUtilReadme,
-    // },
+    readme: {
+      content: UsingReducerIntro,
+      sidebar: UsingReducerReadme,
+    },
   })
   .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)

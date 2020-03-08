@@ -58,10 +58,10 @@ export const DependentStateWrong: FC = () => {
             }
           />
         </label>
-        <button disabled={!amount} onClick={() => amount && add()}>
+        <button disabled={!amount} onClick={() => add()}>
           add
         </button>
-        <button disabled={!amount} onClick={() => amount && subtract()}>
+        <button disabled={!amount} onClick={() => subtract()}>
           subtract
         </button>
         <button disabled={!canUndo} onClick={() => undo()}>

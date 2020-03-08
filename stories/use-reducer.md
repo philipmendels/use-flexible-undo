@@ -1,3 +1,8 @@
+You can separate your redo/undo handlers from your state update logic by using a reducer. However, as you can see, this involves writing a fair amount of boiler plate code. Check the next example for a utility that makes life easier.
+
+Full code:
+
+```typescript
 import React, { FC, useReducer } from 'react';
 import { useFlexibleUndo, PayloadFromTo, UReducer } from '../.';
 import { ActionList } from './components/action-list';
@@ -98,3 +103,4 @@ export const UsingReducer: FC = () => {
     </div>
   );
 };
+```
