@@ -19,6 +19,7 @@ import {
   HandlersByType,
   UseUndoRedoProps,
   StringOnlyKeyOf,
+  Action,
 } from '../index.types';
 
 import { useLatest } from './use-latest';
@@ -220,13 +221,11 @@ export const useUndoRedo = <
       mapObject(handlers, ([type, handler]) => [
         type,
         payload => {
-          const action = {
+          const action = ({
             type,
             payload,
-          } as ActionUnion<PBT>;
-          if (storeActionCreatedDate) {
-            action.created = new Date();
-          }
+            ...(storeActionCreatedDate ? { created: new Date() } : {}),
+          } as Action) as ActionUnion<PBT>;
           const onDoLatest = latestCallbacksRef.current?.onDo;
           const onDoRedoLatest = latestCallbacksRef.current?.onDoRedo;
           if (onDo || onDoRedo || onDoLatest || onDoRedoLatest) {

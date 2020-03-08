@@ -4,6 +4,14 @@ export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
 export type PayloadHandler<P> = (payload: P) => void;
 
+// export type PayloadHandler<P> = (
+//   ...payload: P extends undefined ? [] : [P]
+// ) => void;
+
+// export type PayloadHandler<P> = P extends undefined
+//   ? (payload?: P) => void
+//   : (payload: P) => void;
+
 export type PayloadHandlerWithUndefined<P> = (
   ...payload: P extends undefined ? [] : [P]
 ) => void;
@@ -96,11 +104,16 @@ export type LinkedMetaActions<MR extends NonNullable<MetaActionReturnTypes>> = {
   [K in StringOnlyKeyOf<MR>]: () => MR[K];
 };
 
-export interface Action<T = string, P = any> {
+export type Action<T = string, P = any> = {
   type: T;
-  payload: P;
   created?: Date;
-}
+} & (P extends undefined
+  ? {
+      payload?: P;
+    }
+  : {
+      payload: P;
+    });
 
 export type ActionUnion<PBT extends PayloadByType> = {
   [T in StringOnlyKeyOf<PBT>]: Action<T, PBT[T]>;
@@ -108,7 +121,7 @@ export type ActionUnion<PBT extends PayloadByType> = {
 
 export type StackSetter<A extends Action> = Dispatch<React.SetStateAction<A[]>>;
 
-type UAction<T, P> = Action<T, P> & {
+export type UAction<T, P> = Action<T, P> & {
   meta?: {
     isUndo?: boolean;
   };
@@ -118,10 +131,12 @@ type UActionUnion<PBT extends PayloadByType> = {
   [T in StringOnlyKeyOf<PBT>]: UAction<T, PBT[T]>;
 }[StringOnlyKeyOf<PBT>];
 
-type UActionCreator<
+export type UActionCreator<
   PBT extends PayloadByType,
   T extends StringOnlyKeyOf<PBT>
-> = (payload: PBT[T]) => UAction<T, PBT[T]>;
+> = PBT[T] extends undefined
+  ? (payload?: PBT[T]) => UAction<T, PBT[T]>
+  : (payload: PBT[T]) => UAction<T, PBT[T]>;
 
 export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
   [T in StringOnlyKeyOf<PBT>]: Undoable<UActionCreator<PBT, T>>;
