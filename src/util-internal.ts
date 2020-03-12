@@ -14,9 +14,9 @@ const fromEntries = <O extends object>(entries: Entry<O>[]) =>
 export const makeActionCreator = <T extends string>(
   type: T,
   isUndo?: boolean
-) => <P extends any>(...payload: P extends undefined ? [] : [P]) =>
+) => <P extends any>(payload: P) =>
   (({
     type,
-    ...payload,
+    payload,
     ...(isUndo ? { meta: { isUndo } } : {}),
   } as Action) as UAction<T, P>);

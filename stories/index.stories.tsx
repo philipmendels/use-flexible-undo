@@ -45,6 +45,7 @@ import DependentStateRightIntro from './dependent-state-right-intro.md';
 import DependentStateRightReadme from './dependent-state-right.md';
 import { NoPayloadLight } from './no-payload-light';
 import { NoPayload2Light } from './no-payload-2-light';
+import { MakeUndoablesFromDispatchNoPayload } from './make-undoables-from-dispatch-no-payload';
 
 storiesOf('useFlexibleUndo', module)
   //@ts-ignore
@@ -91,12 +92,6 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoablesExtractReadme,
     },
   })
-  .add('Extract pure functions', () => <MakeUndoablesUtil />, {
-    readme: {
-      content: MakeUndoablesUtilIntro,
-      sidebar: MakeUndoablesUtilReadme,
-    },
-  })
   .add('makeUndoables-invert', () => <MakeUndoablesInvert />, {
     readme: {
       content: MakeUndoablesInvertIntro,
@@ -107,6 +102,12 @@ storiesOf('useFlexibleUndo', module)
     readme: {
       content: MakeUndoablesUtilsIntro,
       sidebar: MakeUndoablesUtilsReadme,
+    },
+  })
+  .add('Extract pure functions', () => <MakeUndoablesUtil />, {
+    readme: {
+      content: MakeUndoablesUtilIntro,
+      sidebar: MakeUndoablesUtilReadme,
     },
   })
   .add('dependent state: WRONG', () => <DependentStateWrong />, {
@@ -128,6 +129,9 @@ storiesOf('useFlexibleUndo', module)
     },
   })
   .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
+  .add('makeUndoablesFromDispatch - no payload', () => (
+    <MakeUndoablesFromDispatchNoPayload />
+  ))
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
   .add('useUndoableReducer', () => <UseUndoableReducer />)
   .add('makeUndoables-meta', () => <MakeUndoablesMeta />);
