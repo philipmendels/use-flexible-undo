@@ -30,12 +30,8 @@ export const makeUndoableHandler = <T>(
 ) => ({ redo, undo });
 
 export const makeUndoableFromToHandler = <T>(handler: (payload: T) => any) => ({
-  redo: ({ to }: PayloadFromTo<T>) => {
-    handler(to);
-  },
-  undo: ({ from }: PayloadFromTo<T>) => {
-    handler(from);
-  },
+  redo: ({ to }: PayloadFromTo<T>) => handler(to),
+  undo: ({ from }: PayloadFromTo<T>) => handler(from),
 });
 
 export const invertUndoable = <T>(undoable: Undoable<T>): Undoable<T> => ({

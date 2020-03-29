@@ -1,3 +1,6 @@
+Full code:
+
+```typescript
 import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
@@ -91,3 +94,4 @@ export const MakeUndoablesFromDispatchNoPayload: FC = () => {
     </div>
   );
 };
+```

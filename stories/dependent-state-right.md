@@ -1,4 +1,4 @@
-If you combine your dependent state in one state object, then you can get it from the previous state in your redo/undo handlers instead of getting it from the action payload.
+As an alternative to passing dependent state as (part of) the action payload, you can store all dependent state together and get it from the previous state in your redo/undo handlers. Here we use useState to store our state, in the following examples we look at useReducer.
 
 ```typescript
 const [{ count, amount }, setState] = useState<State>({
@@ -36,6 +36,7 @@ import {
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -50,7 +51,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-export const DependentStateRight: FC = () => {
+export const DependentStateRight2: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
@@ -89,13 +90,12 @@ export const DependentStateRight: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

@@ -1,4 +1,4 @@
-You should not make your redo/undo handlers depend on external state. Refactor your actions so that you can get dependent state from the action payload (like in all the previous examples) or refactor your state so that you can get it from the previous state (like in the next example).
+You **_should not_** make your redo/undo handlers depend on external state. Refactor your actions so that you can get dependent state from the action payload or refactor your state so that you can get it from the previous state. You can see how in the next two examples.
 
 ```typescript
 const [count, setCount] = useState(0);

@@ -40,12 +40,16 @@ import UsingReducerReadme from './use-reducer.md';
 import { DependentStateWrong } from './dependent-state-wrong';
 import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
 import DependentStateWrongReadme from './dependent-state-wrong.md';
-import { DependentStateRight } from './dependent-state-right';
+import { DependentStateRight1 } from './dependent-state-right-1';
+import DependentStateRight1Intro from './dependent-state-right-1-intro.md';
+import DependentStateRight1Readme from './dependent-state-right-1.md';
+import { DependentStateRight2 } from './dependent-state-right';
 import DependentStateRightIntro from './dependent-state-right-intro.md';
 import DependentStateRightReadme from './dependent-state-right.md';
 import { NoPayloadLight } from './no-payload-light';
 import { NoPayload2Light } from './no-payload-2-light';
 import { MakeUndoablesFromDispatchNoPayload } from './make-undoables-from-dispatch-no-payload';
+import MakeUndoablesFromDispatchNoPayloadReadme from './make-undoables-from-dispatch-no-payload.md';
 
 storiesOf('useFlexibleUndo', module)
   //@ts-ignore
@@ -116,7 +120,13 @@ storiesOf('useFlexibleUndo', module)
       sidebar: DependentStateWrongReadme,
     },
   })
-  .add('dependent state: RIGHT', () => <DependentStateRight />, {
+  .add('dependent state: RIGHT 1', () => <DependentStateRight1 />, {
+    readme: {
+      content: DependentStateRight1Intro,
+      sidebar: DependentStateRight1Readme,
+    },
+  })
+  .add('dependent state: RIGHT 2', () => <DependentStateRight2 />, {
     readme: {
       content: DependentStateRightIntro,
       sidebar: DependentStateRightReadme,
@@ -128,10 +138,17 @@ storiesOf('useFlexibleUndo', module)
       sidebar: UsingReducerReadme,
     },
   })
+  .add(
+    'makeUndoablesFromDispatch - no payload',
+    () => <MakeUndoablesFromDispatchNoPayload />,
+    {
+      readme: {
+        // content: UsingReducerIntro,
+        sidebar: MakeUndoablesFromDispatchNoPayloadReadme,
+      },
+    }
+  )
   .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
-  .add('makeUndoablesFromDispatch - no payload', () => (
-    <MakeUndoablesFromDispatchNoPayload />
-  ))
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
   .add('useUndoableReducer', () => <UseUndoableReducer />)
   .add('makeUndoables-meta', () => <MakeUndoablesMeta />);

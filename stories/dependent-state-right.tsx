@@ -7,6 +7,7 @@ import {
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -21,7 +22,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-export const DependentStateRight: FC = () => {
+export const DependentStateRight2: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
@@ -60,13 +61,12 @@ export const DependentStateRight: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

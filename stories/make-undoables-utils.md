@@ -29,6 +29,7 @@ import {
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -68,13 +69,12 @@ export const MakeUndoablesUtils: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

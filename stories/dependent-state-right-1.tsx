@@ -2,9 +2,8 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeHandler,
-  makeUndoableHandler,
   makeUndoableFromToHandler,
+  makeUndoableHandler,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -18,7 +17,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-export const MakeUndoablesUtils: FC = () => {
+export const DependentStateRight1: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
@@ -32,9 +31,8 @@ export const MakeUndoablesUtils: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
+  const addHandler = (amount: number) => setCount(prev => prev + amount);
+  const subHandler = (amount: number) => setCount(prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: makeUndoableHandler(addHandler, subHandler),
