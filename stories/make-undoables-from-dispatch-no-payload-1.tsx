@@ -1,14 +1,5 @@
-Full code:
-
-```typescript
 import React, { FC, useReducer } from 'react';
-import {
-  useFlexibleUndo,
-  makeUndoableReducer,
-  PayloadFromTo,
-  makeUndoableStateUpdater,
-  makeUndoableFromToStateUpdater,
-} from '../.';
+import { useFlexibleUndo, makeUndoableReducer, PayloadFromTo } from '../dist';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
 import { NumberInput } from './components/number-input';
@@ -26,19 +17,23 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const makeCountHandler = (sign: 1 | -1) => () => (state: State) =>
-  state.amount ? { ...state, count: state.count + sign * state.amount } : state;
-
-const addHandler = makeCountHandler(1);
-const subHandler = makeCountHandler(-1);
-
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: makeUndoableStateUpdater(addHandler, subHandler),
-  subtract: makeUndoableStateUpdater(subHandler, addHandler),
-  updateAmount: makeUndoableFromToStateUpdater(amount => state => ({
-    ...state,
-    amount,
-  })),
+  add: {
+    redo: () => state =>
+      state.amount ? { ...state, count: state.count + state.amount } : state,
+    undo: () => state =>
+      state.amount ? { ...state, count: state.count - state.amount } : state,
+  },
+  subtract: {
+    redo: () => state =>
+      state.amount ? { ...state, count: state.count - state.amount } : state,
+    undo: () => state =>
+      state.amount ? { ...state, count: state.count + state.amount } : state,
+  },
+  updateAmount: {
+    redo: ({ to }) => state => ({ ...state, amount: to }),
+    undo: ({ from }) => state => ({ ...state, amount: from }),
+  },
 });
 
 export const MakeUndoablesFromDispatchNoPayload: FC = () => {
@@ -95,4 +90,3 @@ export const MakeUndoablesFromDispatchNoPayload: FC = () => {
     </div>
   );
 };
-```

@@ -3,8 +3,8 @@ import {
   useFlexibleUndo,
   makeUndoableReducer,
   PayloadFromTo,
-  makeUndoableFromToHandler,
-  makeUndoableHandler,
+  makeUndoableStateUpdater,
+  makeUndoableFromToStateUpdater,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -23,15 +23,16 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const addHandler = () => (state: State) =>
-  state.amount ? { ...state, count: state.count + state.amount } : state;
-const subHandler = () => (state: State) =>
-  state.amount ? { ...state, count: state.count - state.amount } : state;
+const makeCountHandler = (sign: 1 | -1) => () => (state: State) =>
+  state.amount ? { ...state, count: state.count + sign * state.amount } : state;
+
+const addHandler = makeCountHandler(1);
+const subHandler = makeCountHandler(-1);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: makeUndoableHandler(addHandler, subHandler),
-  subtract: makeUndoableHandler(subHandler, addHandler),
-  updateAmount: makeUndoableFromToHandler(amount => (state: State) => ({
+  add: makeUndoableStateUpdater(addHandler, subHandler),
+  subtract: makeUndoableStateUpdater(subHandler, addHandler),
+  updateAmount: makeUndoableFromToStateUpdater(amount => state => ({
     ...state,
     amount,
   })),

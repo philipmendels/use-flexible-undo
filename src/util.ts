@@ -29,7 +29,20 @@ export const makeUndoableHandler = <T>(
   undo: (payload: T) => any
 ) => ({ redo, undo });
 
+export const makeUndoableStateUpdater = <T, S>(
+  redo: (payload: T) => Updater<S>,
+  undo: (payload: T) => Updater<S>
+) => ({ redo, undo });
+
+// handler normally should return void, but let's use any to keep it flexible
 export const makeUndoableFromToHandler = <T>(handler: (payload: T) => any) => ({
+  redo: ({ to }: PayloadFromTo<T>) => handler(to),
+  undo: ({ from }: PayloadFromTo<T>) => handler(from),
+});
+
+export const makeUndoableFromToStateUpdater = <T, S>(
+  handler: (payload: T) => Updater<S>
+) => ({
   redo: ({ to }: PayloadFromTo<T>) => handler(to),
   undo: ({ from }: PayloadFromTo<T>) => handler(from),
 });
