@@ -1,11 +1,14 @@
-import React, { FC } from 'react';
+Full code:
+
+```typescript
+import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
   PayloadFromTo,
   makeUndoableStateUpdater,
   makeUndoableFromToStateUpdater,
-  useUndoableReducer,
+  bindUndoableActionCreators,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -39,18 +42,11 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   })),
 });
 
-export const UseUndoableReducer: FC = () => {
-  const {
-    state: { count, amount },
-    boundActionCreators,
-  } = useUndoableReducer(
-    reducer,
-    {
-      count: 0,
-      amount: 1,
-    },
-    actionCreators
-  );
+export const BindUndoableActionCreators: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
+    count: 0,
+    amount: 1,
+  });
 
   const {
     makeUndoables,
@@ -61,6 +57,11 @@ export const UseUndoableReducer: FC = () => {
     stack,
     timeTravel,
   } = useFlexibleUndo();
+
+  const boundActionCreators = bindUndoableActionCreators(
+    dispatch,
+    actionCreators
+  );
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>(
     boundActionCreators
@@ -99,3 +100,4 @@ export const UseUndoableReducer: FC = () => {
     </div>
   );
 };
+```

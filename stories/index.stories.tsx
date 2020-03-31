@@ -48,8 +48,10 @@ import { MakeUndoablesFromDispatch2 } from './make-undoables-from-dispatch-2';
 import MakeUndoablesFromDispatch2Readme from './make-undoables-from-dispatch-2.md';
 import { MakeUndoablesFromDispatch3 } from './make-undoables-from-dispatch-3';
 import MakeUndoablesFromDispatch3Readme from './make-undoables-from-dispatch-3.md';
-import { UseUndoableReducer } from './use-undoable-reducer';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
+import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md';
+import { UseUndoableReducer } from './use-undoable-reducer';
+import UseUndoableReducerReadme from './use-undoable-reducer.md';
 import { MakeUndoablesMeta } from './make-undoables-meta';
 //
 import { NoPayloadLight } from './no-payload-light';
@@ -157,8 +159,16 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoablesFromDispatch3Readme,
     },
   })
-  .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
-  .add('useUndoableReducer', () => <UseUndoableReducer />)
+  .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />, {
+    readme: {
+      sidebar: BindUndoableActionCreatorsReadme,
+    },
+  })
+  .add('useUndoableReducer', () => <UseUndoableReducer />, {
+    readme: {
+      sidebar: UseUndoableReducerReadme,
+    },
+  })
   .add('makeUndoables-meta', () => <MakeUndoablesMeta />);
 
 storiesOf('useFlexibleUndoLight', module)
