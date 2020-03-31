@@ -7,6 +7,7 @@ import {
   makeUndoableReducer,
   makeUndoableFromToHandler,
   PayloadFromTo,
+  makeUndoableStateUpdater,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -23,15 +24,16 @@ interface PayloadByType {
 
 type Nullber = number | null;
 
+const makeCountHandler = (sign: 1 | -1) => (amount: number) => (
+  state: State
+) => ({ ...state, count: state.count + sign * amount });
+
+const addHandler = makeCountHandler(1);
+const subHandler = makeCountHandler(-1);
+
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: {
-    redo: amount => state => ({ ...state, count: state.count + amount }),
-    undo: amount => state => ({ ...state, count: state.count - amount }),
-  },
-  subtract: {
-    redo: amount => state => ({ ...state, count: state.count - amount }),
-    undo: amount => state => ({ ...state, count: state.count + amount }),
-  },
+  add: makeUndoableStateUpdater(addHandler, subHandler),
+  subtract: makeUndoableStateUpdater(subHandler, addHandler),
 });
 
 export const MakeUndoablesFromDispatch3: FC = () => {
