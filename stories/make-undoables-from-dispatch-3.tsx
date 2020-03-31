@@ -4,9 +4,10 @@ import {
   makeUndoableReducer,
   makeUndoableFromToHandler,
   PayloadFromTo,
-} from '..';
+} from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
+import { NumberInput } from './components/number-input';
 
 interface State {
   count: number;
@@ -30,7 +31,7 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   },
 });
 
-export const MakeUndoablesFromDispatch: FC = () => {
+export const MakeUndoablesFromDispatch3: FC = () => {
   const [{ count }, dispatch] = useReducer(reducer, { count: 0 });
   const [amount, setAmount] = useState<Nullber>(1);
 
@@ -58,13 +59,12 @@ export const MakeUndoablesFromDispatch: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

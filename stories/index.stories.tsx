@@ -30,13 +30,6 @@ import MakeUndoableFromToTupleReadme from './make-undoable-from-to-tuple.md';
 import { MakeUndoablesUtils } from './make-undoables-utils';
 import MakeUndoablesUtilsIntro from './make-undoables-utils-intro.md';
 import MakeUndoablesUtilsReadme from './make-undoables-utils.md';
-import { MakeUndoablesFromDispatch } from './make-undoables-from-dispatch';
-import { UseUndoableReducer } from './use-undoable-reducer';
-import { BindUndoableActionCreators } from './bind-undoable-action-creators';
-import { MakeUndoablesMeta } from './make-undoables-meta';
-import { UsingReducer } from './use-reducer';
-import UsingReducerIntro from './use-reducer-intro.md';
-import UsingReducerReadme from './use-reducer.md';
 import { DependentStateWrong } from './dependent-state-wrong';
 import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
 import DependentStateWrongReadme from './dependent-state-wrong.md';
@@ -46,10 +39,21 @@ import DependentStateRight1Readme from './dependent-state-right-1.md';
 import { DependentStateRight2 } from './dependent-state-right';
 import DependentStateRightIntro from './dependent-state-right-intro.md';
 import DependentStateRightReadme from './dependent-state-right.md';
+import { UsingReducer } from './use-reducer';
+import UsingReducerIntro from './use-reducer-intro.md';
+import UsingReducerReadme from './use-reducer.md';
+import { MakeUndoablesFromDispatch1 } from './make-undoables-from-dispatch-1';
+import MakeUndoablesFromDispatch1Readme from './make-undoables-from-dispatch-1.md';
+import { MakeUndoablesFromDispatch2 } from './make-undoables-from-dispatch-2';
+import MakeUndoablesFromDispatch2Readme from './make-undoables-from-dispatch-2.md';
+import { MakeUndoablesFromDispatch3 } from './make-undoables-from-dispatch-3';
+import MakeUndoablesFromDispatch3Readme from './make-undoables-from-dispatch-3.md';
+import { UseUndoableReducer } from './use-undoable-reducer';
+import { BindUndoableActionCreators } from './bind-undoable-action-creators';
+import { MakeUndoablesMeta } from './make-undoables-meta';
+//
 import { NoPayloadLight } from './no-payload-light';
 import { NoPayload2Light } from './no-payload-2-light';
-import { MakeUndoablesFromDispatchNoPayload } from './make-undoables-from-dispatch-no-payload';
-import MakeUndoablesFromDispatchNoPayloadReadme from './make-undoables-from-dispatch-no-payload.md';
 
 storiesOf('useFlexibleUndo', module)
   //@ts-ignore
@@ -138,17 +142,21 @@ storiesOf('useFlexibleUndo', module)
       sidebar: UsingReducerReadme,
     },
   })
-  .add(
-    'makeUndoablesFromDispatch - no payload',
-    () => <MakeUndoablesFromDispatchNoPayload />,
-    {
-      readme: {
-        // content: UsingReducerIntro,
-        sidebar: MakeUndoablesFromDispatchNoPayloadReadme,
-      },
-    }
-  )
-  .add('makeUndoablesFromDispatch', () => <MakeUndoablesFromDispatch />)
+  .add('makeUndoablesFromDispatch 1', () => <MakeUndoablesFromDispatch1 />, {
+    readme: {
+      sidebar: MakeUndoablesFromDispatch1Readme,
+    },
+  })
+  .add('makeUndoablesFromDispatch 2', () => <MakeUndoablesFromDispatch2 />, {
+    readme: {
+      sidebar: MakeUndoablesFromDispatch2Readme,
+    },
+  })
+  .add('makeUndoablesFromDispatch 3', () => <MakeUndoablesFromDispatch3 />, {
+    readme: {
+      sidebar: MakeUndoablesFromDispatch3Readme,
+    },
+  })
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />)
   .add('useUndoableReducer', () => <UseUndoableReducer />)
   .add('makeUndoables-meta', () => <MakeUndoablesMeta />);
