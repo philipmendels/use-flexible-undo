@@ -53,6 +53,7 @@ import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md
 import { UseUndoableReducer } from './use-undoable-reducer';
 import UseUndoableReducerReadme from './use-undoable-reducer.md';
 import { MakeUndoablesMeta } from './make-undoables-meta';
+import MakeUndoablesMetaReadme from './make-undoables-meta.md';
 //
 import { NoPayloadLight } from './no-payload-light';
 import { NoPayload2Light } from './no-payload-2-light';
@@ -169,7 +170,11 @@ storiesOf('useFlexibleUndo', module)
       sidebar: UseUndoableReducerReadme,
     },
   })
-  .add('makeUndoables-meta', () => <MakeUndoablesMeta />);
+  .add('makeUndoables-meta', () => <MakeUndoablesMeta />, {
+    readme: {
+      sidebar: MakeUndoablesMetaReadme,
+    },
+  });
 
 storiesOf('useFlexibleUndoLight', module)
   //@ts-ignore

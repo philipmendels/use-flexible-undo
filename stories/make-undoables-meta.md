@@ -1,3 +1,6 @@
+Full code:
+
+```typescript
 import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
@@ -100,3 +103,4 @@ export const MakeUndoablesMeta: FC = () => {
     </div>
   );
 };
+```

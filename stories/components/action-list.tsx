@@ -1,11 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  ReactElement,
+  ReactNode,
+} from 'react';
 import styled from '@emotion/styled';
 import { Action, TimeTravelFn, Stack } from '../../src/index.types';
 
-export const ActionList: React.FC<{
-  stack: Stack;
+type ConvertFn<A> = (action: A) => ReactNode;
+
+interface ActionListProps<A extends Action> {
+  stack: Stack<A>;
   timeTravel: TimeTravelFn;
-}> = ({ stack, timeTravel }) => {
+  convert?: ConvertFn<A>;
+}
+
+export const ActionList = <A extends Action>({
+  stack,
+  timeTravel,
+  convert,
+}: ActionListProps<A>): ReactElement | null => {
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 5000);
   const hasPast = stack.past.length > 0;
@@ -18,7 +33,7 @@ export const ActionList: React.FC<{
           style={{ cursor: 'pointer' }}
           onClick={() => timeTravel('future', index)}
         >
-          <StackItem action={action} now={now} />
+          <StackItem action={action} now={now} convert={convert} />
         </div>
       ))}
       <Present>
@@ -33,7 +48,7 @@ export const ActionList: React.FC<{
           style={{ cursor: 'pointer' }}
           onClick={() => timeTravel('past', index)}
         >
-          <StackItem action={action} now={now} />
+          <StackItem action={action} now={now} convert={convert} />
         </div>
       ))}
     </Root>
@@ -49,21 +64,31 @@ const Present = styled.div`
   padding: 8px 0px;
 `;
 
-const StackItem: React.FC<{ action: Action; now: Date }> = ({
-  action: { type, payload, created },
+interface StackItemProps<A extends Action> {
+  action: A;
+  now: Date;
+  convert?: ConvertFn<A>;
+}
+
+const StackItem = <A extends Action>({
+  action,
   now,
-}) => (
-  <StackItemRoot>
-    {Boolean(created) && (
-      <div style={{ color: '#BBB', minWidth: '120px' }}>
-        {formatTime(created!, now)}
+  convert,
+}: StackItemProps<A>): ReactElement | null => {
+  const { created, type, payload } = action;
+  return (
+    <StackItemRoot>
+      {Boolean(created) && (
+        <div style={{ color: '#BBB', minWidth: '120px' }}>
+          {formatTime(created!, now)}
+        </div>
+      )}
+      <div style={{ flex: 1, whiteSpace: 'nowrap' }}>
+        {convert ? convert(action) : JSON.stringify({ type, payload })}
       </div>
-    )}
-    <div style={{ flex: 1, whiteSpace: 'nowrap' }}>
-      {JSON.stringify({ type, payload })}
-    </div>
-  </StackItemRoot>
-);
+    </StackItemRoot>
+  );
+};
 
 const StackItemRoot = styled.div`
   padding: 8px 0px;
