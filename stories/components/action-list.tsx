@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from 'react';
 import styled from '@emotion/styled';
-import { Action, TimeTravelFn, Stack } from '../../src/index.types';
+import { Action, TimeTravelFn, Stack } from '../../.';
 
 type ConvertFn<A> = (action: A) => ReactNode;
 
@@ -26,38 +26,35 @@ export const ActionList = <A extends Action>({
   const hasPast = stack.past.length > 0;
   const hasFuture = stack.future.length > 0;
   return (
-    <Root>
+    <div>
       {stack.future.map((action, index) => (
-        <div
+        <StackItemWrapper
           key={index}
-          style={{ cursor: 'pointer' }}
           onClick={() => timeTravel('future', index)}
         >
+          <Spacer>
+            <div className="line"></div>
+          </Spacer>
           <StackItem action={action} now={now} convert={convert} />
-        </div>
+        </StackItemWrapper>
       ))}
       <Present>
         {hasPast && <>undoable past &darr;</>}
         {hasPast && hasFuture && ' '}
         {hasFuture && <>&uarr; redoable future</>}
-        {(hasPast || hasFuture) && ' - click on an item to time travel'}
+        {(hasPast || hasFuture) && ' - click to time travel'}
       </Present>
       {stack.past.map((action, index) => (
-        <div
-          key={index}
-          style={{ cursor: 'pointer' }}
-          onClick={() => timeTravel('past', index)}
-        >
+        <StackItemWrapper key={index} onClick={() => timeTravel('past', index)}>
           <StackItem action={action} now={now} convert={convert} />
-        </div>
+          <Spacer>
+            <div className="line"></div>
+          </Spacer>
+        </StackItemWrapper>
       ))}
-    </Root>
+    </div>
   );
 };
-
-const Root = styled.div`
-  /* font-size: 12px; */
-`;
 
 const Present = styled.div`
   color: #48a7f6;
@@ -91,10 +88,28 @@ const StackItem = <A extends Action>({
 };
 
 const StackItemRoot = styled.div`
-  padding: 8px 0px;
   display: flex;
-  &:hover {
-    background: #f7f8fa;
+  padding: 8px 0;
+`;
+
+const StackItemWrapper = styled.div`
+  cursor: pointer;
+  &:hover .line {
+    border-bottom: 1px dashed #48a7f6;
+  }
+`;
+
+const Spacer = styled.div`
+  position: relative;
+  height: 32px;
+  margin: -16px 0;
+  z-index: 1;
+  cursor: pointer;
+  div {
+    height: 50%;
+  }
+  &:hover div {
+    border-bottom: 1px dashed #48a7f6;
   }
 `;
 

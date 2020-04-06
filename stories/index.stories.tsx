@@ -52,6 +52,10 @@ import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md';
 import { UseUndoableReducer } from './use-undoable-reducer';
 import UseUndoableReducerReadme from './use-undoable-reducer.md';
+import { ActionHistory } from './action-history';
+import ActionHistoryReadme from './action-history.md';
+import { MakeUndoablesMeta1 } from './make-undoables-meta-1';
+import MakeUndoablesMeta1Readme from './make-undoables-meta-1.md';
 import { MakeUndoablesMeta } from './make-undoables-meta';
 import MakeUndoablesMetaReadme from './make-undoables-meta.md';
 //
@@ -168,6 +172,16 @@ storiesOf('useFlexibleUndo', module)
   .add('useUndoableReducer', () => <UseUndoableReducer />, {
     readme: {
       sidebar: UseUndoableReducerReadme,
+    },
+  })
+  .add('action history', () => <ActionHistory />, {
+    readme: {
+      sidebar: ActionHistoryReadme,
+    },
+  })
+  .add('makeUndoables-meta-1', () => <MakeUndoablesMeta1 />, {
+    readme: {
+      sidebar: MakeUndoablesMeta1Readme,
     },
   })
   .add('makeUndoables-meta', () => <MakeUndoablesMeta />, {
