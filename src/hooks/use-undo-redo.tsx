@@ -199,7 +199,7 @@ export const useUndoRedo = <
   const timeTravel = useCallback(
     (direction: 'past' | 'future', index: number) => {
       if (direction === 'past') {
-        for (let i = 0; i <= index; i++) {
+        for (let i = 0; i < index; i++) {
           undo();
         }
       } else if (direction === 'future') {

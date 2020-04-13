@@ -21,40 +21,121 @@ export const ActionList = <A extends Action>({
   timeTravel,
   convert,
 }: ActionListProps<A>): ReactElement | null => {
+  const [modus, setModus] = useState<'clickBetween' | 'clickOn'>('clickOn');
+  const [startTime] = useState(new Date());
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 5000);
   const hasPast = stack.past.length > 0;
   const hasFuture = stack.future.length > 0;
   return (
-    <div>
-      {stack.future.map((action, index) => (
-        <StackItemWrapper
-          key={index}
-          onClick={() => timeTravel('future', index)}
-        >
-          <Spacer>
-            <div className="line"></div>
-          </Spacer>
-          <StackItem action={action} now={now} convert={convert} />
-        </StackItemWrapper>
-      ))}
-      <Present>
-        {hasPast && <>undoable past &darr;</>}
-        {hasPast && hasFuture && ' '}
-        {hasFuture && <>&uarr; redoable future</>}
-        {(hasPast || hasFuture) && ' - click to time travel'}
-      </Present>
-      {stack.past.map((action, index) => (
-        <StackItemWrapper key={index} onClick={() => timeTravel('past', index)}>
-          <StackItem action={action} now={now} convert={convert} />
-          <Spacer>
-            <div className="line"></div>
-          </Spacer>
-        </StackItemWrapper>
-      ))}
-    </div>
+    <>
+      {(hasPast || hasFuture) && (
+        <>
+          <div
+            style={{
+              marginBottom: '16px',
+            }}
+          >
+            <label>
+              time-travel modus: &nbsp;
+              <select
+                value={modus}
+                onChange={e => setModus(e.currentTarget.value as any)}
+                style={{ fontSize: '14px', padding: '4px' }}
+              >
+                <option value="clickOn">click-on</option>
+                <option value="clickBetween">click-between</option>
+              </select>
+            </label>
+          </div>
+
+          {modus === 'clickOn' && (
+            <div
+              style={{
+                marginBottom: '12px',
+              }}
+            >
+              click to time travel &darr;
+            </div>
+          )}
+        </>
+      )}
+      <div style={{ position: 'relative' }}>
+        {stack.future.map((action, index) => (
+          <StackItemWrapper
+            key={index}
+            onClick={() => timeTravel('future', index)}
+          >
+            {modus === 'clickBetween' && (
+              <Spacer>
+                <div className="line"></div>
+              </Spacer>
+            )}
+            <StackItem action={action} now={now} convert={convert} />
+          </StackItemWrapper>
+        ))}
+        {modus === 'clickBetween' && (
+          <Present>
+            {hasPast && <>undoable past &darr;</>}
+            {hasPast && hasFuture && ' '}
+            {hasFuture && <>&uarr; redoable future</>}
+            {(hasPast || hasFuture) && ' - click to time travel'}
+          </Present>
+        )}
+        {stack.past.map((action, index) => (
+          <StackItemWrapper
+            key={index}
+            onClick={() =>
+              timeTravel('past', modus === 'clickOn' ? index : index + 1)
+            }
+            isCurrent={index === 0 && modus === 'clickOn'}
+          >
+            <StackItem action={action} now={now} convert={convert} />
+            {modus === 'clickBetween' && (
+              <Spacer>
+                <div className="line"></div>
+              </Spacer>
+            )}
+          </StackItemWrapper>
+        ))}
+        {modus === 'clickOn' && (hasPast || hasFuture) && (
+          <>
+            <StackItemWrapper
+              onClick={() => timeTravel('past', stack.past.length)}
+              isCurrent={stack.past.length === 0}
+            >
+              <StackItemRoot>
+                <div className="time" style={{ minWidth: '120px' }}>
+                  {formatTime(startTime!, now)}
+                </div>
+                <div
+                  className="description"
+                  style={{ flex: 1, whiteSpace: 'nowrap' }}
+                >
+                  start
+                </div>
+              </StackItemRoot>
+            </StackItemWrapper>
+            <Indicator style={{ top: 6 + stack.future.length * 33 + 'px' }}>
+              &#11157;
+            </Indicator>
+          </>
+        )}
+      </div>
+    </>
   );
 };
+
+const Indicator = styled.div`
+  z-index: 10;
+  color: #48a7f6;
+  font-size: 16px;
+  opacity: 0.8;
+  position: absolute;
+  left: 0px;
+  border-radius: 50%;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+`;
 
 const Present = styled.div`
   color: #48a7f6;
@@ -64,6 +145,7 @@ const Present = styled.div`
 interface StackItemProps<A extends Action> {
   action: A;
   now: Date;
+  isCurrent?: boolean;
   convert?: ConvertFn<A>;
 }
 
@@ -76,11 +158,11 @@ const StackItem = <A extends Action>({
   return (
     <StackItemRoot>
       {Boolean(created) && (
-        <div style={{ color: '#BBB', minWidth: '120px' }}>
+        <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created!, now)}
         </div>
       )}
-      <div style={{ flex: 1, whiteSpace: 'nowrap' }}>
+      <div className="description" style={{ flex: 1, whiteSpace: 'nowrap' }}>
         {convert ? convert(action) : JSON.stringify({ type, payload })}
       </div>
     </StackItemRoot>
@@ -89,11 +171,20 @@ const StackItem = <A extends Action>({
 
 const StackItemRoot = styled.div`
   display: flex;
-  padding: 8px 0;
+  padding: 8px 25px;
 `;
 
-const StackItemWrapper = styled.div`
+const StackItemWrapper = styled.div<{ isCurrent?: boolean }>`
   cursor: pointer;
+  .time {
+    color: ${({ isCurrent }) => (isCurrent ? '#48a7f6' : '#BBB')};
+  }
+  ${({ isCurrent }) =>
+    isCurrent &&
+    `
+    color: #48a7f6;
+    cursor: default;
+    `}
   &:hover .line {
     border-bottom: 1px dashed #48a7f6;
   }
