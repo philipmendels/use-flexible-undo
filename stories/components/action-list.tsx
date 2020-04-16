@@ -26,6 +26,7 @@ export const ActionList = <A extends Action>({
   const [modus, setModus] = useState<Modus>('clickOn');
   const [startTime] = useState(new Date());
   const [now, setNow] = useState(new Date());
+  const [mouseMoved, setMouseMoved] = useState(false);
   useInterval(() => setNow(new Date()), 5000);
   const hasPast = stack.past.length > 0;
   const hasFuture = stack.future.length > 0;
@@ -57,7 +58,12 @@ export const ActionList = <A extends Action>({
         {stack.future.map((action, index) => (
           <StackItemWrapper
             key={index}
-            onClick={() => timeTravel('future', index)}
+            mouseMoved={mouseMoved}
+            onMouseMove={() => setMouseMoved(true)}
+            onClick={() => {
+              setMouseMoved(false);
+              timeTravel('future', index);
+            }}
           >
             {modus === 'clickBetween' && (
               <Spacer>
@@ -83,9 +89,12 @@ export const ActionList = <A extends Action>({
         {stack.past.map((action, index) => (
           <StackItemWrapper
             key={index}
-            onClick={() =>
-              timeTravel('past', modus === 'clickOn' ? index : index + 1)
-            }
+            onMouseMove={() => setMouseMoved(true)}
+            onClick={() => {
+              setMouseMoved(false);
+              timeTravel('past', modus === 'clickOn' ? index : index + 1);
+            }}
+            mouseMoved={mouseMoved}
             isCurrent={index === 0 && modus === 'clickOn'}
           >
             <StackItem
@@ -104,7 +113,12 @@ export const ActionList = <A extends Action>({
         {modus === 'clickOn' && (hasPast || hasFuture) && (
           <>
             <StackItemWrapper
-              onClick={() => timeTravel('past', stack.past.length)}
+              onMouseMove={() => setMouseMoved(true)}
+              onClick={() => {
+                setMouseMoved(false);
+                timeTravel('past', stack.past.length);
+              }}
+              mouseMoved={mouseMoved}
               isCurrent={stack.past.length === 0}
             >
               <StackItemRoot modus="clickOn">
@@ -191,7 +205,12 @@ const StackItemRoot = styled.div<{ modus: Modus }>`
     }`}
 `;
 
-const StackItemWrapper = styled.div<{ isCurrent?: boolean }>`
+interface StackItemWrapperProps {
+  isCurrent?: boolean;
+  mouseMoved: boolean;
+}
+
+const StackItemWrapper = styled.div<StackItemWrapperProps>`
   cursor: pointer;
   .time {
     color: ${({ isCurrent }) => (isCurrent ? '#48a7f6' : '#BBB')};
@@ -202,9 +221,11 @@ const StackItemWrapper = styled.div<{ isCurrent?: boolean }>`
     color: #48a7f6;
     cursor: default;
     `}
-  &:hover .line {
+  ${({ mouseMoved }) =>
+    mouseMoved &&
+    `&:hover .line {
     border-bottom: 1px dashed #48a7f6;
-  }
+  }`}
 `;
 
 const Spacer = styled.div`
