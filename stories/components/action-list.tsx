@@ -16,12 +16,14 @@ interface ActionListProps<A extends Action> {
   convert?: ConvertFn<A>;
 }
 
+type Modus = 'clickBetween' | 'clickOn';
+
 export const ActionList = <A extends Action>({
   stack,
   timeTravel,
   convert,
 }: ActionListProps<A>): ReactElement | null => {
-  const [modus, setModus] = useState<'clickBetween' | 'clickOn'>('clickOn');
+  const [modus, setModus] = useState<Modus>('clickOn');
   const [startTime] = useState(new Date());
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 5000);
@@ -33,6 +35,7 @@ export const ActionList = <A extends Action>({
         <>
           <div
             style={{
+              marginTop: '30px',
               marginBottom: '16px',
             }}
           >
@@ -48,16 +51,6 @@ export const ActionList = <A extends Action>({
               </select>
             </label>
           </div>
-
-          {modus === 'clickOn' && (
-            <div
-              style={{
-                marginBottom: '12px',
-              }}
-            >
-              click to time travel &darr;
-            </div>
-          )}
         </>
       )}
       <div style={{ position: 'relative' }}>
@@ -71,7 +64,12 @@ export const ActionList = <A extends Action>({
                 <div className="line"></div>
               </Spacer>
             )}
-            <StackItem action={action} now={now} convert={convert} />
+            <StackItem
+              action={action}
+              now={now}
+              convert={convert}
+              modus={modus}
+            />
           </StackItemWrapper>
         ))}
         {modus === 'clickBetween' && (
@@ -90,7 +88,12 @@ export const ActionList = <A extends Action>({
             }
             isCurrent={index === 0 && modus === 'clickOn'}
           >
-            <StackItem action={action} now={now} convert={convert} />
+            <StackItem
+              action={action}
+              now={now}
+              convert={convert}
+              modus={modus}
+            />
             {modus === 'clickBetween' && (
               <Spacer>
                 <div className="line"></div>
@@ -104,7 +107,7 @@ export const ActionList = <A extends Action>({
               onClick={() => timeTravel('past', stack.past.length)}
               isCurrent={stack.past.length === 0}
             >
-              <StackItemRoot>
+              <StackItemRoot modus="clickOn">
                 <div className="time" style={{ minWidth: '120px' }}>
                   {formatTime(startTime!, now)}
                 </div>
@@ -116,7 +119,7 @@ export const ActionList = <A extends Action>({
                 </div>
               </StackItemRoot>
             </StackItemWrapper>
-            <Indicator style={{ top: 6 + stack.future.length * 33 + 'px' }}>
+            <Indicator style={{ top: 2 + stack.future.length * 32 + 'px' }}>
               &#11157;
             </Indicator>
           </>
@@ -127,6 +130,9 @@ export const ActionList = <A extends Action>({
 };
 
 const Indicator = styled.div`
+  height: 32px;
+  display: flex;
+  align-items: center;
   z-index: 10;
   color: #48a7f6;
   font-size: 16px;
@@ -145,6 +151,7 @@ const Present = styled.div`
 interface StackItemProps<A extends Action> {
   action: A;
   now: Date;
+  modus: Modus;
   isCurrent?: boolean;
   convert?: ConvertFn<A>;
 }
@@ -153,10 +160,11 @@ const StackItem = <A extends Action>({
   action,
   now,
   convert,
+  modus,
 }: StackItemProps<A>): ReactElement | null => {
   const { created, type, payload } = action;
   return (
-    <StackItemRoot>
+    <StackItemRoot modus={modus}>
       {Boolean(created) && (
         <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created!, now)}
@@ -169,9 +177,18 @@ const StackItem = <A extends Action>({
   );
 };
 
-const StackItemRoot = styled.div`
+const StackItemRoot = styled.div<{ modus: Modus }>`
   display: flex;
-  padding: 8px 25px;
+  padding: 8px 0px;
+  height: 32px;
+  box-sizing: border-box;
+  ${({ modus }) =>
+    modus === 'clickOn' &&
+    `
+    padding: 8px 25px;
+    &:hover {
+      background: #f7f8fa;
+    }`}
 `;
 
 const StackItemWrapper = styled.div<{ isCurrent?: boolean }>`
