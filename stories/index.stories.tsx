@@ -54,6 +54,7 @@ import { UseUndoableReducer } from './use-undoable-reducer';
 import UseUndoableReducerReadme from './use-undoable-reducer.md';
 import { ActionHistory } from './action-history';
 import ActionHistoryReadme from './action-history.md';
+import { ActionHistory2 } from './action-history-2';
 import { MakeUndoablesMeta1 } from './make-undoables-meta-1';
 import MakeUndoablesMeta1Readme from './make-undoables-meta-1.md';
 import { MakeUndoablesMeta } from './make-undoables-meta';
@@ -177,6 +178,11 @@ storiesOf('useFlexibleUndo', module)
   .add('action history', () => <ActionHistory />, {
     readme: {
       sidebar: ActionHistoryReadme,
+    },
+  })
+  .add('action history 2', () => <ActionHistory2 />, {
+    readme: {
+      // sidebar: ActionHistoryReadme,
     },
   })
   .add('makeUndoables-meta-1', () => <MakeUndoablesMeta1 />, {

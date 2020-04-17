@@ -197,14 +197,22 @@ export const useUndoRedo = <
   });
 
   const timeTravel = useCallback(
-    (direction: 'past' | 'future', index: number) => {
-      if (direction === 'past') {
+    (range: 'past' | 'future' | 'full', index: number) => {
+      const lastFutureIndex = stack.future.length - 1;
+      if (range === 'full') {
+        if (index > lastFutureIndex) {
+          range = 'past';
+          index = index - stack.future.length;
+        } else {
+          range = 'future';
+        }
+      }
+      if (range === 'past') {
         for (let i = 0; i < index; i++) {
           undo();
         }
-      } else if (direction === 'future') {
-        const lastIndex = stack.future.length - 1;
-        for (let i = lastIndex; i >= index; i--) {
+      } else if (range === 'future') {
+        for (let i = lastFutureIndex; i >= index; i--) {
           redo();
         }
       }

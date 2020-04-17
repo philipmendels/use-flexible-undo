@@ -16,7 +16,7 @@ interface PayloadByType {
   subtract: number;
   updateAmount: PayloadFromTo<Nullber>;
 }
-export const ActionHistory: FC = () => {
+export const ActionHistory2: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
@@ -77,21 +77,15 @@ export const ActionHistory: FC = () => {
         </button>
       </div>
       <div>
-        {stack.future.map((action, index) => (
+        {stack.future.concat(stack.past).map((action, index) => (
           <div
             key={index}
-            style={{ cursor: 'pointer', padding: '6px 0', opacity: 0.5 }}
-            onClick={() => timeTravel('future', index)}
-          >
-            {JSON.stringify(action)}
-          </div>
-        ))}
-        {(canUndo || canRedo) && '--- present ---'}
-        {stack.past.map((action, index) => (
-          <div
-            key={index}
-            style={{ cursor: 'pointer', padding: '6px 0' }}
-            onClick={() => timeTravel('past', index)}
+            style={{
+              cursor: 'pointer',
+              padding: '6px 0',
+              opacity: index < stack.future.length ? 0.5 : 1,
+            }}
+            onClick={() => timeTravel('full', index)}
           >
             {JSON.stringify(action)}
           </div>
