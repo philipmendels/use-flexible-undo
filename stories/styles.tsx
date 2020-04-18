@@ -33,3 +33,20 @@ export const uiContainerClass = css`
     }
   }
 `;
+
+export const getStackItemClass = (props: {
+  active: boolean;
+  range: 'past' | 'future';
+}) => css`
+  padding: 6px 0;
+  cursor: default;
+  color: ${props.range === 'future' ? '#BBB' : 'black'};
+  ${props.active
+    ? 'color: #48a7f6;'
+    : `
+    cursor: pointer;
+    &:hover {
+      background: #f7f8fa;
+    } 
+  `}
+`;

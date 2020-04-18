@@ -17,9 +17,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const startTime = new Date();
-
-export const ActionHistory: FC = () => {
+export const ActionHistory1: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
@@ -92,35 +90,23 @@ export const ActionHistory: FC = () => {
             {JSON.stringify(action)}
           </div>
         ))}
-        <div style={{ margin: '8px 0' }}>
+        <div style={{ margin: '8px 0', color: '#48a7f6' }}>
           {canUndo && <>back to the past &darr;</>}
           {canUndo && canRedo && ' '}
-          {canRedo && <>&uarr; back to the future</>}
+          {canRedo && <>&uarr; Back to the Future™</>}
         </div>
         {stack.past.map((action, index) => (
           <div
             key={index}
             className={getStackItemClass({
-              active: index === 0,
+              active: false,
               range: 'past',
             })}
-            onClick={() => timeTravel('past', index)}
+            onClick={() => timeTravel('past', index + 1)}
           >
             {JSON.stringify(action)}
           </div>
         ))}
-        <div
-          className={getStackItemClass({
-            active: stack.past.length === 0,
-            range: 'past',
-          })}
-          onClick={() => timeTravel('past', stack.past.length)}
-        >
-          {JSON.stringify({
-            type: 'start',
-            created: startTime,
-          })}
-        </div>
       </div>
     </div>
   );

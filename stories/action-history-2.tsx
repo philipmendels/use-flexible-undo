@@ -6,7 +6,7 @@ import {
   makeUndoableHandler,
   makeUndoableFromToHandler,
 } from '../.';
-import { rootClass, uiContainerClass } from './styles';
+import { rootClass, uiContainerClass, getStackItemClass } from './styles';
 import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
@@ -16,6 +16,9 @@ interface PayloadByType {
   subtract: number;
   updateAmount: PayloadFromTo<Nullber>;
 }
+
+const startTime = new Date();
+
 export const ActionHistory2: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
@@ -80,16 +83,27 @@ export const ActionHistory2: FC = () => {
         {stack.future.concat(stack.past).map((action, index) => (
           <div
             key={index}
-            style={{
-              cursor: 'pointer',
-              padding: '6px 0',
-              opacity: index < stack.future.length ? 0.5 : 1,
-            }}
+            className={getStackItemClass({
+              active: index === stack.future.length,
+              range: index < stack.future.length ? 'future' : 'past',
+            })}
             onClick={() => timeTravel('full', index)}
           >
             {JSON.stringify(action)}
           </div>
         ))}
+      </div>
+      <div
+        className={getStackItemClass({
+          active: stack.past.length === 0,
+          range: 'past',
+        })}
+        onClick={() => timeTravel('past', stack.past.length)}
+      >
+        {JSON.stringify({
+          type: 'start',
+          created: startTime,
+        })}
       </div>
     </div>
   );
