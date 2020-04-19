@@ -29,6 +29,20 @@ export const makeUndoableHandler = <T>(
   undo: (payload: T) => any
 ) => ({ redo, undo });
 
+export const makeUndoableDeltaHandler = <T extends any>(
+  setter: (updater: Updater<T>) => any
+) => (
+  createRedoUpdater: CurriedUpdater<T>,
+  createUndoUpdater: CurriedUpdater<T>
+): Undoable<PayloadHandler<T>> => ({
+  redo: val => {
+    setter(createRedoUpdater(val));
+  },
+  undo: val => {
+    setter(createUndoUpdater(val));
+  },
+});
+
 export const makeUndoableStateUpdater = <T, S>(
   redo: (payload: T) => Updater<S>,
   undo: (payload: T) => Updater<S>

@@ -15,6 +15,7 @@ import MakeUndoableNegateReadme from './make-undoable-negate.md';
 import { MakeUndoablesUtil } from './make-undoables-util';
 import MakeUndoablesUtilIntro from './make-undoables-util-intro.md';
 import MakeUndoablesUtilReadme from './make-undoables-util.md';
+import { MakeUndoablesUtil2 } from './make-undoables-util-2';
 import { MakeUndoablesExtract } from './make-undoables-extract';
 import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
 import MakeUndoablesExtractReadme from './make-undoables-extract.md';
@@ -125,6 +126,12 @@ storiesOf('useFlexibleUndo', module)
     readme: {
       content: MakeUndoablesUtilIntro,
       sidebar: MakeUndoablesUtilReadme,
+    },
+  })
+  .add('Extract pure functions 2', () => <MakeUndoablesUtil2 />, {
+    readme: {
+      // content: MakeUndoablesUtilIntro,
+      // sidebar: MakeUndoablesUtilReadme,
     },
   })
   .add('dependent state: WRONG', () => <DependentStateWrong />, {

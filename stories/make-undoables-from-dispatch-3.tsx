@@ -5,6 +5,7 @@ import {
   makeUndoableFromToHandler,
   PayloadFromTo,
   makeUndoableStateUpdater,
+  CurriedUpdater,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -21,12 +22,15 @@ interface PayloadByType {
 
 type Nullber = number | null;
 
-const makeCountHandler = (sign: 1 | -1) => (amount: number) => (
-  state: State
-) => ({ ...state, count: state.count + sign * amount });
+const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
+const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
 
-const addHandler = makeCountHandler(1);
-const subHandler = makeCountHandler(-1);
+const makeCountHandler = (updater: CurriedUpdater<number>) => (
+  amount: number
+) => (state: State) => ({ ...state, count: updater(amount)(state.count) });
+
+const addHandler = makeCountHandler(addAmount);
+const subHandler = makeCountHandler(subAmount);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: makeUndoableStateUpdater(addHandler, subHandler),
