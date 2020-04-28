@@ -3,7 +3,7 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFromToHandler,
-  makeUndoableHandler,
+  combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -48,8 +48,8 @@ export const DependentStateRight2: FC = () => {
     );
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: makeUndoableHandler(addHandler, subHandler),
-    subtract: makeUndoableHandler(subHandler, addHandler),
+    add: combineHandlers(addHandler, subHandler),
+    subtract: combineHandlers(subHandler, addHandler),
     updateAmount: makeUndoableFromToHandler(amount =>
       setState(prev => ({ ...prev, amount }))
     ),

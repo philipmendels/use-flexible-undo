@@ -6,10 +6,10 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
+  combineHandlers,
   makeUndoableFromToHandler,
 } from '../.';
-import { rootClass, uiContainerClass } from './styles';
+import { rootClass, uiContainerClass, getStackItemClass } from './styles';
 import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
@@ -19,6 +19,9 @@ interface PayloadByType {
   subtract: number;
   updateAmount: PayloadFromTo<Nullber>;
 }
+
+const startTime = new Date();
+
 export const ActionHistory: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
@@ -42,12 +45,8 @@ export const ActionHistory: FC = () => {
       redo: addHandler,
       undo: subHandler,
     },
-    subtract: {
-      ...makeUndoableHandler(subHandler, addHandler),
-    },
-    updateAmount: {
-      ...makeUndoableFromToHandler(setAmount),
-    },
+    subtract: combineHandlers(subHandler, addHandler),
+    updateAmount: makeUndoableFromToHandler(setAmount),
   });
 
   return (
@@ -83,30 +82,44 @@ export const ActionHistory: FC = () => {
         {stack.future.map((action, index) => (
           <div
             key={index}
-            style={{
-              cursor: 'pointer',
-              padding: '6px 0',
-              'white-space': 'nowrap',
-            }}
+            className={getStackItemClass({
+              active: false,
+              range: 'future',
+            })}
             onClick={() => timeTravel('future', index)}
           >
             {JSON.stringify(action)}
           </div>
         ))}
-        {(canUndo || canRedo) && '--- present ---'}
+        <div style={{ margin: '8px 0' }}>
+          {canUndo && <>back to the past &darr;</>}
+          {canUndo && canRedo && ' '}
+          {canRedo && <>&uarr; back to the future</>}
+        </div>
         {stack.past.map((action, index) => (
           <div
             key={index}
-            style={{
-              cursor: 'pointer',
-              padding: '6px 0',
-              'white-space': 'nowrap',
-            }}
+            className={getStackItemClass({
+              active: index === 0,
+              range: 'past',
+            })}
             onClick={() => timeTravel('past', index)}
           >
             {JSON.stringify(action)}
           </div>
         ))}
+        <div
+          className={getStackItemClass({
+            active: stack.past.length === 0,
+            range: 'past',
+          })}
+          onClick={() => timeTravel('past', stack.past.length)}
+        >
+          {JSON.stringify({
+            type: 'start',
+            created: startTime,
+          })}
+        </div>
       </div>
     </div>
   );

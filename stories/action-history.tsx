@@ -3,7 +3,7 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
+  combineHandlers,
   makeUndoableFromToHandler,
 } from '../.';
 import { rootClass, uiContainerClass, getStackItemClass } from './styles';
@@ -42,12 +42,8 @@ export const ActionHistory: FC = () => {
       redo: addHandler,
       undo: subHandler,
     },
-    subtract: {
-      ...makeUndoableHandler(subHandler, addHandler),
-    },
-    updateAmount: {
-      ...makeUndoableFromToHandler(setAmount),
-    },
+    subtract: combineHandlers(subHandler, addHandler),
+    updateAmount: makeUndoableFromToHandler(setAmount),
   });
 
   return (

@@ -1,7 +1,6 @@
 import {
   PayloadFromTo,
   Updater,
-  CurriedUpdater,
   PayloadHandler,
   Undoable,
   PayloadByType,
@@ -15,55 +14,75 @@ import {
   UndoableHandlersByType,
   UndoableHandlerWithMeta,
   UActionCreator,
+  UpdaterMaker,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
 
-export const makeHandler = <T extends any>(
-  setter: (updater: Updater<T>) => any
-) => (createUpdater: CurriedUpdater<T>): PayloadHandler<T> => val => {
-  setter(createUpdater(val));
-};
+export const makeHandler = <S>(
+  stateSetter: (stateUpdater: Updater<S>) => any
+) => <P = S>(updaterMaker: UpdaterMaker<P, S>): PayloadHandler<P> => payload =>
+  stateSetter(updaterMaker(payload));
 
-export const makeUndoableHandler = <T>(
-  redo: (payload: T) => any,
-  undo: (payload: T) => any
-) => ({ redo, undo });
+export const combineHandlers = <P>(
+  redo: PayloadHandler<P, any>,
+  undo: PayloadHandler<P, any>
+): Undoable<PayloadHandler<P, any>> => ({ redo, undo });
 
-export const makeUndoableDeltaHandler = <T extends any>(
-  setter: (updater: Updater<T>) => any
+export const combineUpdaters = <P, S>(
+  redo: PayloadHandler<P, Updater<S>>,
+  undo: PayloadHandler<P, Updater<S>>
+): Undoable<PayloadHandler<P, Updater<S>>> => ({ redo, undo });
+
+export const makeUndoableFromToHandler = <S>(
+  stateSetter: (newState: S) => any
+): Undoable<PayloadHandler<PayloadFromTo<S>>> => ({
+  redo: ({ to }) => stateSetter(to),
+  undo: ({ from }) => stateSetter(from),
+});
+
+export const makeUndoableFromToUpdater = <S_Part, S>(
+  stateUpdaterMaker: UpdaterMaker<S_Part, S>
+): Undoable<PayloadHandler<PayloadFromTo<S_Part>, Updater<S>>> => ({
+  redo: ({ to }) => stateUpdaterMaker(to),
+  undo: ({ from }) => stateUpdaterMaker(from),
+});
+
+export const makeUndoableHandler = <S>(
+  stateSetter: (stateUpdater: Updater<S>) => any
+) => <P = S>(
+  updaterForRedoMaker: UpdaterMaker<P, S>,
+  updaterForUndoMaker: UpdaterMaker<P, S>
+): Undoable<PayloadHandler<P>> => ({
+  redo: payload => stateSetter(updaterForRedoMaker(payload)),
+  undo: payload => stateSetter(updaterForUndoMaker(payload)),
+});
+
+export const makeUndoableUpdater = <S_Part, S>(
+  stateUpdaterMaker: UpdaterMaker<Updater<S_Part>, S>
+) => <P = S_Part>(
+  updaterForRedoMaker: UpdaterMaker<P, S_Part>,
+  updaterForUndoMaker: UpdaterMaker<P, S_Part>
+): Undoable<UpdaterMaker<P, S>> => ({
+  redo: payload => stateUpdaterMaker(updaterForRedoMaker(payload)),
+  undo: payload => stateUpdaterMaker(updaterForUndoMaker(payload)),
+});
+
+export const makeUndoableDepStateUpdater = <S_Dep, S_Part, S>(
+  stateUpdaterMaker: UpdaterMaker<UpdaterMaker<S_Dep, S_Part>, S>
 ) => (
-  createRedoUpdater: CurriedUpdater<T>,
-  createUndoUpdater: CurriedUpdater<T>
-): Undoable<PayloadHandler<T>> => ({
-  redo: val => {
-    setter(createRedoUpdater(val));
-  },
-  undo: val => {
-    setter(createUndoUpdater(val));
-  },
+  updaterForRedoMaker: UpdaterMaker<S_Dep, S_Part>,
+  updaterForUndoMaker: UpdaterMaker<S_Dep, S_Part>
+): Undoable<() => Updater<S>> => ({
+  redo: () => stateUpdaterMaker(updaterForRedoMaker),
+  undo: () => stateUpdaterMaker(updaterForUndoMaker),
 });
 
-export const makeUndoableStateUpdater = <T, S>(
-  redo: (payload: T) => Updater<S>,
-  undo: (payload: T) => Updater<S>
-) => ({ redo, undo });
-
-// handler normally should return void, but let's use any to keep it flexible
-export const makeUndoableFromToHandler = <T>(handler: (payload: T) => any) => ({
-  redo: ({ to }: PayloadFromTo<T>) => handler(to),
-  undo: ({ from }: PayloadFromTo<T>) => handler(from),
-});
-
-export const makeUndoableFromToStateUpdater = <T, S>(
-  handler: (payload: T) => Updater<S>
-) => ({
-  redo: ({ to }: PayloadFromTo<T>) => handler(to),
-  undo: ({ from }: PayloadFromTo<T>) => handler(from),
-});
-
-export const invertUndoable = <T>(undoable: Undoable<T>): Undoable<T> => ({
-  redo: undoable.undo,
-  undo: undoable.redo,
+export const invertUndoable = <T>({
+  redo,
+  undo,
+}: Undoable<T>): Undoable<T> => ({
+  redo: undo,
+  undo: redo,
 });
 
 export const makeUndoableReducer = <

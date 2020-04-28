@@ -1,3 +1,20 @@
+```typescript
+//outside function component:
+const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
+const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
+
+//inside function component:
+const addHandler = makeUndoableHandler(setCount)(addAmount, subAmount);
+
+const { add, subtract } = makeUndoables<PayloadByType>({
+  add: addHandler,
+  subtract: invertUndoable(addHandler),
+});
+```
+
+Full code:
+
+```typescript
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
@@ -53,3 +70,4 @@ export const MakeUndoablesUtil2: FC = () => {
     </div>
   );
 };
+```

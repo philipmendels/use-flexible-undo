@@ -6,8 +6,8 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
   makeUndoableFromToHandler,
+  combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -53,7 +53,7 @@ export const MakeUndoablesMeta: FC = () => {
       },
     },
     subtract: {
-      ...makeUndoableHandler(subHandler, addHandler),
+      ...combineHandlers(subHandler, addHandler),
       meta: {
         describe: amount => `Decrease count by ${amount}`,
       },

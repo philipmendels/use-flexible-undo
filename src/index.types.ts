@@ -2,7 +2,7 @@ import { Dispatch } from 'react';
 
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
-export type PayloadHandler<P> = (payload: P) => void;
+export type PayloadHandler<P, R = void> = (payload: P) => R;
 
 // export type PayloadHandler<P> = (
 //   ...payload: P extends undefined ? [] : [P]
@@ -170,7 +170,8 @@ export interface PayloadFromTo<T> {
 export type PayloadTupleFromTo<T> = [T, T];
 
 export type Updater<T> = (prev: T) => T;
-export type CurriedUpdater<T> = (amount: T) => Updater<T>;
+export type CurriedUpdater<T> = (payload: T) => Updater<T>;
+export type UpdaterMaker<P, S = P> = (payload: P) => Updater<S>;
 
 export type TimeTravelFn = (
   direction: 'past' | 'future',

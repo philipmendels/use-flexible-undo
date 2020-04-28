@@ -1,9 +1,9 @@
 import React, { FC, useState } from 'react';
 import {
-  CurriedUpdater,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
+  combineHandlers,
+  UpdaterMaker,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
@@ -13,8 +13,8 @@ interface PayloadByType {
   subtract: number;
 }
 
-const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
-const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
+const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
+const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
 
 export const MakeUndoablesUtil: FC = () => {
   const [count, setCount] = useState(0);
@@ -34,8 +34,8 @@ export const MakeUndoablesUtil: FC = () => {
   const subHandler = countHandler(subAmount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
-    add: makeUndoableHandler(addHandler, subHandler),
-    subtract: makeUndoableHandler(subHandler, addHandler),
+    add: combineHandlers(addHandler, subHandler),
+    subtract: combineHandlers(subHandler, addHandler),
   });
 
   return (

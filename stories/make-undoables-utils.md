@@ -1,7 +1,7 @@
-The library exposes various utilities to construct your redo/undo handlers.
+The library exposes various utilities to create and compose your undoable redo/undo handlers.
 
 - **makeHandler** is a curried function that takes a function that sets the state (e.g. the one returned from React.useState) and returns a function that takes a curried function that converts the previous state to the new state.
-- **makeUndoableHandler** takes the redo handler as first argument and the undo handler as second argument, and returns an object with redo and undo as keys and the handlers as values.
+- **combineHandlers** takes the redo handler as first argument and the undo handler as second argument, and returns an object with redo and undo as keys and the handlers as values.
 - **makeUndoableFromToHandler** takes a function that sets the state and returns an object with redo/undo handlers that expect a payload that containes the previous state and the new state.
 
 ```typescript
@@ -10,8 +10,8 @@ const addHandler = countHandler(amount => prev => prev + amount);
 const subHandler = countHandler(amount => prev => prev - amount);
 
 const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-  add: makeUndoableHandler(addHandler, subHandler),
-  subtract: makeUndoableHandler(subHandler, addHandler),
+  add: combineHandlers(addHandler, subHandler),
+  subtract: combineHandlers(subHandler, addHandler),
   updateAmount: makeUndoableFromToHandler(setAmount),
 });
 ```
@@ -24,8 +24,8 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
   makeUndoableFromToHandler,
+  combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -54,12 +54,12 @@ export const MakeUndoablesUtils: FC = () => {
   } = useFlexibleUndo();
 
   const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
+  const addHandler = countHandler((amount: number) => prev => prev + amount);
+  const subHandler = countHandler((amount: number) => prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: makeUndoableHandler(addHandler, subHandler),
-    subtract: makeUndoableHandler(subHandler, addHandler),
+    add: combineHandlers(addHandler, subHandler),
+    subtract: combineHandlers(subHandler, addHandler),
     updateAmount: makeUndoableFromToHandler(setAmount),
   });
 

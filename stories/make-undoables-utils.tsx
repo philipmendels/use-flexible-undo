@@ -3,8 +3,8 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
   makeUndoableFromToHandler,
+  combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -33,12 +33,12 @@ export const MakeUndoablesUtils: FC = () => {
   } = useFlexibleUndo();
 
   const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
+  const addHandler = countHandler((amount: number) => prev => prev + amount);
+  const subHandler = countHandler((amount: number) => prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: makeUndoableHandler(addHandler, subHandler),
-    subtract: makeUndoableHandler(subHandler, addHandler),
+    add: combineHandlers(addHandler, subHandler),
+    subtract: combineHandlers(subHandler, addHandler),
     updateAmount: makeUndoableFromToHandler(setAmount),
   });
 

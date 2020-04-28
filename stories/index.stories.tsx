@@ -16,6 +16,7 @@ import { MakeUndoablesUtil } from './make-undoables-util';
 import MakeUndoablesUtilIntro from './make-undoables-util-intro.md';
 import MakeUndoablesUtilReadme from './make-undoables-util.md';
 import { MakeUndoablesUtil2 } from './make-undoables-util-2';
+import MakeUndoablesUtil2Readme from './make-undoables-util-2.md';
 import { MakeUndoablesExtract } from './make-undoables-extract';
 import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
 import MakeUndoablesExtractReadme from './make-undoables-extract.md';
@@ -49,6 +50,10 @@ import { MakeUndoablesFromDispatch2 } from './make-undoables-from-dispatch-2';
 import MakeUndoablesFromDispatch2Readme from './make-undoables-from-dispatch-2.md';
 import { MakeUndoablesFromDispatch3 } from './make-undoables-from-dispatch-3';
 import MakeUndoablesFromDispatch3Readme from './make-undoables-from-dispatch-3.md';
+import { MakeUndoablesFromDispatch4 } from './make-undoables-from-dispatch-4';
+import MakeUndoablesFromDispatch4Readme from './make-undoables-from-dispatch-4.md';
+import { MakeUndoablesFromDispatch5 } from './make-undoables-from-dispatch-5';
+import MakeUndoablesFromDispatch5Readme from './make-undoables-from-dispatch-5.md';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md';
 import { UseUndoableReducer } from './use-undoable-reducer';
@@ -131,7 +136,7 @@ storiesOf('useFlexibleUndo', module)
   .add('Extract pure functions 2', () => <MakeUndoablesUtil2 />, {
     readme: {
       // content: MakeUndoablesUtilIntro,
-      // sidebar: MakeUndoablesUtilReadme,
+      sidebar: MakeUndoablesUtil2Readme,
     },
   })
   .add('dependent state: WRONG', () => <DependentStateWrong />, {
@@ -171,6 +176,16 @@ storiesOf('useFlexibleUndo', module)
   .add('makeUndoablesFromDispatch 3', () => <MakeUndoablesFromDispatch3 />, {
     readme: {
       sidebar: MakeUndoablesFromDispatch3Readme,
+    },
+  })
+  .add('makeUndoablesFromDispatch 4', () => <MakeUndoablesFromDispatch4 />, {
+    readme: {
+      sidebar: MakeUndoablesFromDispatch4Readme,
+    },
+  })
+  .add('makeUndoablesFromDispatch 5', () => <MakeUndoablesFromDispatch5 />, {
+    readme: {
+      sidebar: MakeUndoablesFromDispatch5Readme,
     },
   })
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />, {

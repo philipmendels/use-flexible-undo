@@ -3,8 +3,8 @@ import {
   PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
   makeUndoableFromToHandler,
+  combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass, getStackItemClass } from './styles';
 import { NumberInput } from './components/number-input';
@@ -36,8 +36,8 @@ export const ActionHistory1: FC = () => {
   const subHandler = countHandler(amount => prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: makeUndoableHandler(addHandler, subHandler),
-    subtract: makeUndoableHandler(subHandler, addHandler),
+    add: combineHandlers(addHandler, subHandler),
+    subtract: combineHandlers(subHandler, addHandler),
     updateAmount: makeUndoableFromToHandler(setAmount),
   });
 

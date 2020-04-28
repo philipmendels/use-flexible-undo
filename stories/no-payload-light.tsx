@@ -2,8 +2,8 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   makeUndoableFromToHandler,
-  makeUndoableHandler,
   useFlexibleUndoLight,
+  combineHandlers,
 } from '..';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -42,8 +42,8 @@ export const NoPayloadLight: FC = () => {
     timeTravel,
   } = useFlexibleUndoLight<PayloadByType>({
     handlers: {
-      add: makeUndoableHandler(addHandler, subHandler),
-      subtract: makeUndoableHandler(subHandler, addHandler),
+      add: combineHandlers(addHandler, subHandler),
+      subtract: combineHandlers(subHandler, addHandler),
       updateAmount: makeUndoableFromToHandler(setAmount),
     },
     options: {

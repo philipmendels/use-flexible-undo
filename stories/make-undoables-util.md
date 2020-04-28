@@ -1,11 +1,9 @@
-Extracting functions outside of your component is good for reusability, testability and possibly performance - but some may find that the added indirection makes the code harder too follow or may dislike the fact that extraction requires a bit more static typing.
-
-If performance is your main reason for extraction: we will look at some of the memoization techniques that React offers for improving the performance of your function components in later examples.
+Extracting functions outside of your component may require more naming and static typing, but it is good for reusability, testability and possibly performance. If performance is your main reason for extraction: we will look at some of the memoization techniques that React offers for improving the performance of your function components in later examples.
 
 ```typescript
 //outside function component:
-const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
-const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
+const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
+const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
 
 //inside function component:
 const countHandler = makeHandler(setCount);
@@ -13,8 +11,8 @@ const addHandler = countHandler(addAmount);
 const subHandler = countHandler(subAmount);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
-  add: makeUndoableHandler(addHandler, subHandler),
-  subtract: makeUndoableHandler(subHandler, addHandler),
+  add: combineHandlers(addHandler, subHandler),
+  subtract: combineHandlers(subHandler, addHandler),
 });
 ```
 
@@ -23,10 +21,10 @@ Full code:
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  CurriedUpdater,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableHandler,
+  combineHandlers,
+  UpdaterMaker,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
@@ -36,8 +34,8 @@ interface PayloadByType {
   subtract: number;
 }
 
-const addAmount: CurriedUpdater<number> = amount => prev => prev + amount;
-const subAmount: CurriedUpdater<number> = amount => prev => prev - amount;
+const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
+const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
 
 export const MakeUndoablesUtil: FC = () => {
   const [count, setCount] = useState(0);
@@ -57,8 +55,8 @@ export const MakeUndoablesUtil: FC = () => {
   const subHandler = countHandler(subAmount);
 
   const { add, subtract } = makeUndoables<PayloadByType>({
-    add: makeUndoableHandler(addHandler, subHandler),
-    subtract: makeUndoableHandler(subHandler, addHandler),
+    add: combineHandlers(addHandler, subHandler),
+    subtract: combineHandlers(subHandler, addHandler),
   });
 
   return (
