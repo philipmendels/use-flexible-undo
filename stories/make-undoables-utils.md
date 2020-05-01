@@ -2,7 +2,6 @@ The library exposes various utilities to create and compose your undoable redo/u
 
 - **makeHandler** is a curried function that takes a function that sets the state (e.g. the one returned from React.useState) and returns a function that takes a curried function that converts the previous state to the new state.
 - **combineHandlers** takes the redo handler as first argument and the undo handler as second argument, and returns an object with redo and undo as keys and the handlers as values.
-- **makeUndoableFromToHandler** takes a function that sets the state and returns an object with redo/undo handlers that expect a payload that containes the previous state and the new state.
 
 ```typescript
 const countHandler = makeHandler(setCount);

@@ -8,11 +8,11 @@ interface PayloadByType {
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: {
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   },
   subtract: {
-    redo: amount => setCount(prev => prev - amount),
+    drdo: amount => setCount(prev => prev - amount),
     undo: amount => setCount(prev => prev + amount),
   },
 });

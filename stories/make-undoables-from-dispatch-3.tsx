@@ -7,7 +7,7 @@ import {
   invertUndoable,
   UpdaterMaker,
   makeUndoableDepStateUpdater,
-  makeUndoableFromToUpdater,
+  makeUndoableFromToHandler,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -43,7 +43,7 @@ const addUpdater = makeUndoableDepStateUpdater(countUpdater)(
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: addUpdater,
   subtract: invertUndoable(addUpdater),
-  updateAmount: makeUndoableFromToUpdater(amount => state => ({
+  updateAmount: makeUndoableFromToHandler(amount => state => ({
     ...state,
     amount,
   })),

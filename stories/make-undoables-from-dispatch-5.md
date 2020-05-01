@@ -8,13 +8,13 @@ import {
   makeUndoableFromToHandler,
   PayloadFromTo,
   Updater,
-  makeUndoableUpdater,
   invertUndoable,
   UpdaterMaker,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
 import { NumberInput } from './components/number-input';
+import { makeUndoableHandler } from '../src';
 
 interface State {
   count: number;
@@ -36,7 +36,7 @@ const countUpdater = (updater: Updater<number>): Updater<State> => state => ({
   count: updater(state.count),
 });
 
-const addUpdater = makeUndoableUpdater(countUpdater)(addAmount, subAmount);
+const addUpdater = makeUndoableHandler(countUpdater)(addAmount, subAmount);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: addUpdater,

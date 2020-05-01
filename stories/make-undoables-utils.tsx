@@ -33,8 +33,8 @@ export const MakeUndoablesUtils: FC = () => {
   } = useFlexibleUndo();
 
   const countHandler = makeHandler(setCount);
-  const addHandler = countHandler((amount: number) => prev => prev + amount);
-  const subHandler = countHandler((amount: number) => prev => prev - amount);
+  const addHandler = countHandler(amount => prev => prev + amount);
+  const subHandler = countHandler(amount => prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: combineHandlers(addHandler, subHandler),

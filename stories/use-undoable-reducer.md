@@ -7,10 +7,10 @@ import {
   makeUndoableReducer,
   PayloadFromTo,
   useUndoableReducer,
-  makeUndoableFromToUpdater,
+  makeUndoableFromToHandler,
   UpdaterMaker,
   Updater,
-  combineUpdaters,
+  combineHandlers,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -42,9 +42,9 @@ const addHandler = countUpdater(addAmount);
 const subHandler = countUpdater(subAmount);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: combineUpdaters(addHandler, subHandler),
-  subtract: combineUpdaters(subHandler, addHandler),
-  updateAmount: makeUndoableFromToUpdater(amount => state => ({
+  add: combineHandlers(addHandler, subHandler),
+  subtract: combineHandlers(subHandler, addHandler),
+  updateAmount: makeUndoableFromToHandler(amount => state => ({
     ...state,
     amount,
   })),

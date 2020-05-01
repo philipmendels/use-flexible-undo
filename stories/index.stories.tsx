@@ -15,8 +15,18 @@ import MakeUndoableNegateReadme from './make-undoable-negate.md';
 import { MakeUndoablesUtil } from './make-undoables-util';
 import MakeUndoablesUtilIntro from './make-undoables-util-intro.md';
 import MakeUndoablesUtilReadme from './make-undoables-util.md';
-import { MakeUndoablesUtil2 } from './make-undoables-util-2';
-import MakeUndoablesUtil2Readme from './make-undoables-util-2.md';
+
+import { MakeUndoableFromToHandlerExample } from './make-undoable-from-to-handler';
+import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
+import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md';
+
+import { WrapFromToHandlerExample } from './wrap-from-to-handler';
+// import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
+import WrapFromToHandlerReadme from './wrap-from-to-handler.md';
+
+import { MakeUndoableHandlerExample } from './make-undoable-handler';
+import MakeUndoableHandlerIntro from './make-undoable-handler-intro.md';
+import MakeUndoableHandlerReadme from './make-undoable-handler.md';
 import { MakeUndoablesExtract } from './make-undoables-extract';
 import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
 import MakeUndoablesExtractReadme from './make-undoables-extract.md';
@@ -127,16 +137,32 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoablesUtilsReadme,
     },
   })
+  .add('makeUndoableHandler', () => <MakeUndoableHandlerExample />, {
+    readme: {
+      content: MakeUndoableHandlerIntro,
+      sidebar: MakeUndoableHandlerReadme,
+    },
+  })
+  .add(
+    'makeUndoableFromToHandler',
+    () => <MakeUndoableFromToHandlerExample />,
+    {
+      readme: {
+        content: MakeUndoableFromToHandlerIntro,
+        sidebar: MakeUndoableFromToHandlerReadme,
+      },
+    }
+  )
+  .add('wrapFromToHandler', () => <WrapFromToHandlerExample />, {
+    readme: {
+      // content: WrapFromToHandlerIntro,
+      sidebar: WrapFromToHandlerReadme,
+    },
+  })
   .add('Extract pure functions', () => <MakeUndoablesUtil />, {
     readme: {
       content: MakeUndoablesUtilIntro,
       sidebar: MakeUndoablesUtilReadme,
-    },
-  })
-  .add('Extract pure functions 2', () => <MakeUndoablesUtil2 />, {
-    readme: {
-      // content: MakeUndoablesUtilIntro,
-      sidebar: MakeUndoablesUtil2Readme,
     },
   })
   .add('dependent state: WRONG', () => <DependentStateWrong />, {

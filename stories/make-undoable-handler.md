@@ -1,14 +1,16 @@
-```typescript
-//outside function component:
-const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
-const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
+The utility **makeUndoableHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument and returns a function that takes two (do/redo and undo) curried functions for updating the state based on the payload and the previous state. The final return value is an object with do/redo and undo handlers.
 
-//inside function component:
-const addHandler = makeUndoableHandler(setCount)(addAmount, subAmount);
+```typescript
+const [count, setCount] = useState(0);
+
+const undoableAddHandler = makeUndoableHandler(setCount)(
+  amount => prev => prev + amount,
+  amount => prev => prev - amount
+);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
-  add: addHandler,
-  subtract: invertUndoable(addHandler),
+  add: undoableAddHandler,
+  subtract: invertUndoable(undoableAddHandler),
 });
 ```
 
@@ -20,8 +22,7 @@ import {
   useFlexibleUndo,
   invertUndoable,
   makeUndoableHandler,
-  UpdaterMaker,
-} from '../.';
+} from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -30,10 +31,7 @@ interface PayloadByType {
   subtract: number;
 }
 
-const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
-const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
-
-export const MakeUndoablesUtil2: FC = () => {
+export const MakeUndoableHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -46,11 +44,14 @@ export const MakeUndoablesUtil2: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const addHandler = makeUndoableHandler(setCount)(addAmount, subAmount);
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
+  );
 
   const { add, subtract } = makeUndoables<PayloadByType>({
-    add: addHandler,
-    subtract: invertUndoable(addHandler),
+    add: undoableAddHandler,
+    subtract: invertUndoable(undoableAddHandler),
   });
 
   return (

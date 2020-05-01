@@ -5,7 +5,7 @@ import {
   makeUndoableFromToHandler,
   PayloadFromTo,
   UpdaterMaker,
-  combineUpdaters,
+  combineHandlers,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -34,8 +34,8 @@ const addHandler = makeCountHandler(addAmount);
 const subHandler = makeCountHandler(subAmount);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: combineUpdaters(addHandler, subHandler),
-  subtract: combineUpdaters(subHandler, addHandler),
+  add: combineHandlers(addHandler, subHandler),
+  subtract: combineHandlers(subHandler, addHandler),
 });
 
 export const MakeUndoablesFromDispatch4: FC = () => {
