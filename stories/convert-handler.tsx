@@ -1,18 +1,13 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeHandler, combineHandlers } from '../.';
-import { rootClass, uiContainerClass } from './styles';
+import { useFlexibleUndo, convertHandler } from '../.';
 import { ActionList } from './components/action-list';
+import { rootClass, uiContainerClass } from './styles';
 
-interface PayloadByType {
-  add: number;
-  subtract: number;
-}
-
-export const MakeUndoablesUtils: FC = () => {
+export const ConvertHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
-    makeUndoables,
+    makeUndoable,
     canUndo,
     undo,
     canRedo,
@@ -21,14 +16,13 @@ export const MakeUndoablesUtils: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
-
-  const { add, subtract } = makeUndoables<PayloadByType>({
-    add: combineHandlers(addHandler, subHandler),
-    subtract: combineHandlers(subHandler, addHandler),
+  const add = makeUndoable<number>({
+    type: 'add',
+    drdo: amount => setCount(prev => prev + amount),
+    undo: amount => setCount(prev => prev - amount),
   });
+
+  const subtract = convertHandler(add)(amount => -amount);
 
   return (
     <div className={rootClass}>

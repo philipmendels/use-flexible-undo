@@ -2,10 +2,10 @@
 const [count, setCount] = useState(1);
 
 const { updateCount } = makeUndoables<PayloadByType>({
-  updateCount: makeUndoableFromToHandler(setCount),
+  updateCount: makeUndoableFTObjHandler(setCount),
 });
 
-const countHandler = wrapFromToHandler(updateCount, count);
+const countHandler = wrapFTObjHandler(updateCount, count);
 const multiply = countHandler(amount => prev => prev * amount);
 const divide = countHandler(amount => prev => prev / amount);
 ```
@@ -17,8 +17,8 @@ import React, { useState } from 'react';
 import {
   useFlexibleUndo,
   PayloadFromTo,
-  makeUndoableFromToHandler,
-  wrapFromToHandler,
+  makeUndoableFTObjHandler,
+  wrapFTObjHandler,
 } from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -27,7 +27,7 @@ interface PayloadByType {
   updateCount: PayloadFromTo<number>;
 }
 
-export const WrapFromToHandlerExample: React.FC = () => {
+export const WrapFTObjHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
@@ -41,10 +41,10 @@ export const WrapFromToHandlerExample: React.FC = () => {
   } = useFlexibleUndo();
 
   const { updateCount } = makeUndoables<PayloadByType>({
-    updateCount: makeUndoableFromToHandler(setCount),
+    updateCount: makeUndoableFTObjHandler(setCount),
   });
 
-  const countHandler = wrapFromToHandler(updateCount, count);
+  const countHandler = wrapFTObjHandler(updateCount, count);
   const multiply = countHandler(amount => prev => prev * amount);
   const divide = countHandler(amount => prev => prev / amount);
 

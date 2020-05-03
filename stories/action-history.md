@@ -5,10 +5,10 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeHandler,
-  combineHandlers,
-  makeUndoableFromToHandler,
-} from '../.';
+  makeUndoableFTObjHandler,
+  makeUndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass, getStackItemClass } from './styles';
 import { NumberInput } from './components/number-input';
 
@@ -36,17 +36,15 @@ export const ActionHistory: FC = () => {
     timeTravel,
   } = useFlexibleUndo<PayloadByType>();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
+  );
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: {
-      redo: addHandler,
-      undo: subHandler,
-    },
-    subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(setAmount),
+    add: undoableAddHandler,
+    subtract: invertHandlers(undoableAddHandler),
+    updateAmount: makeUndoableFTObjHandler(setAmount),
   });
 
   return (

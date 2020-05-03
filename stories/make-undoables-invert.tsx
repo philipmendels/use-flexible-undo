@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, UndoableHandler, invertUndoable } from '../.';
+import { useFlexibleUndo, UndoableHandler, invertHandlers } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -8,7 +8,7 @@ interface PayloadByType {
   subtract: number;
 }
 
-export const MakeUndoablesInvert: FC = () => {
+export const InvertHandlersExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -22,13 +22,13 @@ export const MakeUndoablesInvert: FC = () => {
   } = useFlexibleUndo();
 
   const undoableAddHandler: UndoableHandler<number> = {
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   };
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: undoableAddHandler,
-    subtract: invertUndoable(undoableAddHandler),
+    subtract: invertHandlers(undoableAddHandler),
   });
 
   return (

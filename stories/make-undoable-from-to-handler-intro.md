@@ -1,1 +1,1 @@
-In this example the utility **makeUndoableFromToHandler** is used to create the do/redo and undo handlers for the undoable "updateCount" function
+In this example the utility **makeUndoableFTObjHandler** is used to create the do/redo and undo handlers for the undoable "updateCount" function

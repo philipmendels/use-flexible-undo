@@ -2,11 +2,12 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFromToHandler,
+  makeUndoableFTObjHandler,
   combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -38,7 +39,7 @@ export const DependentStateWrong: FC = () => {
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: combineHandlers(addHandler, subHandler),
     subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(setAmount),
+    updateAmount: makeUndoableFTObjHandler(setAmount),
   });
 
   return (
@@ -47,13 +48,12 @@ export const DependentStateWrong: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

@@ -1,10 +1,41 @@
+```typescript
+type Nullber = number | null;
+
+interface State {
+  count: number;
+  amount: Nullber;
+}
+
+const countUpdater = (um: UpdaterMaker<number>) =>
+  setState(prev =>
+    prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
+  );
+
+const undoableAddHandler = makeUndoableStateDepHandler(countUpdater)(
+  amount => prev => prev + amount,
+  amount => prev => prev - amount
+);
+
+const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
+  add: undoableAddHandler,
+  subtract: invertHandlers(undoableAddHandler),
+  updateAmount: makeUndoableFTObjHandler(amount => setState(merge({ amount }))),
+});
+```
+
+Full code:
+
+```typescript
 import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFromToHandler,
-  combineHandlers,
-} from '../.';
+  makeUndoableFTObjHandler,
+  UpdaterMaker,
+  makeUndoableStateDepHandler,
+  invertHandlers,
+  merge,
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
 import { NumberInput } from './components/number-input';
@@ -22,7 +53,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-export const DependentStateRight2: FC = () => {
+export const DependentStateRight3Example: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
@@ -38,20 +69,21 @@ export const DependentStateRight2: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const addHandler = () =>
+  const countUpdater = (um: UpdaterMaker<number>) =>
     setState(prev =>
-      prev.amount ? { ...prev, count: prev.count + prev.amount } : prev
-    );
-  const subHandler = () =>
-    setState(prev =>
-      prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
+      prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
     );
 
+  const undoableAddHandler = makeUndoableStateDepHandler(countUpdater)(
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
+  );
+
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: combineHandlers(addHandler, subHandler),
-    subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(amount =>
-      setState(prev => ({ ...prev, amount }))
+    add: undoableAddHandler,
+    subtract: invertHandlers(undoableAddHandler),
+    updateAmount: makeUndoableFTObjHandler(amount =>
+      setState(merge({ amount }))
     ),
   });
 
@@ -88,3 +120,4 @@ export const DependentStateRight2: FC = () => {
     </div>
   );
 };
+```

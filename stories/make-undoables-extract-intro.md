@@ -1,1 +1,1 @@
-Here we define our redo/undo handlers outside of **makeUndoables**, so that we can reuse them.
+Here we define our do/redo and undo handlers outside of **makeUndoables**, so that we can reuse them.

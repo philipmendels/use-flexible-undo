@@ -1,11 +1,13 @@
-**useFlexibleUndo** is a custom hook that that keeps a history of undoable actions - as opposed to a history of snapshots of (a slice of) state. How you manage your state is up to you and independent of the undo mechanism.
+The custom React hook **useFlexibleUndo** keeps a history of undoable actions - as opposed to a history of snapshots of (a slice of) state. How you manage your state is up to you and independent of the undo mechanism.
 
-**makeUndoable** takes an object with an action type and redo/undo handlers. The redo and undo handlers take the payload (here named "amount") as single argument and use it to update the state. Here we make a single undoable function "add". Each time we call "add" the redo handler will be called once immediately, and an action with type "add" and a simple delta value of type number as payload will be stored in the history, so that we can undo/redo later.
+The hook returns the function **makeUndoable** which takes an object with an action type and do/redo and undo handlers as single argument. The do/redo and undo handlers take the payload (here named "amount") as single argument and use it to update the state. Here we make a single undoable function "add". Each time we call "add" the do/redo handler will be called once immediately, and an action with type "add" and a simple delta value of type number as payload will be stored in the history, so that we can undo/redo later.
 
 ```typescript
+const [count, setCount] = useState(0);
+
 const add = makeUndoable<number>({
   type: 'add',
-  redo: amount => setCount(prev => prev + amount),
+  drdo: amount => setCount(prev => prev + amount),
   undo: amount => setCount(prev => prev - amount),
 });
 ```
@@ -14,11 +16,11 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo } from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
-export const MakeUndoableDelta: FC = () => {
+export const MakeUndoableExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -33,7 +35,7 @@ export const MakeUndoableDelta: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
 

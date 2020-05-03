@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo, PayloadFromTo } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
 
-export const MakeUndoableFromToTuple: React.FC = () => {
+export const MakeUndoableFromToExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
@@ -16,14 +16,16 @@ export const MakeUndoableFromToTuple: React.FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const updateCount = makeUndoable<[number, number]>({
+  const updateCount = makeUndoable<PayloadFromTo<number>>({
     type: 'updateCount',
-    redo: ([_, to]) => setCount(to),
-    undo: ([from]) => setCount(from),
+    drdo: ({ to }) => setCount(to),
+    undo: ({ from }) => setCount(from),
   });
 
-  const multiply = (amount: number) => updateCount([count, count * amount]);
-  const divide = (amount: number) => updateCount([count, count / amount]);
+  const multiply = (amount: number) =>
+    updateCount({ from: count, to: count * amount });
+  const divide = (amount: number) =>
+    updateCount({ from: count, to: count / amount });
 
   return (
     <div className={rootClass}>

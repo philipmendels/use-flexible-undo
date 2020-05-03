@@ -18,68 +18,84 @@ import {
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
 
-export const makeHandler = <S>(
-  stateSetter: (stateUpdater: Updater<S>) => any
-) => <P = S>(updaterMaker: UpdaterMaker<P, S>): PayloadHandler<P> => payload =>
-  stateSetter(updaterMaker(payload));
+export const merge = <S, P extends Partial<S>>(
+  partial: P
+): Updater<S> => state => ({
+  ...state,
+  ...partial,
+});
 
-export const combineHandlers = <T>(redo: T, undo: T): Undoable<T> => ({
-  redo,
+export const combineHandlers = <P, R>(
+  drdo: PayloadHandler<P, R>,
+  undo: PayloadHandler<P, R>
+): Undoable<PayloadHandler<P, R>> => ({
+  drdo,
   undo,
 });
 
-export const makeUndoableFromToHandler = <S, R>(
-  stateSetter: (newState: S) => R
-): Undoable<PayloadHandler<PayloadFromTo<S>, R>> => ({
-  redo: ({ to }) => stateSetter(to),
-  undo: ({ from }) => stateSetter(from),
-});
+export const invertHandlers = <P, R>({
+  drdo,
+  undo,
+}: Undoable<PayloadHandler<P, R>>) => combineHandlers(undo, drdo);
 
-export const makeUndoableFromToTupleHandler = <S, R>(
-  stateSetter: (newState: S) => R
-): Undoable<PayloadHandler<[S, S], R>> => ({
-  redo: ([_, to]) => stateSetter(to),
-  undo: ([from]) => stateSetter(from),
-});
+export const makeHandler = <S, R>(
+  stateSetter: (stateUpdater: Updater<S>) => R
+) => <P = S>(
+  updaterMaker: UpdaterMaker<P, S>
+): PayloadHandler<P, R> => payload => stateSetter(updaterMaker(payload));
 
 export const makeUndoableHandler = <S, R>(
   stateSetter: (stateUpdater: Updater<S>) => R
 ) => <P = S>(
-  updaterForRedoMaker: UpdaterMaker<P, S>,
+  updaterForDrdoMaker: UpdaterMaker<P, S>,
   updaterForUndoMaker: UpdaterMaker<P, S>
-): Undoable<PayloadHandler<P, R>> => ({
-  redo: payload => stateSetter(updaterForRedoMaker(payload)),
-  undo: payload => stateSetter(updaterForUndoMaker(payload)),
-});
+) =>
+  combineHandlers<P, R>(
+    payload => stateSetter(updaterForDrdoMaker(payload)),
+    payload => stateSetter(updaterForUndoMaker(payload))
+  );
 
-export const makeUndoableDepStateUpdater = <S_Dep, S_Part, S>(
-  stateUpdaterMaker: UpdaterMaker<UpdaterMaker<S_Dep, S_Part>, S>
+export const makeUndoableFTObjHandler = <S, R>(
+  stateSetter: (newState: S) => R
+) =>
+  combineHandlers<PayloadFromTo<S>, R>(
+    ({ to }) => stateSetter(to),
+    ({ from }) => stateSetter(from)
+  );
+
+export const makeUndoableFTTupleHandler = <S, R>(
+  stateSetter: (newState: S) => R
+) =>
+  combineHandlers<[S, S], R>(
+    ([_, to]) => stateSetter(to),
+    ([from]) => stateSetter(from)
+  );
+
+export const makeUndoableStateDepHandler = <S1, S2, R>(
+  stateUpdaterMaker: (um: UpdaterMaker<S1, S2>) => R
 ) => (
-  updaterForRedoMaker: UpdaterMaker<S_Dep, S_Part>,
-  updaterForUndoMaker: UpdaterMaker<S_Dep, S_Part>
-): Undoable<() => Updater<S>> => ({
-  redo: () => stateUpdaterMaker(updaterForRedoMaker),
-  undo: () => stateUpdaterMaker(updaterForUndoMaker),
-});
+  updaterForDrdoMaker: UpdaterMaker<S1, S2>,
+  updaterForUndoMaker: UpdaterMaker<S1, S2>
+) =>
+  combineHandlers<undefined, R>(
+    () => stateUpdaterMaker(updaterForDrdoMaker),
+    () => stateUpdaterMaker(updaterForUndoMaker)
+  );
 
-export const invertUndoable = <T>({
-  redo,
-  undo,
-}: Undoable<T>): Undoable<T> => ({
-  redo: undo,
-  undo: redo,
-});
+export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(
+  convertor: (p2: P2) => P
+) => (payload: P2) => handler(convertor(payload));
 
-export const wrapFromToHandler = <S>(
-  handler: PayloadHandler<PayloadFromTo<S>, any>,
+export const wrapFTObjHandler = <S, R>(
+  handler: PayloadHandler<PayloadFromTo<S>, R>,
   state: S
-) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P> => payload =>
+) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler({ from: state, to: updater(payload)(state) });
 
-export const wrapFromToTupleHandler = <S>(
-  handler: PayloadHandler<[S, S]>,
+export const wrapFTTupleHandler = <S, R>(
+  handler: PayloadHandler<[S, S], R>,
   state: S
-) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P> => payload =>
+) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler([state, updater(payload)(state)]);
 
 export const makeUndoableReducer = <
@@ -96,13 +112,13 @@ export const makeUndoableReducer = <
     return updater
       ? meta && meta.isUndo
         ? updater.undo(payload)(state)
-        : updater.redo(payload)(state)
+        : updater.drdo(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
   }) as UReducer<S, PBT>,
   actionCreators: mapObject(stateUpdaters, ([type, _]) => [
     type,
     {
-      redo: makeActionCreator(type) as UActionCreator<PBT, typeof type>,
+      drdo: makeActionCreator(type) as UActionCreator<PBT, typeof type>,
       undo: makeActionCreator(type, true) as UActionCreator<PBT, typeof type>,
     },
   ]) as UndoableUActionCreatorsByType<PBT>,
@@ -125,7 +141,7 @@ export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   mapObject(actionCreators, ([type, creator]) => [
     type,
     {
-      redo: payload => dispatch(creator.redo(payload)),
+      drdo: payload => dispatch(creator.drdo(payload)),
       undo: payload => dispatch(creator.undo(payload)),
     },
   ]);
@@ -143,7 +159,7 @@ export const makeUndoableHandlersFromDispatch = <
   mapObject(actionCreators, ([type, action]) => [
     type,
     {
-      redo: payload => dispatch(action.redo(payload)),
+      drdo: payload => dispatch(action.drdo(payload)),
       undo: payload => dispatch(action.undo(payload)),
       ...(metaActionHandlers.length
         ? { meta: metaActionHandlers[0]![type] }

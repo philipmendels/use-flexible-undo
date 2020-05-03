@@ -2,17 +2,18 @@ Extracting functions outside of your component may require more naming and stati
 
 ```typescript
 //outside function component:
-const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
-const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
+type UMN = UpdaterMaker<number>;
+const addAmount: UMN = amount => prev => prev + amount;
+const subAmount: UMN = amount => prev => prev - amount;
 
 //inside function component:
-const countHandler = makeHandler(setCount);
-const addHandler = countHandler(addAmount);
-const subHandler = countHandler(subAmount);
+const [count, setCount] = useState(0);
+
+const undoableAddHandler = makeUndoableHandler(setCount)(addAmount, subAmount);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
-  add: combineHandlers(addHandler, subHandler),
-  subtract: combineHandlers(subHandler, addHandler),
+  add: undoableAddHandler,
+  subtract: invertHandlers(undoableAddHandler),
 });
 ```
 
@@ -22,10 +23,10 @@ Full code:
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
-  makeHandler,
-  combineHandlers,
   UpdaterMaker,
-} from '../.';
+  makeUndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -34,8 +35,9 @@ interface PayloadByType {
   subtract: number;
 }
 
-const addAmount: UpdaterMaker<number> = amount => prev => prev + amount;
-const subAmount: UpdaterMaker<number> = amount => prev => prev - amount;
+type UMN = UpdaterMaker<number>;
+const addAmount: UMN = amount => prev => prev + amount;
+const subAmount: UMN = amount => prev => prev - amount;
 
 export const MakeUndoablesUtil: FC = () => {
   const [count, setCount] = useState(0);
@@ -50,13 +52,14 @@ export const MakeUndoablesUtil: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(addAmount);
-  const subHandler = countHandler(subAmount);
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    addAmount,
+    subAmount
+  );
 
   const { add, subtract } = makeUndoables<PayloadByType>({
-    add: combineHandlers(addHandler, subHandler),
-    subtract: combineHandlers(subHandler, addHandler),
+    add: undoableAddHandler,
+    subtract: invertHandlers(undoableAddHandler),
   });
 
   return (

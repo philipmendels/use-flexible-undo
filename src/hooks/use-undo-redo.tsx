@@ -127,7 +127,7 @@ export const useUndoRedo = <
         onRedoLatest?.(event);
         onDoRedoLatest?.(event);
       }
-      handlers.current[action.type].redo(action.payload);
+      handlers.current[action.type].drdo(action.payload);
     },
     [latestCallbacksRef, onRedo, onDoRedo, getMAH, handlers]
   );
@@ -248,7 +248,7 @@ export const useUndoRedo = <
             onDoLatest?.(event);
             onDoRedoLatest?.(event);
           }
-          handler.redo(payload);
+          handler.drdo(payload);
           setStack(prev => ({
             past: [action, ...prev.past],
             future: [],

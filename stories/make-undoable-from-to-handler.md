@@ -1,10 +1,10 @@
-The utility **makeUndoableFromToHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument. It returns an object with do/redo and undo handlers.
+The utility **makeUndoableFTObjHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument. It returns an object with do/redo and undo handlers that take an object with the current 'from' state and the new 'to' state as payload.
 
 ```typescript
 const [count, setCount] = useState(1);
 
 const { updateCount } = makeUndoables<PayloadByType>({
-  updateCount: makeUndoableFromToHandler(setCount),
+  updateCount: makeUndoableFTObjHandler(setCount),
 });
 
 const multiply = (amount: number) =>
@@ -17,11 +17,7 @@ Full code:
 
 ```typescript
 import React, { useState } from 'react';
-import {
-  useFlexibleUndo,
-  PayloadFromTo,
-  makeUndoableFromToHandler,
-} from 'use-flexible-undo';
+import { useFlexibleUndo, PayloadFromTo, makeUndoableFTObjHandler } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
 
@@ -29,7 +25,7 @@ interface PayloadByType {
   updateCount: PayloadFromTo<number>;
 }
 
-export const MakeUndoableFromToHandlerExample: React.FC = () => {
+export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
@@ -43,7 +39,7 @@ export const MakeUndoableFromToHandlerExample: React.FC = () => {
   } = useFlexibleUndo();
 
   const { updateCount } = makeUndoables<PayloadByType>({
-    updateCount: makeUndoableFromToHandler(setCount),
+    updateCount: makeUndoableFTObjHandler(setCount),
   });
 
   const multiply = (amount: number) =>

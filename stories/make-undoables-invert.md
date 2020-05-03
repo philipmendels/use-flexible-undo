@@ -1,14 +1,16 @@
-As an alternative to manually inverting the redo/undo handlers like in the previous example, you can use the utility **invertUndoable**. This function takes an object with "redo" and "undo" properties and switches the values of these properties.
+As an alternative to manually inverting the do/redo and undo handlers like in the previous example, you can use the utility **invertHandlers**. This function takes an object with "drdo" and "undo" properties and switches the values of these properties.
 
 ```typescript
+const [count, setCount] = useState(0);
+
 const undoableAddHandler: UndoableHandler<number> = {
-  redo: amount => setCount(prev => prev + amount),
+  drdo: amount => setCount(prev => prev + amount),
   undo: amount => setCount(prev => prev - amount),
 };
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: undoableAddHandler,
-  subtract: invertUndoable(undoableAddHandler),
+  subtract: invertHandlers(undoableAddHandler),
 });
 ```
 
@@ -16,7 +18,11 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, UndoableHandler, invertUndoable } from '../.';
+import {
+  useFlexibleUndo,
+  UndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -25,7 +31,7 @@ interface PayloadByType {
   subtract: number;
 }
 
-export const MakeUndoablesInvert: FC = () => {
+export const InvertHandlersExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -39,13 +45,13 @@ export const MakeUndoablesInvert: FC = () => {
   } = useFlexibleUndo();
 
   const undoableAddHandler: UndoableHandler<number> = {
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   };
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: undoableAddHandler,
-    subtract: invertUndoable(undoableAddHandler),
+    subtract: invertHandlers(undoableAddHandler),
   });
 
   return (

@@ -1,10 +1,12 @@
-Instead of making multiple calls to **makeUndoable** you can use **makeUndoables** to make multiple undoable functions at once. It takes an object with as keys action types and as values objects with redo/undo handlers. It returns an object with undoable functions by action type.
+Instead of making multiple calls to **makeUndoable** you can use **makeUndoables** to make multiple undoable functions at once. It takes an object with as keys action types and as values objects with do/redo and undo handlers. It returns an object with undoable functions by action type.
 
 ```typescript
 interface PayloadByType {
   add: number;
   subtract: number;
 }
+
+const [count, setCount] = useState(0);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: {
@@ -22,7 +24,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo } from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -46,11 +48,11 @@ export const MakeUndoables: FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
-      redo: amount => setCount(prev => prev + amount),
+      drdo: amount => setCount(prev => prev + amount),
       undo: amount => setCount(prev => prev - amount),
     },
     subtract: {
-      redo: amount => setCount(prev => prev - amount),
+      drdo: amount => setCount(prev => prev - amount),
       undo: amount => setCount(prev => prev + amount),
     },
   });

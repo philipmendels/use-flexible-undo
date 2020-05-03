@@ -1,26 +1,30 @@
-As an alternative to passing dependent state as (part of) the action payload, you can store all dependent state together and get it from the previous state in your redo/undo handlers. Here we use useState to store our state, in the following examples we look at useReducer.
+As an alternative to passing dependent state as (part of) the action payload, you can store all dependent state together and get it from the previous state in your do/redo and undo handlers. Here we use useState to store our state, in later examples we take a look at useReducer.
 
 ```typescript
+type Nullber = number | null;
+
+interface State {
+  count: number;
+  amount: Nullber;
+}
+
 const [{ count, amount }, setState] = useState<State>({
   count: 0,
   amount: 1,
 });
 
-const addHandler = () =>
+const makeCountHandler = (um: UpdaterMaker<number>) => () =>
   setState(prev =>
-    prev.amount ? { ...prev, count: prev.count + prev.amount } : prev
+    prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
   );
-const subHandler = () =>
-  setState(prev =>
-    prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
-  );
+
+const addHandler = makeCountHandler(amount => prev => prev + amount);
+const subHandler = makeCountHandler(amount => prev => prev - amount);
 
 const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
   add: combineHandlers(addHandler, subHandler),
   subtract: combineHandlers(subHandler, addHandler),
-  updateAmount: makeUndoableFromToHandler(amount =>
-    setState(prev => ({ ...prev, amount }))
-  ),
+  updateAmount: makeUndoableFTObjHandler(amount => setState(merge({ amount }))),
 });
 ```
 
@@ -31,9 +35,11 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFromToHandler,
+  makeUndoableFTObjHandler,
   combineHandlers,
-} from '../.';
+  UpdaterMaker,
+  merge,
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
 import { NumberInput } from './components/number-input';
@@ -51,7 +57,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-export const DependentStateRight2: FC = () => {
+export const DependentStateRight2Example: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
@@ -67,20 +73,19 @@ export const DependentStateRight2: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const addHandler = () =>
+  const makeCountHandler = (um: UpdaterMaker<number>) => () =>
     setState(prev =>
-      prev.amount ? { ...prev, count: prev.count + prev.amount } : prev
+      prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
     );
-  const subHandler = () =>
-    setState(prev =>
-      prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
-    );
+
+  const addHandler = makeCountHandler(amount => prev => prev + amount);
+  const subHandler = makeCountHandler(amount => prev => prev - amount);
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: combineHandlers(addHandler, subHandler),
     subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(amount =>
-      setState(prev => ({ ...prev, amount }))
+    updateAmount: makeUndoableFTObjHandler(amount =>
+      setState(merge({ amount }))
     ),
   });
 

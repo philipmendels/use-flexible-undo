@@ -1,12 +1,13 @@
 import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
-  makeUndoableFromToHandler,
+  makeUndoableFTObjHandler,
   useFlexibleUndoLight,
+  combineHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
-import { combineHandlers } from '../src';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -48,7 +49,7 @@ export const NoPayload2Light: FC = () => {
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
-      updateAmount: makeUndoableFromToHandler(amount =>
+      updateAmount: makeUndoableFTObjHandler(amount =>
         setState(prev => ({ ...prev, amount }))
       ),
     },
@@ -65,13 +66,12 @@ export const NoPayload2Light: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

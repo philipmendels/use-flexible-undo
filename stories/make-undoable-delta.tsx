@@ -3,7 +3,7 @@ import { useFlexibleUndo } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
-export const MakeUndoableDelta: FC = () => {
+export const MakeUndoableExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -18,7 +18,7 @@ export const MakeUndoableDelta: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
 

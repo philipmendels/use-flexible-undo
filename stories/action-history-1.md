@@ -1,13 +1,15 @@
-import React, { FC, useState, ReactNode } from 'react';
+Full code:
+
+```typescript
+import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTObjHandler,
   makeUndoableHandler,
   invertHandlers,
-} from '../.';
-import { rootClass, uiContainerClass } from './styles';
-import { ActionList } from './components/action-list';
+} from 'use-flexible-undo';
+import { rootClass, uiContainerClass, getStackItemClass } from './styles';
 import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
@@ -18,17 +20,7 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-type PayloadDescribers = {
-  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
-};
-
-const payloadDescribers: PayloadDescribers = {
-  add: amount => `Increase count by ${amount}`,
-  subtract: amount => `Decrease count by ${amount}`,
-  updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
-};
-
-export const MakeUndoablesMeta1: FC = () => {
+export const ActionHistory1: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
@@ -82,14 +74,38 @@ export const MakeUndoablesMeta1: FC = () => {
           redo
         </button>
       </div>
-      <ActionList
-        stack={stack}
-        timeTravel={timeTravel}
-        convert={action =>
-          // TypeScript does not properly narrow the payload type
-          payloadDescribers[action.type](action.payload as any)
-        }
-      />
+      <div>
+        {stack.future.map((action, index) => (
+          <div
+            key={index}
+            className={getStackItemClass({
+              active: false,
+              range: 'future',
+            })}
+            onClick={() => timeTravel('future', index)}
+          >
+            {JSON.stringify(action)}
+          </div>
+        ))}
+        <div style={{ margin: '8px 0', color: '#48a7f6' }}>
+          {canUndo && <>back to the past &darr;</>}
+          {canUndo && canRedo && ' '}
+          {canRedo && <>&uarr; Back to the Future™</>}
+        </div>
+        {stack.past.map((action, index) => (
+          <div
+            key={index}
+            className={getStackItemClass({
+              active: false,
+              range: 'past',
+            })}
+            onClick={() => timeTravel('past', index + 1)}
+          >
+            {JSON.stringify(action)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
+```

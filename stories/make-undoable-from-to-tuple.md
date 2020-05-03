@@ -1,9 +1,11 @@
 You can model the action payload anyway you like. Here we use a tuple instead of an object.
 
 ```typescript
+const [count, setCount] = useState(1);
+
 const updateCount = makeUndoable<[number, number]>({
   type: 'updateCount',
-  redo: ([_, to]) => setCount(to),
+  drdo: ([_, to]) => setCount(to),
   undo: ([from]) => setCount(from),
 });
 
@@ -34,7 +36,7 @@ export const MakeUndoableFromToTuple: React.FC = () => {
 
   const updateCount = makeUndoable<[number, number]>({
     type: 'updateCount',
-    redo: ([_, to]) => setCount(to),
+    drdo: ([_, to]) => setCount(to),
     undo: ([from]) => setCount(from),
   });
 

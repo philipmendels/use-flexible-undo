@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import {
-  useFlexibleUndo,
-  PayloadFromTo,
-  makeUndoableFromToHandler,
-} from '../.';
+import { useFlexibleUndo, PayloadFromTo, makeUndoableFTObjHandler } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
 
@@ -11,7 +7,7 @@ interface PayloadByType {
   updateCount: PayloadFromTo<number>;
 }
 
-export const MakeUndoableFromToHandlerExample: React.FC = () => {
+export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
@@ -25,7 +21,7 @@ export const MakeUndoableFromToHandlerExample: React.FC = () => {
   } = useFlexibleUndo();
 
   const { updateCount } = makeUndoables<PayloadByType>({
-    updateCount: makeUndoableFromToHandler(setCount),
+    updateCount: makeUndoableFTObjHandler(setCount),
   });
 
   const multiply = (amount: number) =>

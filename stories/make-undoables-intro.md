@@ -1,1 +1,1 @@
-Here we make a single call to **makeUndoables** to make the two undoable functions "add" and "subtract".
+In this example the function **makeUndoables** which is returned by **useFlexibleUndo** is used to make the two undoable functions "add" and "subtract".

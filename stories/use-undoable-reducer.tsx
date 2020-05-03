@@ -4,10 +4,12 @@ import {
   makeUndoableReducer,
   PayloadFromTo,
   useUndoableReducer,
-  makeUndoableFromToHandler,
+  makeUndoableFTObjHandler,
   UpdaterMaker,
   Updater,
-  combineHandlers,
+  makeUndoableStateDepHandler,
+  invertHandlers,
+  merge,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
@@ -26,25 +28,18 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-type UM = UpdaterMaker<number>;
-const addAmount: UM = amount => prev => prev + amount;
-const subAmount: UM = amount => prev => prev - amount;
+const makeCountHandler = (um: UpdaterMaker<number>): Updater<State> => prev =>
+  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
 
-const countUpdater = (updater: UM) => (): Updater<State> => state =>
-  state.amount
-    ? { ...state, count: updater(state.amount)(state.count) }
-    : state;
-
-const addHandler = countUpdater(addAmount);
-const subHandler = countUpdater(subAmount);
+const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+  amount => prev => prev + amount,
+  amount => prev => prev - amount
+);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: combineHandlers(addHandler, subHandler),
-  subtract: combineHandlers(subHandler, addHandler),
-  updateAmount: makeUndoableFromToHandler(amount => state => ({
-    ...state,
-    amount,
-  })),
+  add: undoableAddHandler,
+  subtract: invertHandlers(undoableAddHandler),
+  updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
 });
 
 export const UseUndoableReducer: FC = () => {

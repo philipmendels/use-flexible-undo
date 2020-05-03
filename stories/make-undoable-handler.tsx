@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, invertUndoable, makeUndoableHandler } from '../.';
+import { useFlexibleUndo, invertHandlers, makeUndoableHandler } from '../.';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -28,7 +28,7 @@ export const MakeUndoableHandlerExample: FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: undoableAddHandler,
-    subtract: invertUndoable(undoableAddHandler),
+    subtract: invertHandlers(undoableAddHandler),
   });
 
   return (

@@ -27,11 +27,11 @@ export type HandlersWithUndefinedByType<PBT extends PayloadByType> = {
 type StateUpdater<P, S> = (payload: P) => (state: S) => S;
 
 export type Undoable<T> = {
-  redo: T;
+  drdo: T;
   undo: T;
 };
 
-export type UndoableHandler<P> = Undoable<PayloadHandler<P>>;
+export type UndoableHandler<P, R = void> = Undoable<PayloadHandler<P, R>>;
 
 export type UndoableHandlersByType<PBT extends PayloadByType> = {
   [K in StringOnlyKeyOf<PBT>]: UndoableHandler<PBT[K]>;

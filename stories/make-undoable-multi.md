@@ -1,14 +1,16 @@
 You can make multiple calls to **makeUndoable** or to any of its variations such as **makeUndoables** or **makeUndoablesFromDispatch**. It is however not possible to have multiple undoable functions with the same action type. Previously made undoable functions with the same type (either the same function in a previous render or a different function in the same render) will be overwritten. It is up to you to avoid conflicts in action types.
 
 ```typescript
+const [count, setCount] = useState(0);
+
 const add = makeUndoable<number>({
   type: 'add',
-  redo: amount => setCount(prev => prev + amount),
+  drdo: amount => setCount(prev => prev + amount),
   undo: amount => setCount(prev => prev - amount),
 });
 const subtract = makeUndoable<number>({
   type: 'subtract',
-  redo: amount => setCount(prev => prev - amount),
+  drdo: amount => setCount(prev => prev - amount),
   undo: amount => setCount(prev => prev + amount),
 });
 ```
@@ -17,7 +19,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo } from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -36,12 +38,12 @@ export const MakeUndoableMulti: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
   const subtract = makeUndoable<number>({
     type: 'subtract',
-    redo: amount => setCount(prev => prev - amount),
+    drdo: amount => setCount(prev => prev - amount),
     undo: amount => setCount(prev => prev + amount),
   });
 

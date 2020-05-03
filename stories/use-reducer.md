@@ -4,9 +4,15 @@ Full code:
 
 ```typescript
 import React, { FC, useReducer } from 'react';
-import { useFlexibleUndo, PayloadFromTo, UReducer } from '../.';
+import {
+  useFlexibleUndo,
+  PayloadFromTo,
+  UReducer,
+  UpdaterMaker,
+} from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -21,19 +27,23 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
+const countUpdater = (prev: State, um: UpdaterMaker<number>): State =>
+  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
+
 const reducer: UReducer<State, PayloadByType> = (prevState, action) => {
-  const { count, amount } = prevState;
   const isUndo = action.meta?.isUndo;
+  const addHandler = countUpdater(prevState, amount => prev => prev + amount);
+  const subHandler = countUpdater(prevState, amount => prev => prev - amount);
   switch (action.type) {
     case 'add':
-      return amount ? { ...prevState, count: count + amount } : prevState;
+      return isUndo ? subHandler : addHandler;
     case 'subtract':
-      return amount ? { ...prevState, count: count - amount } : prevState;
+      return isUndo ? addHandler : subHandler;
     case 'updateAmount':
       const { from, to } = action.payload;
       return { ...prevState, amount: isUndo ? from : to };
     default:
-      throw new Error();
+      return prevState;
   }
 };
 
@@ -55,15 +65,15 @@ export const UsingReducer: FC = () => {
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: {
-      redo: () => dispatch({ type: 'add' }),
-      undo: () => dispatch({ type: 'subtract' }),
+      drdo: () => dispatch({ type: 'add' }),
+      undo: () => dispatch({ type: 'add', meta: { isUndo: true } }),
     },
     subtract: {
-      redo: () => dispatch({ type: 'subtract' }),
-      undo: () => dispatch({ type: 'add' }),
+      drdo: () => dispatch({ type: 'subtract' }),
+      undo: () => dispatch({ type: 'subtract', meta: { isUndo: true } }),
     },
     updateAmount: {
-      redo: payload => dispatch({ type: 'updateAmount', payload }),
+      drdo: payload => dispatch({ type: 'updateAmount', payload }),
       undo: payload =>
         dispatch({ type: 'updateAmount', payload, meta: { isUndo: true } }),
     },
@@ -75,13 +85,12 @@ export const UsingReducer: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

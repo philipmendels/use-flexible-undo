@@ -1,34 +1,33 @@
-import React, { FC, useState, ReactNode } from 'react';
+Full code:
+
+```typescript
+import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTObjHandler,
   makeUndoableHandler,
   invertHandlers,
-} from '../.';
-import { rootClass, uiContainerClass } from './styles';
-import { ActionList } from './components/action-list';
+} from 'use-flexible-undo';
+import { rootClass, uiContainerClass, getStackItemClass } from './styles';
 import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
-interface PayloadByType {
+interface PayloadByType1 {
   add: number;
   subtract: number;
+}
+
+interface PayloadByType2 {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-type PayloadDescribers = {
-  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
-};
+type PayloadByTypeTotal = PayloadByType1 & PayloadByType2;
 
-const payloadDescribers: PayloadDescribers = {
-  add: amount => `Increase count by ${amount}`,
-  subtract: amount => `Decrease count by ${amount}`,
-  updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
-};
+const startTime = new Date();
 
-export const MakeUndoablesMeta1: FC = () => {
+export const ActionHistory3: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
@@ -40,16 +39,19 @@ export const MakeUndoablesMeta1: FC = () => {
     redo,
     stack,
     timeTravel,
-  } = useFlexibleUndo<PayloadByType>();
+  } = useFlexibleUndo<PayloadByTypeTotal>();
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
+  const { add, subtract } = makeUndoables<PayloadByType1>({
     add: undoableAddHandler,
     subtract: invertHandlers(undoableAddHandler),
+  });
+
+  const { updateAmount } = makeUndoables<PayloadByType2>({
     updateAmount: makeUndoableFTObjHandler(setAmount),
   });
 
@@ -82,14 +84,35 @@ export const MakeUndoablesMeta1: FC = () => {
           redo
         </button>
       </div>
-      <ActionList
-        stack={stack}
-        timeTravel={timeTravel}
-        convert={action =>
-          // TypeScript does not properly narrow the payload type
-          payloadDescribers[action.type](action.payload as any)
-        }
-      />
+      <div>
+        {stack.future.concat(stack.past).map((action, index) => (
+          <div
+            key={index}
+            className={getStackItemClass({
+              active: index === stack.future.length,
+              range: index < stack.future.length ? 'future' : 'past',
+            })}
+            onClick={() => timeTravel('full', index)}
+          >
+            {action.type === 'add'
+              ? `Increase count by ${action.payload}`
+              : JSON.stringify(action)}
+          </div>
+        ))}
+      </div>
+      <div
+        className={getStackItemClass({
+          active: stack.past.length === 0,
+          range: 'past',
+        })}
+        onClick={() => timeTravel('past', stack.past.length)}
+      >
+        {JSON.stringify({
+          type: 'start',
+          created: startTime,
+        })}
+      </div>
     </div>
   );
 };
+```

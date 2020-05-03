@@ -26,11 +26,11 @@ export const MakeUndoablesExtract: FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
-      redo: addHandler,
+      drdo: addHandler,
       undo: subHandler,
     },
     subtract: {
-      redo: subHandler,
+      drdo: subHandler,
       undo: addHandler,
     },
   });

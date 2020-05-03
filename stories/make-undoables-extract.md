@@ -1,16 +1,18 @@
-It's up to you how you define your redo/undo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the undo handler of one as the redo handler of the other (and vice versa).
+It's up to you how you define your do/redo and undo handlers. You can define them inline as in the previous examples, or you can extract them for reuse. Here we extract them because the two functions "add" and "subtract" are the inverse of each other - so we can use the do/redo handler of one as the undo handler of the other (and vice versa).
 
 ```typescript
+const [count, setCount] = useState(0);
+
 const addHandler = (amount: number) => setCount(prev => prev + amount);
 const subHandler = (amount: number) => setCount(prev => prev - amount);
 
 const { add, subtract } = makeUndoables<PayloadByType>({
   add: {
-    redo: addHandler,
+    drdo: addHandler,
     undo: subHandler,
   },
   subtract: {
-    redo: subHandler,
+    drdo: subHandler,
     undo: addHandler,
   },
 });
@@ -20,7 +22,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo } from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -47,11 +49,11 @@ export const MakeUndoablesExtract: FC = () => {
 
   const { add, subtract } = makeUndoables<PayloadByType>({
     add: {
-      redo: addHandler,
+      drdo: addHandler,
       undo: subHandler,
     },
     subtract: {
-      redo: subHandler,
+      drdo: subHandler,
       undo: addHandler,
     },
   });

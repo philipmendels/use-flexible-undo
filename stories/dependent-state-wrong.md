@@ -1,6 +1,8 @@
 You **_should not_** make your redo/undo handlers depend on external state. Refactor your actions so that you can get dependent state from the action payload or refactor your state so that you can get it from the previous state. You can see how in the next two examples.
 
 ```typescript
+type Nullber = number | null;
+
 const [count, setCount] = useState(0);
 const [amount, setAmount] = useState<Nullber>(1);
 
@@ -12,7 +14,7 @@ const subHandler = () => amount && setCount(prev => prev - amount);
 const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
   add: combineHandlers(addHandler, subHandler),
   subtract: combineHandlers(subHandler, addHandler),
-  updateAmount: makeUndoableFromToHandler(setAmount),
+  updateAmount: makeUndoableFTObjHandler(setAmount),
 });
 ```
 
@@ -23,11 +25,12 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFromToHandler,
+  makeUndoableFTObjHandler,
   combineHandlers,
-} from '../.';
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
+import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -59,7 +62,7 @@ export const DependentStateWrong: FC = () => {
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: combineHandlers(addHandler, subHandler),
     subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(setAmount),
+    updateAmount: makeUndoableFTObjHandler(setAmount),
   });
 
   return (
@@ -68,13 +71,12 @@ export const DependentStateWrong: FC = () => {
       <div className={uiContainerClass}>
         <label>
           amount:&nbsp;
-          <input
-            type="number"
-            value={amount === null ? '' : amount}
-            onChange={({ target: { value } }) =>
+          <NumberInput
+            value={amount}
+            onChange={value =>
               updateAmount({
                 from: amount,
-                to: value === '' ? null : Number(value),
+                to: value,
               })
             }
           />

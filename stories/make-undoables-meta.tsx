@@ -2,9 +2,9 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeHandler,
-  makeUndoableFromToHandler,
-  combineHandlers,
+  makeUndoableFTObjHandler,
+  makeUndoableHandler,
+  invertHandlers,
 } from '../.';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
@@ -37,26 +37,26 @@ export const MakeUndoablesMeta: FC = () => {
     getMetaActionHandlers,
   } = useFlexibleUndo<PayloadByType, MetaActionReturnTypes>();
 
-  const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
+  );
 
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: {
-      redo: addHandler,
-      undo: subHandler,
+      ...undoableAddHandler,
       meta: {
         describe: amount => `Increase count by ${amount}`,
       },
     },
     subtract: {
-      ...combineHandlers(subHandler, addHandler),
+      ...invertHandlers(undoableAddHandler),
       meta: {
         describe: amount => `Decrease count by ${amount}`,
       },
     },
     updateAmount: {
-      ...makeUndoableFromToHandler(setAmount),
+      ...makeUndoableFTObjHandler(setAmount),
       meta: {
         describe: ({ from, to }) => `Update amount from ${from} to ${to}`,
       },

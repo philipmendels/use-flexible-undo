@@ -18,12 +18,12 @@ export const MakeUndoableMulti: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
   const subtract = makeUndoable<number>({
     type: 'subtract',
-    redo: amount => setCount(prev => prev - amount),
+    drdo: amount => setCount(prev => prev - amount),
     undo: amount => setCount(prev => prev + amount),
   });
 

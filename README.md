@@ -23,7 +23,7 @@ This library cannot be used to undo 'real-life' events such as:
 ```typescript
 const add = makeUndoable<number>({
   type: 'add',
-  redo: amount => setCount(prev => prev + amount),
+  drdo: amount => setCount(prev => prev + amount),
   undo: amount => setCount(prev => prev - amount),
 });
 ```

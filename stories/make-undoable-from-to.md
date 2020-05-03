@@ -1,11 +1,13 @@
 If the payload is a decimal number that represents the delta (i.e. the state change), then the resulting state after undo/redo may differ slightly from the original state due to (cumulative) floating point precision-related rounding errors.
 
-Instead you can choose to store the previous state and the new state in the payload (or the previous state and the delta). This makes the payload a bit bigger, but it does give you the guarantee that you can restore the exact previous state.
+Instead you can choose to store the current 'from' state and the new 'to' state in the payload. This makes the payload a bit bigger, but it does give you the guarantee that you can restore the exact same state after undo/redo.
 
 ```typescript
+const [count, setCount] = useState(1);
+
 const updateCount = makeUndoable<PayloadFromTo<number>>({
   type: 'updateCount',
-  redo: ({ to }) => setCount(to),
+  drdo: ({ to }) => setCount(to),
   undo: ({ from }) => setCount(from),
 });
 
@@ -38,7 +40,7 @@ export const MakeUndoableFromTo: React.FC = () => {
 
   const updateCount = makeUndoable<PayloadFromTo<number>>({
     type: 'updateCount',
-    redo: ({ to }) => setCount(to),
+    drdo: ({ to }) => setCount(to),
     undo: ({ from }) => setCount(from),
   });
 

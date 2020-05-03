@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { MakeUndoableDelta } from './make-undoable-delta.stories';
+import { MakeUndoableExample } from './make-undoable-delta';
 import MakeUndoableDeltaIntro from './make-undoable-delta-intro.md';
 import MakeUndoableDeltaReadme from './make-undoable-delta.md';
 import { MakeUndoableMulti } from './make-undoable-multi';
@@ -16,11 +16,11 @@ import { MakeUndoablesUtil } from './make-undoables-util';
 import MakeUndoablesUtilIntro from './make-undoables-util-intro.md';
 import MakeUndoablesUtilReadme from './make-undoables-util.md';
 
-import { MakeUndoableFromToHandlerExample } from './make-undoable-from-to-handler';
+import { MakeUndoableFTObjHandlerExample } from './make-undoable-from-to-handler';
 import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
 import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md';
 
-import { WrapFromToHandlerExample } from './wrap-from-to-handler';
+import { WrapFTObjHandlerExample } from './wrap-from-to-handler';
 // import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
 import WrapFromToHandlerReadme from './wrap-from-to-handler.md';
 
@@ -30,13 +30,13 @@ import MakeUndoableHandlerReadme from './make-undoable-handler.md';
 import { MakeUndoablesExtract } from './make-undoables-extract';
 import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
 import MakeUndoablesExtractReadme from './make-undoables-extract.md';
-import { MakeUndoablesInvert } from './make-undoables-invert';
+import { InvertHandlersExample } from './make-undoables-invert';
 import MakeUndoablesInvertIntro from './make-undoables-invert-intro.md';
 import MakeUndoablesInvertReadme from './make-undoables-invert.md';
-import { MakeUndoableFromTo } from './make-undoable-from-to.stories';
+import { MakeUndoableFromToExample } from './make-undoable-from-to';
 import MakeUndoableFromToIntro from './make-undoable-from-to-intro.md';
 import MakeUndoableFromToReadme from './make-undoable-from-to.md';
-import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple.stories';
+import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple';
 import MakeUndoableFromToTupleIntro from './make-undoable-from-to-tuple-intro.md';
 import MakeUndoableFromToTupleReadme from './make-undoable-from-to-tuple.md';
 import { MakeUndoablesUtils } from './make-undoables-utils';
@@ -45,25 +45,23 @@ import MakeUndoablesUtilsReadme from './make-undoables-utils.md';
 import { DependentStateWrong } from './dependent-state-wrong';
 import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
 import DependentStateWrongReadme from './dependent-state-wrong.md';
-import { DependentStateRight1 } from './dependent-state-right-1';
+import { DependentStateRight1Example } from './dependent-state-right-1';
 import DependentStateRight1Intro from './dependent-state-right-1-intro.md';
 import DependentStateRight1Readme from './dependent-state-right-1.md';
-import { DependentStateRight2 } from './dependent-state-right';
-import DependentStateRightIntro from './dependent-state-right-intro.md';
-import DependentStateRightReadme from './dependent-state-right.md';
+import { DependentStateRight2Example } from './dependent-state-right-2';
+import DependentStateRight2Intro from './dependent-state-right-2-intro.md';
+import DependentStateRight2Readme from './dependent-state-right-2.md';
+import { DependentStateRight3Example } from './dependent-state-right-3';
+import DependentStateRight3Readme from './dependent-state-right-3.md';
 import { UsingReducer } from './use-reducer';
 import UsingReducerIntro from './use-reducer-intro.md';
 import UsingReducerReadme from './use-reducer.md';
-import { MakeUndoablesFromDispatch1 } from './make-undoables-from-dispatch-1';
-import MakeUndoablesFromDispatch1Readme from './make-undoables-from-dispatch-1.md';
-import { MakeUndoablesFromDispatch2 } from './make-undoables-from-dispatch-2';
+import { MakeUndoablesFromDispatchExample } from './make-undoables-from-dispatch';
+import MakeUndoablesFromDispatchReadme from './make-undoables-from-dispatch.md';
+import { MakeUndoablesFromDispatchExample2 } from './make-undoables-from-dispatch-2';
 import MakeUndoablesFromDispatch2Readme from './make-undoables-from-dispatch-2.md';
-import { MakeUndoablesFromDispatch3 } from './make-undoables-from-dispatch-3';
+import { MakeUndoablesFromDispatchExample3 } from './make-undoables-from-dispatch-3';
 import MakeUndoablesFromDispatch3Readme from './make-undoables-from-dispatch-3.md';
-import { MakeUndoablesFromDispatch4 } from './make-undoables-from-dispatch-4';
-import MakeUndoablesFromDispatch4Readme from './make-undoables-from-dispatch-4.md';
-import { MakeUndoablesFromDispatch5 } from './make-undoables-from-dispatch-5';
-import MakeUndoablesFromDispatch5Readme from './make-undoables-from-dispatch-5.md';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
 import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md';
 import { UseUndoableReducer } from './use-undoable-reducer';
@@ -71,7 +69,11 @@ import UseUndoableReducerReadme from './use-undoable-reducer.md';
 import { ActionHistory } from './action-history';
 import ActionHistoryReadme from './action-history.md';
 import { ActionHistory1 } from './action-history-1';
+import ActionHistory1Readme from './action-history-1.md';
 import { ActionHistory2 } from './action-history-2';
+import ActionHistory2Readme from './action-history-2.md';
+import { ActionHistory3 } from './action-history-3';
+import ActionHistory3Readme from './action-history-3.md';
 import { MakeUndoablesMeta1 } from './make-undoables-meta-1';
 import MakeUndoablesMeta1Readme from './make-undoables-meta-1.md';
 import { MakeUndoablesMeta } from './make-undoables-meta';
@@ -83,25 +85,33 @@ import { NoPayload2Light } from './no-payload-2-light';
 storiesOf('useFlexibleUndo', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
-  .add('makeUndoable-delta', () => <MakeUndoableDelta />, {
+  .add('makeUndoable', () => <MakeUndoableExample />, {
     readme: {
       content: MakeUndoableDeltaIntro,
       sidebar: MakeUndoableDeltaReadme,
     },
   })
-  .add('makeUndoable-from-to', () => <MakeUndoableFromTo />, {
-    readme: {
-      content: MakeUndoableFromToIntro,
-      sidebar: MakeUndoableFromToReadme,
-    },
-  })
-  .add('makeUndoable-from-to-tuple', () => <MakeUndoableFromToTuple />, {
-    readme: {
-      content: MakeUndoableFromToTupleIntro,
-      sidebar: MakeUndoableFromToTupleReadme,
-    },
-  })
-  .add('makeUndoable-multi', () => <MakeUndoableMulti />, {
+  .add(
+    'object payload with from and to state',
+    () => <MakeUndoableFromToExample />,
+    {
+      readme: {
+        content: MakeUndoableFromToIntro,
+        sidebar: MakeUndoableFromToReadme,
+      },
+    }
+  )
+  .add(
+    'tuple payload with from and to state',
+    () => <MakeUndoableFromToTuple />,
+    {
+      readme: {
+        content: MakeUndoableFromToTupleIntro,
+        sidebar: MakeUndoableFromToTupleReadme,
+      },
+    }
+  )
+  .add('multiple calls to makeUndoable', () => <MakeUndoableMulti />, {
     readme: {
       content: MakeUndoableMultiIntro,
       sidebar: MakeUndoableMultiReadme,
@@ -113,25 +123,25 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoablesReadme,
     },
   })
-  .add('Negate the payload', () => <MakeUndoableNegate />, {
+  .add('wrap undoable function', () => <MakeUndoableNegate />, {
     readme: {
       content: MakeUndoableNegateIntro,
       sidebar: MakeUndoableNegateReadme,
     },
   })
-  .add('Extract redo/undo handlers', () => <MakeUndoablesExtract />, {
+  .add('reuse handlers', () => <MakeUndoablesExtract />, {
     readme: {
       content: MakeUndoablesExtractIntro,
       sidebar: MakeUndoablesExtractReadme,
     },
   })
-  .add('makeUndoables-invert', () => <MakeUndoablesInvert />, {
+  .add('invertHandlers', () => <InvertHandlersExample />, {
     readme: {
       content: MakeUndoablesInvertIntro,
       sidebar: MakeUndoablesInvertReadme,
     },
   })
-  .add('makeUndoables-utils', () => <MakeUndoablesUtils />, {
+  .add('makeHandler and combineHandlers', () => <MakeUndoablesUtils />, {
     readme: {
       content: MakeUndoablesUtilsIntro,
       sidebar: MakeUndoablesUtilsReadme,
@@ -143,23 +153,19 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoableHandlerReadme,
     },
   })
-  .add(
-    'makeUndoableFromToHandler',
-    () => <MakeUndoableFromToHandlerExample />,
-    {
-      readme: {
-        content: MakeUndoableFromToHandlerIntro,
-        sidebar: MakeUndoableFromToHandlerReadme,
-      },
-    }
-  )
-  .add('wrapFromToHandler', () => <WrapFromToHandlerExample />, {
+  .add('makeUndoableFTObjHandler', () => <MakeUndoableFTObjHandlerExample />, {
+    readme: {
+      content: MakeUndoableFromToHandlerIntro,
+      sidebar: MakeUndoableFromToHandlerReadme,
+    },
+  })
+  .add('wrapFTObjHandler', () => <WrapFTObjHandlerExample />, {
     readme: {
       // content: WrapFromToHandlerIntro,
       sidebar: WrapFromToHandlerReadme,
     },
   })
-  .add('Extract pure functions', () => <MakeUndoablesUtil />, {
+  .add('extract updater functions', () => <MakeUndoablesUtil />, {
     readme: {
       content: MakeUndoablesUtilIntro,
       sidebar: MakeUndoablesUtilReadme,
@@ -171,49 +177,56 @@ storiesOf('useFlexibleUndo', module)
       sidebar: DependentStateWrongReadme,
     },
   })
-  .add('dependent state: RIGHT 1', () => <DependentStateRight1 />, {
+  .add('dependent state: RIGHT 1', () => <DependentStateRight1Example />, {
     readme: {
       content: DependentStateRight1Intro,
       sidebar: DependentStateRight1Readme,
     },
   })
-  .add('dependent state: RIGHT 2', () => <DependentStateRight2 />, {
+  .add('dependent state: RIGHT 2', () => <DependentStateRight2Example />, {
     readme: {
-      content: DependentStateRightIntro,
-      sidebar: DependentStateRightReadme,
+      content: DependentStateRight2Intro,
+      sidebar: DependentStateRight2Readme,
     },
   })
-  .add('Extracting state: useReducer', () => <UsingReducer />, {
+  .add('dependent state: RIGHT 3', () => <DependentStateRight3Example />, {
+    readme: {
+      sidebar: DependentStateRight3Readme,
+    },
+  })
+  .add('use with useReducer', () => <UsingReducer />, {
     readme: {
       content: UsingReducerIntro,
       sidebar: UsingReducerReadme,
     },
   })
-  .add('makeUndoablesFromDispatch 1', () => <MakeUndoablesFromDispatch1 />, {
-    readme: {
-      sidebar: MakeUndoablesFromDispatch1Readme,
-    },
-  })
-  .add('makeUndoablesFromDispatch 2', () => <MakeUndoablesFromDispatch2 />, {
-    readme: {
-      sidebar: MakeUndoablesFromDispatch2Readme,
-    },
-  })
-  .add('makeUndoablesFromDispatch 3', () => <MakeUndoablesFromDispatch3 />, {
-    readme: {
-      sidebar: MakeUndoablesFromDispatch3Readme,
-    },
-  })
-  .add('makeUndoablesFromDispatch 4', () => <MakeUndoablesFromDispatch4 />, {
-    readme: {
-      sidebar: MakeUndoablesFromDispatch4Readme,
-    },
-  })
-  .add('makeUndoablesFromDispatch 5', () => <MakeUndoablesFromDispatch5 />, {
-    readme: {
-      sidebar: MakeUndoablesFromDispatch5Readme,
-    },
-  })
+  .add(
+    'makeUndoablesFromDispatch 1',
+    () => <MakeUndoablesFromDispatchExample />,
+    {
+      readme: {
+        sidebar: MakeUndoablesFromDispatchReadme,
+      },
+    }
+  )
+  .add(
+    'makeUndoablesFromDispatch 2',
+    () => <MakeUndoablesFromDispatchExample2 />,
+    {
+      readme: {
+        sidebar: MakeUndoablesFromDispatch2Readme,
+      },
+    }
+  )
+  .add(
+    'makeUndoablesFromDispatch 3',
+    () => <MakeUndoablesFromDispatchExample3 />,
+    {
+      readme: {
+        sidebar: MakeUndoablesFromDispatch3Readme,
+      },
+    }
+  )
   .add('bindUndoableActionCreators', () => <BindUndoableActionCreators />, {
     readme: {
       sidebar: BindUndoableActionCreatorsReadme,
@@ -226,25 +239,30 @@ storiesOf('useFlexibleUndo', module)
   })
   .add('action history 1', () => <ActionHistory1 />, {
     readme: {
-      // sidebar: ActionHistoryReadme,
+      sidebar: ActionHistory1Readme,
     },
   })
-  .add('action history', () => <ActionHistory />, {
+  .add('action history 2', () => <ActionHistory />, {
     readme: {
       sidebar: ActionHistoryReadme,
     },
   })
-  .add('action history 2', () => <ActionHistory2 />, {
+  .add('action history 3', () => <ActionHistory2 />, {
     readme: {
-      // sidebar: ActionHistoryReadme,
+      sidebar: ActionHistory2Readme,
     },
   })
-  .add('makeUndoables-meta-1', () => <MakeUndoablesMeta1 />, {
+  .add('action history 4', () => <ActionHistory3 />, {
+    readme: {
+      sidebar: ActionHistory3Readme,
+    },
+  })
+  .add('makeUndoables meta 1 ', () => <MakeUndoablesMeta1 />, {
     readme: {
       sidebar: MakeUndoablesMeta1Readme,
     },
   })
-  .add('makeUndoables-meta', () => <MakeUndoablesMeta />, {
+  .add('makeUndoables meta 2', () => <MakeUndoablesMeta />, {
     readme: {
       sidebar: MakeUndoablesMetaReadme,
     },

@@ -1,52 +1,53 @@
-import React, { FC, useReducer, useState } from 'react';
+import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
-  makeUndoableFromToHandler,
   PayloadFromTo,
   Updater,
-  invertUndoable,
   UpdaterMaker,
+  makeUndoableFTObjHandler,
+  combineHandlers,
+  merge,
 } from '../.';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
 import { NumberInput } from './components/number-input';
-import { makeUndoableHandler } from '../src';
-
-interface State {
-  count: number;
-}
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-}
 
 type Nullber = number | null;
 
-type UM = UpdaterMaker<number>;
-const addAmount: UM = amount => prev => prev + amount;
-const subAmount: UM = amount => prev => prev - amount;
+interface State {
+  count: number;
+  amount: Nullber;
+}
 
-const countUpdater = (updater: Updater<number>): Updater<State> => state => ({
-  ...state,
-  count: updater(state.count),
-});
+interface PayloadByType {
+  add: undefined;
+  subtract: undefined;
+  updateAmount: PayloadFromTo<Nullber>;
+}
 
-const addUpdater = makeUndoableHandler(countUpdater)(addAmount, subAmount);
+const makeCountHandler = (um: UpdaterMaker<number>) => (): Updater<
+  State
+> => prev =>
+  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
+
+const addHandler = makeCountHandler(amount => prev => prev + amount);
+const subHandler = makeCountHandler(amount => prev => prev - amount);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: addUpdater,
-  subtract: invertUndoable(addUpdater),
+  add: combineHandlers(addHandler, subHandler),
+  subtract: combineHandlers(subHandler, addHandler),
+  updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
 });
 
-export const MakeUndoablesFromDispatch5: FC = () => {
-  const [{ count }, dispatch] = useReducer(reducer, { count: 0 });
-  const [amount, setAmount] = useState<Nullber>(1);
+export const MakeUndoablesFromDispatchExample: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
+    count: 0,
+    amount: 1,
+  });
 
   const {
     makeUndoablesFromDispatch,
-    makeUndoable,
     canUndo,
     undo,
     canRedo,
@@ -55,12 +56,10 @@ export const MakeUndoablesFromDispatch5: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const { add, subtract } = makeUndoablesFromDispatch(dispatch, actionCreators);
-
-  const updateAmount = makeUndoable<PayloadFromTo<Nullber>>({
-    type: 'updateAmount',
-    ...makeUndoableFromToHandler(setAmount),
-  });
+  const { add, subtract, updateAmount } = makeUndoablesFromDispatch(
+    dispatch,
+    actionCreators
+  );
 
   return (
     <div className={rootClass}>
@@ -78,10 +77,10 @@ export const MakeUndoablesFromDispatch5: FC = () => {
             }
           />
         </label>
-        <button disabled={!amount} onClick={() => amount && add(amount)}>
+        <button disabled={!amount} onClick={() => add()}>
           add
         </button>
-        <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+        <button disabled={!amount} onClick={() => subtract()}>
           subtract
         </button>
         <button disabled={!canUndo} onClick={() => undo()}>

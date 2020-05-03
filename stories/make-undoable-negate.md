@@ -1,9 +1,11 @@
 You do not necessarily need to call your undoable functions directly. They are just functions that you can use as you feel fit. For example by wrapping them in another function like we do here. A consequence of this example is that all actions in the history will have the type "add", which may or may not be a problem depending on your use case. Check out the next examples for alternative ways of code reuse.
 
 ```typescript
+const [count, setCount] = useState(0);
+
 const add = makeUndoable<number>({
   type: 'add',
-  redo: amount => setCount(prev => prev + amount),
+  drdo: amount => setCount(prev => prev + amount),
   undo: amount => setCount(prev => prev - amount),
 });
 
@@ -14,7 +16,7 @@ Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../.';
+import { useFlexibleUndo } from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { rootClass, uiContainerClass } from './styles';
 
@@ -33,7 +35,7 @@ export const MakeUndoableNegate: FC = () => {
 
   const add = makeUndoable<number>({
     type: 'add',
-    redo: amount => setCount(prev => prev + amount),
+    drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
 

@@ -1,17 +1,17 @@
-The library exposes various utilities to create and compose your undoable redo/undo handlers.
+The utility **makeHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument and returns a function that takes a curried function for updating the state based on the payload and the previous state. The final return value is a function that can be used as a do/redo or undo handler.
 
-- **makeHandler** is a curried function that takes a function that sets the state (e.g. the one returned from React.useState) and returns a function that takes a curried function that converts the previous state to the new state.
-- **combineHandlers** takes the redo handler as first argument and the undo handler as second argument, and returns an object with redo and undo as keys and the handlers as values.
+The utility **combineHandlers** takes the do/redo handler as first argument and the undo handler as second argument, and returns an object with 'drdo' and 'undo' as keys and the handlers as values.
 
 ```typescript
+const [count, setCount] = useState(0);
+
 const countHandler = makeHandler(setCount);
 const addHandler = countHandler(amount => prev => prev + amount);
 const subHandler = countHandler(amount => prev => prev - amount);
 
-const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
+const { add, subtract } = makeUndoables<PayloadByType>({
   add: combineHandlers(addHandler, subHandler),
   subtract: combineHandlers(subHandler, addHandler),
-  updateAmount: makeUndoableFromToHandler(setAmount),
 });
 ```
 
@@ -20,27 +20,20 @@ Full code:
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
   makeHandler,
-  makeUndoableFromToHandler,
   combineHandlers,
-} from '../.';
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from './styles';
 import { ActionList } from './components/action-list';
-import { NumberInput } from './components/number-input';
-
-type Nullber = number | null;
 
 interface PayloadByType {
   add: number;
   subtract: number;
-  updateAmount: PayloadFromTo<Nullber>;
 }
 
 export const MakeUndoablesUtils: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
 
   const {
     makeUndoables,
@@ -53,37 +46,20 @@ export const MakeUndoablesUtils: FC = () => {
   } = useFlexibleUndo();
 
   const countHandler = makeHandler(setCount);
-  const addHandler = countHandler((amount: number) => prev => prev + amount);
-  const subHandler = countHandler((amount: number) => prev => prev - amount);
+  const addHandler = countHandler(amount => prev => prev + amount);
+  const subHandler = countHandler(amount => prev => prev - amount);
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
+  const { add, subtract } = makeUndoables<PayloadByType>({
     add: combineHandlers(addHandler, subHandler),
     subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFromToHandler(setAmount),
   });
 
   return (
     <div className={rootClass}>
       <div>count = {count}</div>
       <div className={uiContainerClass}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => amount && add(amount)}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => amount && subtract(amount)}>
-          subtract
-        </button>
+        <button onClick={() => add(1)}>add 1</button>
+        <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>
           undo
         </button>
