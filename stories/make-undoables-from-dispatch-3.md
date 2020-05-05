@@ -9,11 +9,11 @@ import {
   PayloadFromTo,
   Updater,
   invertHandlers,
+  makeUndoableHandler,
 } from 'use-flexible-undo';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
 import { NumberInput } from './components/number-input';
-import { makeUndoableHandler } from '../src';
 
 interface State {
   count: number;

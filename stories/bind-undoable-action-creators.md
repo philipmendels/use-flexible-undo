@@ -31,7 +31,9 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const makeCountHandler = (um: UpdaterMaker<number>): Updater<State> => prev =>
+const makeCountHandler = (um: UpdaterMaker<number>) => (): Updater<
+  State
+> => prev =>
   prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
 
 const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(

@@ -71,15 +71,15 @@ export const makeUndoableFTTupleHandler = <S, R>(
     ([from]) => stateSetter(from)
   );
 
-export const makeUndoableStateDepHandler = <S1, S2, R>(
-  stateUpdaterMaker: (um: UpdaterMaker<S1, S2>) => R
+export const makeUndoableStateDepHandler = <S1, S2, P, R>(
+  stateUpdaterMaker: (um: UpdaterMaker<S1, S2>) => (payload: P) => R
 ) => (
   updaterForDrdoMaker: UpdaterMaker<S1, S2>,
   updaterForUndoMaker: UpdaterMaker<S1, S2>
 ) =>
-  combineHandlers<undefined, R>(
-    () => stateUpdaterMaker(updaterForDrdoMaker),
-    () => stateUpdaterMaker(updaterForUndoMaker)
+  combineHandlers<P, R>(
+    stateUpdaterMaker(updaterForDrdoMaker),
+    stateUpdaterMaker(updaterForUndoMaker)
   );
 
 export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(

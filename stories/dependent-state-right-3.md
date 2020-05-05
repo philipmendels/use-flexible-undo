@@ -6,12 +6,12 @@ interface State {
   amount: Nullber;
 }
 
-const countUpdater = (um: UpdaterMaker<number>) =>
+const makeCountHandler = (um: UpdaterMaker<number>) => () =>
   setState(prev =>
     prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
   );
 
-const undoableAddHandler = makeUndoableStateDepHandler(countUpdater)(
+const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
   amount => prev => prev + amount,
   amount => prev => prev - amount
 );
@@ -69,12 +69,12 @@ export const DependentStateRight3Example: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const countUpdater = (um: UpdaterMaker<number>) =>
+  const makeCountHandler = (um: UpdaterMaker<number>) => () =>
     setState(prev =>
       prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
     );
 
-  const undoableAddHandler = makeUndoableStateDepHandler(countUpdater)(
+  const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );

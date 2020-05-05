@@ -53,6 +53,8 @@ import DependentStateRight2Intro from './dependent-state-right-2-intro.md';
 import DependentStateRight2Readme from './dependent-state-right-2.md';
 import { DependentStateRight3Example } from './dependent-state-right-3';
 import DependentStateRight3Readme from './dependent-state-right-3.md';
+import { DependentStateRight4Example } from './dependent-state-right-4';
+import DependentStateRight4Readme from './dependent-state-right-4.md';
 import { UsingReducer } from './use-reducer';
 import UsingReducerIntro from './use-reducer-intro.md';
 import UsingReducerReadme from './use-reducer.md';
@@ -60,6 +62,8 @@ import { MakeUndoablesFromDispatchExample } from './make-undoables-from-dispatch
 import MakeUndoablesFromDispatchReadme from './make-undoables-from-dispatch.md';
 import { MakeUndoablesFromDispatchExample2 } from './make-undoables-from-dispatch-2';
 import MakeUndoablesFromDispatch2Readme from './make-undoables-from-dispatch-2.md';
+import { MakeUndoablesFromDispatchWithPayloadExample } from './make-undoables-from-dispatch-with-payload';
+import MakeUndoablesFromDispatchWithPayloadReadme from './make-undoables-from-dispatch-with-payload.md';
 import { MakeUndoablesFromDispatchExample3 } from './make-undoables-from-dispatch-3';
 import MakeUndoablesFromDispatch3Readme from './make-undoables-from-dispatch-3.md';
 import { BindUndoableActionCreators } from './bind-undoable-action-creators';
@@ -194,6 +198,11 @@ storiesOf('useFlexibleUndo', module)
       sidebar: DependentStateRight3Readme,
     },
   })
+  .add('dependent state: RIGHT 4', () => <DependentStateRight4Example />, {
+    readme: {
+      sidebar: DependentStateRight4Readme,
+    },
+  })
   .add('use with useReducer', () => <UsingReducer />, {
     readme: {
       content: UsingReducerIntro,
@@ -215,6 +224,15 @@ storiesOf('useFlexibleUndo', module)
     {
       readme: {
         sidebar: MakeUndoablesFromDispatch2Readme,
+      },
+    }
+  )
+  .add(
+    'makeUndoablesFromDispatch with payload',
+    () => <MakeUndoablesFromDispatchWithPayloadExample />,
+    {
+      readme: {
+        sidebar: MakeUndoablesFromDispatchWithPayloadReadme,
       },
     }
   )

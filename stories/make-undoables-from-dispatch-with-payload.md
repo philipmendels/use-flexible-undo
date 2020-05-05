@@ -1,22 +1,21 @@
 Full code:
 
 ```typescript
-import React, { FC } from 'react';
+import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
   PayloadFromTo,
-  useUndoableReducer,
-  makeUndoableFTObjHandler,
-  UpdaterMaker,
   Updater,
+  UpdaterMaker,
   makeUndoableStateDepHandler,
-  invertHandlers,
   merge,
+  invertHandlers,
+  makeUndoableFTObjHandler,
 } from 'use-flexible-undo';
+import { NumberInput } from './components/number-input';
 import { ActionList } from './components/action-list';
 import { uiContainerClass, rootClass } from './styles';
-import { NumberInput } from './components/number-input';
 
 type Nullber = number | null;
 
@@ -26,15 +25,20 @@ interface State {
 }
 
 interface PayloadByType {
-  add: undefined;
-  subtract: undefined;
+  add: boolean;
+  subtract: boolean;
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const makeCountHandler = (um: UpdaterMaker<number>) => (): Updater<
-  State
-> => prev =>
-  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
+const makeCountHandler = (um: UpdaterMaker<number>) => (
+  shouldDouble: boolean
+): Updater<State> => prev =>
+  prev.amount
+    ? {
+        ...prev,
+        count: um(shouldDouble ? prev.amount * 2 : prev.amount)(prev.count),
+      }
+    : prev;
 
 const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
   amount => prev => prev + amount,
@@ -47,21 +51,14 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
 });
 
-export const UseUndoableReducer: FC = () => {
-  const {
-    state: { count, amount },
-    boundActionCreators,
-  } = useUndoableReducer(
-    reducer,
-    {
-      count: 0,
-      amount: 1,
-    },
-    actionCreators
-  );
+export const MakeUndoablesFromDispatchWithPayloadExample: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
+    count: 0,
+    amount: 1,
+  });
 
   const {
-    makeUndoables,
+    makeUndoablesFromDispatch,
     canUndo,
     undo,
     canRedo,
@@ -70,8 +67,9 @@ export const UseUndoableReducer: FC = () => {
     timeTravel,
   } = useFlexibleUndo();
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>(
-    boundActionCreators
+  const { add, subtract, updateAmount } = makeUndoablesFromDispatch(
+    dispatch,
+    actionCreators
   );
 
   return (
@@ -90,10 +88,13 @@ export const UseUndoableReducer: FC = () => {
             }
           />
         </label>
-        <button disabled={!amount} onClick={() => add()}>
+        <button disabled={!amount} onClick={() => add(false)}>
           add
         </button>
-        <button disabled={!amount} onClick={() => subtract()}>
+        <button disabled={!amount} onClick={() => add(true)}>
+          add double
+        </button>
+        <button disabled={!amount} onClick={() => subtract(false)}>
           subtract
         </button>
         <button disabled={!canUndo} onClick={() => undo()}>
