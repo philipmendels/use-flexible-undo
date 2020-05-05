@@ -47,8 +47,8 @@ export const ActionList = <A extends Action>({
                 onChange={e => setModus(e.currentTarget.value as any)}
                 style={{ fontSize: '14px', padding: '4px' }}
               >
-                <option value="clickOn">click-on</option>
-                <option value="clickBetween">click-between</option>
+                <option value="clickOn">Last of the past</option>
+                <option value="clickBetween">Move the present</option>
               </select>
             </label>
           </div>
