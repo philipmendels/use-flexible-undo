@@ -20,9 +20,17 @@ import { MakeUndoableFTObjHandlerExample } from './make-undoable-from-to-handler
 import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
 import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md';
 
+import { MakeUndoableFTTupleHandlerExample } from './make-undoable-from-to-tuple-handler';
+import MakeUndoableFTTupleHandlerReadme from './make-undoable-from-to-tuple-handler.md';
+
 import { WrapFTObjHandlerExample } from './wrap-from-to-handler';
-// import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
 import WrapFromToHandlerReadme from './wrap-from-to-handler.md';
+
+import { WrapFTTupleHandlerExample } from './wrap-from-to-tuple-handler';
+import WrapFTTupleHandlerReadme from './wrap-from-to-tuple-handler.md';
+
+import { ConvertHandlerExample } from './convert-handler';
+import ConvertHandlerReadme from './convert-handler.md';
 
 import { MakeUndoableHandlerExample } from './make-undoable-handler';
 import MakeUndoableHandlerIntro from './make-undoable-handler-intro.md';
@@ -157,22 +165,40 @@ storiesOf('useFlexibleUndo', module)
       sidebar: MakeUndoableHandlerReadme,
     },
   })
+  .add('extract updater functions', () => <MakeUndoablesUtil />, {
+    readme: {
+      content: MakeUndoablesUtilIntro,
+      sidebar: MakeUndoablesUtilReadme,
+    },
+  })
   .add('makeUndoableFTObjHandler', () => <MakeUndoableFTObjHandlerExample />, {
     readme: {
       content: MakeUndoableFromToHandlerIntro,
       sidebar: MakeUndoableFromToHandlerReadme,
     },
   })
+  .add(
+    'makeUndoableFTTupleHandler',
+    () => <MakeUndoableFTTupleHandlerExample />,
+    {
+      readme: {
+        sidebar: MakeUndoableFTTupleHandlerReadme,
+      },
+    }
+  )
   .add('wrapFTObjHandler', () => <WrapFTObjHandlerExample />, {
     readme: {
-      // content: WrapFromToHandlerIntro,
       sidebar: WrapFromToHandlerReadme,
     },
   })
-  .add('extract updater functions', () => <MakeUndoablesUtil />, {
+  .add('wrapFTTupleHandler', () => <WrapFTTupleHandlerExample />, {
     readme: {
-      content: MakeUndoablesUtilIntro,
-      sidebar: MakeUndoablesUtilReadme,
+      sidebar: WrapFTTupleHandlerReadme,
+    },
+  })
+  .add('convertHandler', () => <ConvertHandlerExample />, {
+    readme: {
+      sidebar: ConvertHandlerReadme,
     },
   })
   .add('dependent state: WRONG', () => <DependentStateWrong />, {
