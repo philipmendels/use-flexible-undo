@@ -1,15 +1,8 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 
-import './basics/basics.index';
-import './utilities/utilities.index';
-import './dependent-state/dependent-state.index';
-import './reducer/reducer.index';
-import './time-travel/time-travel.index';
-import './meta-actions/meta-actions.index';
-//
-import { NoPayloadLight } from './light/no-payload-light';
-import { NoPayload2Light } from './light/no-payload-2-light';
+import { NoPayloadLight } from './no-payload-light';
+import { NoPayload2Light } from './no-payload-2-light';
 
 storiesOf('useFlexibleUndoLight', module)
   //@ts-ignore
