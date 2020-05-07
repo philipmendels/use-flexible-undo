@@ -98,6 +98,14 @@ export const wrapFTTupleHandler = <S, R>(
 ) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler([state, updater(payload)(state)]);
 
+export const combineUHandlerWithMeta = <P, R, MR extends MetaActionReturnTypes>(
+  undoableHandlers: Undoable<PayloadHandler<P, R>>,
+  meta: MR
+) => ({
+  ...undoableHandlers,
+  meta,
+});
+
 export const makeUndoableReducer = <
   S,
   PBT extends PayloadByType,
