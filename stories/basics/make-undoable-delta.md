@@ -17,7 +17,7 @@ Full code:
 ```typescript
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from 'use-flexible-undo';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
 
 export const MakeUndoableExample: FC = () => {

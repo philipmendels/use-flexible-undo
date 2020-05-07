@@ -13,8 +13,8 @@ import {
   invertHandlers,
   makeUndoableFTObjHandler,
 } from 'use-flexible-undo';
-import { NumberInput } from '../components'/number-input';
-import { ActionList } from '../components'/action-list';
+import { NumberInput } from '../components/number-input';
+import { ActionList } from '../components/action-list';
 import { uiContainerClass, rootClass } from '../styles';
 
 type Nullber = number | null;

@@ -3,7 +3,7 @@ Full code:
 ```typescript
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo, convertHandler } from 'use-flexible-undo';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
 
 export const ConvertHandlerExample: FC = () => {

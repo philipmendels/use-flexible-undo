@@ -10,7 +10,7 @@ import {
   invertHandlers,
 } from 'use-flexible-undo';
 import { rootClass, uiContainerClass, getStackItemClass } from '../styles';
-import { NumberInput } from '../components'/number-input';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 

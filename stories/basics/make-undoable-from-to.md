@@ -23,7 +23,7 @@ Full code:
 import React, { useState } from 'react';
 import { useFlexibleUndo, PayloadFromTo } from '../.';
 import { rootClass, uiContainerClass } from '../styles';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 
 export const MakeUndoableFromTo: React.FC = () => {
   const [count, setCount] = useState(1);

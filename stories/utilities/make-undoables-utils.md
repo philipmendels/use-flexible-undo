@@ -25,7 +25,7 @@ import {
   combineHandlers,
 } from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from '../styles';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 
 interface PayloadByType {
   add: number;

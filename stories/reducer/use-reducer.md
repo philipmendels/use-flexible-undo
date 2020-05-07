@@ -10,9 +10,9 @@ import {
   UReducer,
   UpdaterMaker,
 } from 'use-flexible-undo';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
-import { NumberInput } from '../components'/number-input';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 

@@ -23,7 +23,7 @@ import {
   UndoableHandler,
   invertHandlers,
 } from 'use-flexible-undo';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
 
 interface PayloadByType {

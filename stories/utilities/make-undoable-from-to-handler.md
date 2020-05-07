@@ -19,7 +19,7 @@ Full code:
 import React, { useState } from 'react';
 import { useFlexibleUndo, PayloadFromTo, makeUndoableFTObjHandler } from '../.';
 import { rootClass, uiContainerClass } from '../styles';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 
 interface PayloadByType {
   updateCount: PayloadFromTo<number>;

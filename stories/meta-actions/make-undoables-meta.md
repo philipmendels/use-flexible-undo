@@ -10,8 +10,8 @@ import {
   invertHandlers,
 } from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from '../styles';
-import { ActionList } from '../components'/action-list';
-import { NumberInput } from '../components'/number-input';
+import { ActionList } from '../components/action-list';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 

@@ -11,9 +11,9 @@ import {
   invertHandlers,
   makeUndoableHandler,
 } from 'use-flexible-undo';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 import { uiContainerClass, rootClass } from '../styles';
-import { NumberInput } from '../components'/number-input';
+import { NumberInput } from '../components/number-input';
 
 interface State {
   count: number;

@@ -14,9 +14,9 @@ import {
   invertHandlers,
   merge,
 } from 'use-flexible-undo';
-import { ActionList } from '../components'/action-list';
+import { ActionList } from '../components/action-list';
 import { uiContainerClass, rootClass } from '../styles';
-import { NumberInput } from '../components'/number-input';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
