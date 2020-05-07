@@ -53,9 +53,6 @@ export const NoPayload2Light: FC = () => {
         setState(prev => ({ ...prev, amount }))
       ),
     },
-    options: {
-      callHandlersFrom: 'UPDATER',
-    },
   });
 
   const { add, subtract, updateAmount } = undoables;

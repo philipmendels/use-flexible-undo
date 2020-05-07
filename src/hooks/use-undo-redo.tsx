@@ -39,7 +39,7 @@ export const useUndoRedo = <
 
   const { onDo, onRedo, onUndo, onDoRedo, latest } = callbacks;
 
-  const { callHandlersFrom, storeActionCreatedDate } = {
+  const { unstable_callHandlersFrom, storeActionCreatedDate } = {
     ...defaultOptions,
     ...options,
   };
@@ -139,7 +139,7 @@ export const useUndoRedo = <
         const [action, ...rest] = prev.past;
         updaterCalledAmount++;
         if (updaterCalledAmount === 1) {
-          callHandlersFrom === 'UPDATER'
+          unstable_callHandlersFrom === 'UPDATER'
             ? handleUndo(action)
             : undoActionsRef.current.push(action);
         }
@@ -150,7 +150,7 @@ export const useUndoRedo = <
       }
       return prev;
     });
-  }, [handleUndo, callHandlersFrom]);
+  }, [handleUndo, unstable_callHandlersFrom]);
 
   const redo = useCallback(() => {
     let updaterCalledAmount = 0;
@@ -160,7 +160,7 @@ export const useUndoRedo = <
         const action = prev.future[lastIndex];
         updaterCalledAmount++;
         if (updaterCalledAmount === 1) {
-          callHandlersFrom === 'UPDATER'
+          unstable_callHandlersFrom === 'UPDATER'
             ? handleRedo(action)
             : redoActionsRef.current.push(action);
         }
@@ -171,7 +171,7 @@ export const useUndoRedo = <
       }
       return prev;
     });
-  }, [handleRedo, callHandlersFrom]);
+  }, [handleRedo, unstable_callHandlersFrom]);
 
   const handleUndoRedoFromEffect = useCallback(() => {
     while (redoActionsRef.current.length) {
@@ -185,13 +185,13 @@ export const useUndoRedo = <
   }, [handleRedo, handleUndo]);
 
   useEffect(() => {
-    if (callHandlersFrom === 'EFFECT') {
+    if (unstable_callHandlersFrom === 'EFFECT') {
       handleUndoRedoFromEffect();
     }
   });
 
   useLayoutEffect(() => {
-    if (callHandlersFrom === 'LAYOUT_EFFECT') {
+    if (unstable_callHandlersFrom === 'LAYOUT_EFFECT') {
       handleUndoRedoFromEffect();
     }
   });

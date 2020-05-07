@@ -20,28 +20,31 @@ import {
   UFUProps,
   HandlersWithUndefinedByType,
   PayloadHandlerWithUndefined,
+  PBT_Inferred,
 } from './index.types';
 
 export const useFlexibleUndo = <
   PBT_All extends PayloadByType | undefined = undefined,
   MR extends MetaActionReturnTypes = undefined
->({ callbacks = {}, ...rest }: UFUProps<NonNullable<PBT_All>, MR> = {}) => {
-  type PBT_Inferred = PBT_All extends undefined ? PayloadByType : PBT_All;
-  type PBT_Partial = Partial<PBT_Inferred>;
-  type P_All = ValueOf<PBT_Inferred>;
+>({ callbacks = {}, ...rest }: UFUProps<PBT_Inferred<PBT_All>, MR> = {}) => {
+  type PBT_Inf = PBT_Inferred<PBT_All>;
+  type PBT_Partial = Partial<PBT_Inf>;
+  type P_All = ValueOf<PBT_Inf>;
   type NMR = NonNullable<MR>;
 
-  type Handlers = UndoableHandlerWithMetaByType<PBT_Inferred, MR>;
+  type Handlers = UndoableHandlerWithMetaByType<PBT_Inf, MR>;
 
   const handlersRef = useRef<Handlers>({} as Handlers);
 
+  const { onMakeUndoables, latest = {}, ...callbacksRest } = callbacks;
+  const { onMakeUndoables: onMakeUndoablesLatest, ...latestRest } = latest;
+  const onMakeUndoablesLatestRef = useLatest(onMakeUndoablesLatest);
+
   const { createUndoables, ...undoRedoRest } = useUndoRedo({
     handlers: handlersRef,
+    callbacks: { ...callbacksRest, latest: latestRest },
     ...rest,
   });
-
-  const { onMakeUndoables, latest } = callbacks;
-  const onMakeUndoablesLatestRef = useLatest(latest?.onMakeUndoables);
 
   const makeUndoables = useCallback(
     <PBT extends PBT_Partial>(
@@ -50,7 +53,7 @@ export const useFlexibleUndo = <
       }
     ): HandlersWithUndefinedByType<PBT> => {
       handlersRef.current = { ...handlersRef.current, ...handlers };
-      const types = Object.keys(handlers) as StringOnlyKeyOf<PBT_All>[];
+      const types = Object.keys(handlers) as StringOnlyKeyOf<PBT_Inf>[];
       onMakeUndoables?.(types);
       onMakeUndoablesLatestRef.current?.(types);
       return createUndoables(handlers) as HandlersWithUndefinedByType<PBT>;
@@ -62,7 +65,7 @@ export const useFlexibleUndo = <
     <P extends P_All>(
       handler: UndoableHandlerWithMetaAndType<
         P,
-        ExtractKeyByValue<PBT_Inferred, P>,
+        ExtractKeyByValue<PBT_Inf, P>,
         MR
       >
     ): PayloadHandlerWithUndefined<P> => {

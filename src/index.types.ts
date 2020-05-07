@@ -2,6 +2,10 @@ import { Dispatch } from 'react';
 
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
+export type PBT_Inferred<
+  PBT_All extends PayloadByType | undefined
+> = PBT_All extends undefined ? PayloadByType : PBT_All;
+
 export type PayloadHandler<P, R = void> = (payload: P) => R;
 
 // export type PayloadHandler<P> = (
@@ -230,7 +234,7 @@ export type Callbacks<
 
 export interface UFUOptions {
   storeActionCreatedDate?: boolean;
-  callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
+  unstable_callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
 }
 
 export interface UFUProps<
