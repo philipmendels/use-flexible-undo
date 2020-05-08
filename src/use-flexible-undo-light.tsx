@@ -5,7 +5,6 @@ import {
   PayloadByType,
   MetaActionReturnTypes,
   UFULightProps,
-  HandlersWithUndefinedByType,
 } from './index.types';
 
 export const useFlexibleUndoLight = <
@@ -20,10 +19,10 @@ export const useFlexibleUndoLight = <
     ...rest,
   });
 
-  const undoables = useMemo(
-    () => createUndoables(handlers) as HandlersWithUndefinedByType<PBT>,
-    [handlers, createUndoables]
-  );
+  const undoables = useMemo(() => createUndoables(handlers), [
+    handlers,
+    createUndoables,
+  ]);
 
   return {
     undoables,

@@ -8,24 +8,8 @@ export type PBT_Inferred<
 
 export type PayloadHandler<P, R = void> = (payload: P) => R;
 
-// export type PayloadHandler<P> = (
-//   ...payload: P extends undefined ? [] : [P]
-// ) => void;
-
-// export type PayloadHandler<P> = P extends undefined
-//   ? (payload?: P) => void
-//   : (payload: P) => void;
-
-export type PayloadHandlerWithUndefined<P> = (
-  ...payload: P extends undefined ? [] : [P]
-) => void;
-
 export type HandlersByType<PBT extends PayloadByType> = {
   [K in StringOnlyKeyOf<PBT>]: PayloadHandler<PBT[K]>;
-};
-
-export type HandlersWithUndefinedByType<PBT extends PayloadByType> = {
-  [K in StringOnlyKeyOf<PBT>]: PayloadHandlerWithUndefined<PBT[K]>;
 };
 
 type StateUpdater<P, S> = (payload: P) => (state: S) => S;
@@ -111,7 +95,7 @@ export type LinkedMetaActions<MR extends NonNullable<MetaActionReturnTypes>> = {
 export type Action<T = string, P = any> = {
   type: T;
   created?: Date;
-} & (P extends undefined
+} & (P extends void | undefined
   ? {
       payload?: P;
     }
@@ -138,9 +122,7 @@ type UActionUnion<PBT extends PayloadByType> = {
 export type UActionCreator<
   PBT extends PayloadByType,
   T extends StringOnlyKeyOf<PBT>
-> = PBT[T] extends undefined
-  ? (payload?: PBT[T]) => UAction<T, PBT[T]>
-  : (payload: PBT[T]) => UAction<T, PBT[T]>;
+> = (payload: PBT[T]) => UAction<T, PBT[T]>;
 
 export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
   [T in StringOnlyKeyOf<PBT>]: Undoable<UActionCreator<PBT, T>>;

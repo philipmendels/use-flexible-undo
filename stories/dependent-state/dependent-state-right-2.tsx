@@ -19,8 +19,8 @@ interface State {
 }
 
 interface PayloadByType {
-  add: undefined;
-  subtract: undefined;
+  add: void;
+  subtract: void;
   updateAmount: PayloadFromTo<Nullber>;
 }
 

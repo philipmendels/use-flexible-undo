@@ -13,7 +13,6 @@ import {
   UDispatch,
   UndoableHandlersByType,
   UndoableHandlerWithMeta,
-  UActionCreator,
   UpdaterMaker,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
@@ -126,8 +125,8 @@ export const makeUndoableReducer = <
   actionCreators: mapObject(stateUpdaters, ([type, _]) => [
     type,
     {
-      drdo: makeActionCreator(type) as UActionCreator<PBT, typeof type>,
-      undo: makeActionCreator(type, true) as UActionCreator<PBT, typeof type>,
+      drdo: makeActionCreator(type),
+      undo: makeActionCreator(type, true),
     },
   ]) as UndoableUActionCreatorsByType<PBT>,
   ...({

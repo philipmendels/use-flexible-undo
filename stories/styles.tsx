@@ -16,6 +16,7 @@ export const uiContainerClass = css`
     margin-right: 10px;
     padding: 4px 8px;
     border-radius: 2px;
+    margin-top: 10px;
   }
   input[type='number'] {
     width: 40px;
