@@ -18,7 +18,7 @@ export const uiContainerClass = css`
     border-radius: 2px;
   }
   input[type='number'] {
-    width: 30px;
+    width: 40px;
     border: 1px solid gray;
   }
   button {

@@ -1,7 +1,4 @@
-Full code:
-
-```typescript
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo, useCallback } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
@@ -9,7 +6,8 @@ import {
   makeUndoableHandler,
   invertHandlers,
   combineUHandlerWithMeta,
-} from 'use-flexible-undo';
+  CB,
+} from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -26,9 +24,18 @@ interface MetaActionReturnTypes {
   describe: string;
 }
 
-export const CombineUHandlerWithMetaExample: FC = () => {
+const onMakeUndoables = (types: (keyof PayloadByType)[]) =>
+  console.log('makeUndoables', types);
+
+export const Memoization4Example: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
+
+  const onDoRedo = useCallback<CB<PayloadByType, MetaActionReturnTypes>>(
+    ({ eventName, meta }) =>
+      console.log(`${eventName}: ${meta.describe()} when count was ${count}`),
+    [count]
+  );
 
   const {
     makeUndoables,
@@ -39,24 +46,33 @@ export const CombineUHandlerWithMetaExample: FC = () => {
     stack,
     timeTravel,
     getMetaActionHandlers,
-  } = useFlexibleUndo<PayloadByType, MetaActionReturnTypes>();
-
-  const undoableAddHandler = makeUndoableHandler(setCount)(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
-  );
-
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: combineUHandlerWithMeta(undoableAddHandler, {
-      describe: amount => `Increase count by ${amount}`,
-    }),
-    subtract: combineUHandlerWithMeta(invertHandlers(undoableAddHandler), {
-      describe: amount => `Decrease count by ${amount}`,
-    }),
-    updateAmount: combineUHandlerWithMeta(makeUndoableFTObjHandler(setAmount), {
-      describe: ({ from, to }) => `Update amount from ${from} to ${to}`,
-    }),
+  } = useFlexibleUndo<PayloadByType, MetaActionReturnTypes>({
+    callbacks: {
+      onMakeUndoables,
+      onDoRedo,
+    },
   });
+
+  const { add, subtract, updateAmount } = useMemo(() => {
+    const undoableAddHandler = makeUndoableHandler(setCount)(
+      amount => prev => prev + amount,
+      amount => prev => prev - amount
+    );
+    return makeUndoables<PayloadByType>({
+      add: combineUHandlerWithMeta(undoableAddHandler, {
+        describe: amount => `Increase count by ${amount}`,
+      }),
+      subtract: combineUHandlerWithMeta(invertHandlers(undoableAddHandler), {
+        describe: amount => `Decrease count by ${amount}`,
+      }),
+      updateAmount: combineUHandlerWithMeta(
+        makeUndoableFTObjHandler(setAmount),
+        {
+          describe: ({ from, to }) => `Update amount from ${from} to ${to}`,
+        }
+      ),
+    });
+  }, [makeUndoables]);
 
   return (
     <div className={rootClass}>
@@ -95,4 +111,3 @@ export const CombineUHandlerWithMetaExample: FC = () => {
     </div>
   );
 };
-```

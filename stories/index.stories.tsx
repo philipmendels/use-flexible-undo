@@ -5,5 +5,6 @@ import './reducer/reducer.index';
 import './time-travel/time-travel.index';
 import './meta-actions/meta-actions.index';
 import './callbacks/callbacks.index';
+import './memoization/memoization.index';
 
 import './light/light.index';

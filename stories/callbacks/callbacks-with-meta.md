@@ -9,7 +9,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
   combineUHandlerWithMeta,
-} from '../../.';
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
