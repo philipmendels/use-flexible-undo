@@ -39,7 +39,11 @@ export const useUndoRedo = <
 
   const { onDo, onRedo, onUndo, onDoRedo, latest } = callbacks;
 
-  const { unstable_callHandlersFrom, storeActionCreatedDate } = {
+  const {
+    unstable_callHandlersFrom,
+    unstable_waitForNextUpdate,
+    storeActionCreatedDate,
+  } = {
     ...defaultOptions,
     ...options,
   };
@@ -57,9 +61,6 @@ export const useUndoRedo = <
   const canRedo = useMemo(() => Boolean(stack.future.length), [
     stack.future.length,
   ]);
-
-  const undoActionsRef = useRef<ActionUnion<PBT>[]>([]);
-  const redoActionsRef = useRef<ActionUnion<PBT>[]>([]);
 
   // For internal use
   const getMAH = useCallback(
@@ -132,7 +133,15 @@ export const useUndoRedo = <
     [latestCallbacksRef, onRedo, onDoRedo, getMAH, handlers]
   );
 
-  const undo = useCallback(() => {
+  // For unstable_waitForNextUpdate
+  const delayedUpdatesRef = useRef<('undo' | 'redo')[]>([]);
+
+  // For unstable_callHandlersFrom === 'EFFECT' | 'LAYOUT_EFFECT'
+  const batchedUpdatesRef = useRef<
+    { type: 'undo' | 'redo'; action: ActionUnion<PBT> }[]
+  >([]);
+
+  const changeStackForUndo = useCallback(() => {
     let updaterCalledAmount = 0;
     setStack(prev => {
       if (prev.past.length) {
@@ -141,7 +150,7 @@ export const useUndoRedo = <
         if (updaterCalledAmount === 1) {
           unstable_callHandlersFrom === 'UPDATER'
             ? handleUndo(action)
-            : undoActionsRef.current.push(action);
+            : batchedUpdatesRef.current.push({ type: 'undo', action });
         }
         return {
           past: rest,
@@ -152,7 +161,7 @@ export const useUndoRedo = <
     });
   }, [handleUndo, unstable_callHandlersFrom]);
 
-  const redo = useCallback(() => {
+  const changeStackForRedo = useCallback(() => {
     let updaterCalledAmount = 0;
     setStack(prev => {
       if (prev.future.length) {
@@ -162,7 +171,7 @@ export const useUndoRedo = <
         if (updaterCalledAmount === 1) {
           unstable_callHandlersFrom === 'UPDATER'
             ? handleRedo(action)
-            : redoActionsRef.current.push(action);
+            : batchedUpdatesRef.current.push({ type: 'redo', action });
         }
         return {
           past: [action, ...prev.past],
@@ -173,14 +182,38 @@ export const useUndoRedo = <
     });
   }, [handleRedo, unstable_callHandlersFrom]);
 
-  const handleUndoRedoFromEffect = useCallback(() => {
-    while (redoActionsRef.current.length) {
-      const action = redoActionsRef.current.shift()!;
-      handleRedo(action);
+  const isUpdateInProgressRef = useRef(false);
+
+  const undo = useCallback(() => {
+    if (unstable_waitForNextUpdate) {
+      if (isUpdateInProgressRef.current) {
+        delayedUpdatesRef.current.push('undo');
+      } else {
+        isUpdateInProgressRef.current = true;
+        changeStackForUndo();
+      }
+    } else {
+      changeStackForUndo();
     }
-    while (undoActionsRef.current.length) {
-      const action = undoActionsRef.current.shift()!;
-      handleUndo(action);
+  }, [changeStackForUndo, unstable_waitForNextUpdate]);
+
+  const redo = useCallback(() => {
+    if (unstable_waitForNextUpdate) {
+      if (isUpdateInProgressRef.current) {
+        delayedUpdatesRef.current.push('redo');
+      } else {
+        isUpdateInProgressRef.current = true;
+        changeStackForRedo();
+      }
+    } else {
+      changeStackForRedo();
+    }
+  }, [changeStackForRedo, unstable_waitForNextUpdate]);
+
+  const handleUndoRedoFromEffect = useCallback(() => {
+    while (batchedUpdatesRef.current.length) {
+      const { action, type } = batchedUpdatesRef.current.shift()!;
+      type === 'undo' ? handleUndo(action) : handleRedo(action);
     }
   }, [handleRedo, handleUndo]);
 
@@ -195,6 +228,15 @@ export const useUndoRedo = <
       handleUndoRedoFromEffect();
     }
   });
+
+  useEffect(() => {
+    isUpdateInProgressRef.current = false;
+    if (delayedUpdatesRef.current.length) {
+      delayedUpdatesRef.current.shift()! === 'undo'
+        ? changeStackForUndo()
+        : changeStackForRedo();
+    }
+  }, [changeStackForRedo, changeStackForUndo, stack]);
 
   const timeTravel = useCallback(
     (range: 'past' | 'future' | 'full', index: number) => {

@@ -4,6 +4,8 @@ import { storiesOf } from '@storybook/react';
 import { DependentStateWrong } from './dependent-state-wrong';
 import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
 import DependentStateWrongReadme from './dependent-state-wrong.md';
+import { WaitForUpdateExample } from './dependent-state-wait';
+import WaitForUpdateReadme from './dependent-state-wait.md';
 import { DependentStateRight1Example } from './dependent-state-right-1';
 import DependentStateRight1Intro from './dependent-state-right-1-intro.md';
 import DependentStateRight1Readme from './dependent-state-right-1.md';
@@ -22,6 +24,12 @@ storiesOf('useFlexibleUndo/dependent state', module)
     readme: {
       content: DependentStateWrongIntro,
       sidebar: DependentStateWrongReadme,
+    },
+  })
+  .add('dependent state: wait for update', () => <WaitForUpdateExample />, {
+    readme: {
+      // content: DependentStateWrongIntro,
+      sidebar: WaitForUpdateReadme,
     },
   })
   .add('dependent state: RIGHT 1', () => <DependentStateRight1Example />, {

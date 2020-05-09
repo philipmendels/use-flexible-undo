@@ -217,6 +217,7 @@ export type Callbacks<
 export interface UFUOptions {
   storeActionCreatedDate?: boolean;
   unstable_callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
+  unstable_waitForNextUpdate?: boolean;
 }
 
 export interface UFUProps<
