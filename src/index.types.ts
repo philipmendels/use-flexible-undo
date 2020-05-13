@@ -228,6 +228,7 @@ export interface UFUProps<
     latest?: Callbacks<PBT, MR>;
   };
   options?: UFUOptions;
+  initialStack?: Stack<ActionUnion<PBT>>;
 }
 
 export interface UFULightProps<
@@ -239,6 +240,7 @@ export interface UFULightProps<
     latest?: CallbacksLight<PBT, MR>;
   };
   options?: UFUOptions;
+  initialStack?: Stack<ActionUnion<PBT>>;
 }
 
 export interface UseUndoRedoProps<
@@ -252,4 +254,5 @@ export interface UseUndoRedoProps<
     latest?: CallbacksLight<PBT, MR>;
   };
   options?: UFUOptions;
+  initialStack?: Stack<ActionUnion<PBT>>;
 }

@@ -7,6 +7,7 @@ import { CallbacksLatestExample } from './callbacks-latest';
 import CallbacksLatestReadme from './callbacks-latest.md';
 import { CallbacksWithMetaExample } from './callbacks-with-meta';
 import CallbacksWithMetaReadme from './callbacks-with-meta.md';
+import { StackChangeExample } from './stack-change';
 
 storiesOf('useFlexibleUndo/callbacks', module)
   //@ts-ignore
@@ -24,5 +25,10 @@ storiesOf('useFlexibleUndo/callbacks', module)
   .add('callbacks with meta-actions', () => <CallbacksWithMetaExample />, {
     readme: {
       sidebar: CallbacksWithMetaReadme,
+    },
+  })
+  .add('stack change', () => <StackChangeExample />, {
+    readme: {
+      // sidebar: CallbacksWithMetaReadme,
     },
   });

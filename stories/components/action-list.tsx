@@ -13,6 +13,7 @@ type ConvertFn<A> = (action: A) => ReactNode;
 interface ActionListProps<A extends Action> {
   stack: Stack<A>;
   timeTravel: TimeTravelFn;
+  startTime?: Date;
   convert?: ConvertFn<A>;
 }
 
@@ -22,9 +23,10 @@ export const ActionList = <A extends Action>({
   stack,
   timeTravel,
   convert,
+  startTime,
 }: ActionListProps<A>): ReactElement | null => {
   const [modus, setModus] = useState<Modus>('clickOn');
-  const [startTime] = useState(new Date());
+  const startTimeRef = useRef(new Date());
   const [now, setNow] = useState(new Date());
   const [mouseMoved, setMouseMoved] = useState(false);
   useInterval(() => setNow(new Date()), 5000);
@@ -123,7 +125,7 @@ export const ActionList = <A extends Action>({
             >
               <StackItemRoot modus="clickOn">
                 <div className="time" style={{ minWidth: '120px' }}>
-                  {formatTime(startTime!, now)}
+                  {formatTime(startTime || startTimeRef.current, now)}
                 </div>
                 <div
                   className="description"

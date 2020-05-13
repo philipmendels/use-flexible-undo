@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import {
-  Stack,
   ActionUnion,
   UndoableHandlerWithMeta,
   MetaActionHandlers,
@@ -34,6 +33,10 @@ export const useUndoRedo = <
   handlers,
   callbacks = {},
   options,
+  initialStack = {
+    past: [],
+    future: [],
+  },
 }: UseUndoRedoProps<PBT, MR>) => {
   type NMR = NonNullable<MR>;
 
@@ -50,10 +53,7 @@ export const useUndoRedo = <
 
   const latestCallbacksRef = useLatest(latest);
 
-  const [stack, setStack] = useState<Stack<ActionUnion<PBT>>>({
-    past: [],
-    future: [],
-  });
+  const [stack, setStack] = useState(initialStack);
 
   const canUndo = useMemo(() => Boolean(stack.past.length), [
     stack.past.length,
@@ -316,5 +316,6 @@ export const useUndoRedo = <
     timeTravel,
     getMetaActionHandlers,
     createUndoables,
+    setStack,
   };
 };
