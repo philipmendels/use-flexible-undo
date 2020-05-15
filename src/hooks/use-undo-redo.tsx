@@ -7,6 +7,8 @@ import {
   useLayoutEffect,
 } from 'react';
 
+import { v4 } from 'uuid';
+
 import {
   ActionUnion,
   UndoableHandlerWithMeta,
@@ -19,12 +21,25 @@ import {
   UseUndoRedoProps,
   StringOnlyKeyOf,
   Action,
+  History,
 } from '../index.types';
 
 import { useLatest } from './use-latest';
 
 import { mapObject } from '../util-internal';
 import { defaultOptions } from '../constants';
+
+const createInitialHistory = <PBT extends PayloadByType>(): History<PBT> => {
+  const id = v4();
+  return {
+    currentBranchId: id,
+    currentIndex: -1,
+    branches: {
+      [id]: { id, created: new Date(), stack: [] },
+    },
+    mainBranchId: id,
+  };
+};
 
 export const useUndoRedo = <
   PBT extends PayloadByType,
@@ -33,27 +48,54 @@ export const useUndoRedo = <
   handlers,
   callbacks = {},
   options,
-  initialStack = {
-    past: [],
-    future: [],
-  },
+  initialHistory = createInitialHistory(),
 }: UseUndoRedoProps<PBT, MR>) => {
   type NMR = NonNullable<MR>;
 
   const { onDo, onRedo, onUndo, onDoRedo, latest } = callbacks;
 
-  const {
-    unstable_callHandlersFrom,
-    unstable_waitForNextUpdate,
-    storeActionCreatedDate,
-  } = {
+  const { storeActionCreatedDate, unstable_callHandlersFrom } = {
     ...defaultOptions,
     ...options,
   };
 
   const latestCallbacksRef = useLatest(latest);
 
-  const [stack, setStack] = useState(initialStack);
+  const [history, setHistory] = useState(initialHistory);
+
+  useEffect(() => console.log(history), [history]);
+
+  const stack = useMemo(() => {
+    let stack: ActionUnion<PBT>[] = [];
+    const { currentBranchId, mainBranchId, branches, currentIndex } = history;
+    let branch = branches[mainBranchId];
+    while (true) {
+      if (branch.nextChild) {
+        stack = stack.concat(
+          branch.stack.slice(0, branch.nextChild.actionIndex + 1)
+        );
+        branch = branches[branch.nextChild.branchId];
+      } else {
+        stack = stack.concat(branch.stack);
+        break;
+      }
+    }
+
+    let globalIndex = currentIndex;
+    branch = branches[currentBranchId];
+    while (true) {
+      if (branch.parent) {
+        globalIndex += branch.parent.actionIndex + 1;
+        branch = branches[branch.parent.branchId];
+      } else {
+        break;
+      }
+    }
+    return {
+      past: stack.slice(0, globalIndex + 1).reverse(),
+      future: stack.slice(globalIndex + 1, stack.length).reverse(),
+    };
+  }, [history]);
 
   const canUndo = useMemo(() => Boolean(stack.past.length), [
     stack.past.length,
@@ -133,82 +175,80 @@ export const useUndoRedo = <
     [latestCallbacksRef, onRedo, onDoRedo, getMAH, handlers]
   );
 
-  // For unstable_waitForNextUpdate
-  const delayedUpdatesRef = useRef<('undo' | 'redo')[]>([]);
-
   // For unstable_callHandlersFrom === 'EFFECT' | 'LAYOUT_EFFECT'
   const batchedUpdatesRef = useRef<
     { type: 'undo' | 'redo'; action: ActionUnion<PBT> }[]
   >([]);
 
-  const changeStackForUndo = useCallback(() => {
-    let updaterCalledAmount = 0;
-    setStack(prev => {
-      if (prev.past.length) {
-        const [action, ...rest] = prev.past;
-        updaterCalledAmount++;
-        if (updaterCalledAmount === 1) {
+  const undo = useCallback(() => {
+    let hasSideEffectRun = false;
+    setHistory(prev => {
+      const index = prev.currentIndex;
+      const branch = prev.branches[prev.currentBranchId];
+      const parent = branch.parent;
+      if (index < 0) {
+        return prev;
+      } else {
+        if (!hasSideEffectRun) {
+          hasSideEffectRun = true;
+          const action = branch.stack[index];
           unstable_callHandlersFrom === 'UPDATER'
             ? handleUndo(action)
             : batchedUpdatesRef.current.push({ type: 'undo', action });
         }
-        return {
-          past: rest,
-          future: [...prev.future, action],
-        };
+        if (index === 0 && parent) {
+          return {
+            ...prev,
+            currentIndex: parent.actionIndex,
+            currentBranchId: parent.branchId,
+          };
+        } else {
+          return {
+            ...prev,
+            currentIndex: index - 1,
+          };
+        }
       }
-      return prev;
     });
   }, [handleUndo, unstable_callHandlersFrom]);
 
-  const changeStackForRedo = useCallback(() => {
-    let updaterCalledAmount = 0;
-    setStack(prev => {
-      if (prev.future.length) {
-        const lastIndex = prev.future.length - 1;
-        const action = prev.future[lastIndex];
-        updaterCalledAmount++;
-        if (updaterCalledAmount === 1) {
-          unstable_callHandlersFrom === 'UPDATER'
-            ? handleRedo(action)
-            : batchedUpdatesRef.current.push({ type: 'redo', action });
+  const redo = useCallback(() => {
+    let hasSideEffectRun = false;
+    setHistory(prev => {
+      const index = prev.currentIndex;
+      const branch = prev.branches[prev.currentBranchId];
+      if (index < branch.stack.length - 1) {
+        if (branch.nextChild?.actionIndex === index) {
+          if (!hasSideEffectRun) {
+            hasSideEffectRun = true;
+            const action = prev.branches[branch.nextChild.branchId].stack[0];
+            unstable_callHandlersFrom === 'UPDATER'
+              ? handleRedo(action)
+              : batchedUpdatesRef.current.push({ type: 'redo', action });
+          }
+          return {
+            ...prev,
+            currentBranchId: branch.nextChild.branchId,
+            currentIndex: 0,
+          };
+        } else {
+          if (!hasSideEffectRun) {
+            hasSideEffectRun = true;
+            const action = branch.stack[index + 1];
+            unstable_callHandlersFrom === 'UPDATER'
+              ? handleRedo(action)
+              : batchedUpdatesRef.current.push({ type: 'redo', action });
+          }
+          return {
+            ...prev,
+            currentIndex: index + 1,
+          };
         }
-        return {
-          past: [action, ...prev.past],
-          future: prev.future.slice(0, lastIndex),
-        };
+      } else {
+        return prev;
       }
-      return prev;
     });
   }, [handleRedo, unstable_callHandlersFrom]);
-
-  const isUpdateInProgressRef = useRef(false);
-
-  const undo = useCallback(() => {
-    if (unstable_waitForNextUpdate) {
-      if (isUpdateInProgressRef.current) {
-        delayedUpdatesRef.current.push('undo');
-      } else {
-        isUpdateInProgressRef.current = true;
-        changeStackForUndo();
-      }
-    } else {
-      changeStackForUndo();
-    }
-  }, [changeStackForUndo, unstable_waitForNextUpdate]);
-
-  const redo = useCallback(() => {
-    if (unstable_waitForNextUpdate) {
-      if (isUpdateInProgressRef.current) {
-        delayedUpdatesRef.current.push('redo');
-      } else {
-        isUpdateInProgressRef.current = true;
-        changeStackForRedo();
-      }
-    } else {
-      changeStackForRedo();
-    }
-  }, [changeStackForRedo, unstable_waitForNextUpdate]);
 
   const handleUndoRedoFromEffect = useCallback(() => {
     while (batchedUpdatesRef.current.length) {
@@ -228,15 +268,6 @@ export const useUndoRedo = <
       handleUndoRedoFromEffect();
     }
   });
-
-  useEffect(() => {
-    isUpdateInProgressRef.current = false;
-    if (delayedUpdatesRef.current.length) {
-      delayedUpdatesRef.current.shift()! === 'undo'
-        ? changeStackForUndo()
-        : changeStackForRedo();
-    }
-  }, [changeStackForRedo, changeStackForUndo, stack]);
 
   const timeTravel = useCallback(
     (range: 'past' | 'future' | 'full', index: number) => {
@@ -291,20 +322,53 @@ export const useUndoRedo = <
             onDoRedoLatest?.(event);
           }
           handler.drdo(payload);
-          setStack(prev => ({
-            past: [action, ...prev.past],
-            future: [],
-          }));
+          setHistory(prev => {
+            const branch = prev.branches[prev.currentBranchId];
+            const stack = branch.stack;
+            const index = prev.currentIndex;
+            if (index === stack.length - 1) {
+              return {
+                ...prev,
+                currentIndex: index + 1,
+                branches: {
+                  ...prev.branches,
+                  [branch.id]: {
+                    ...branch,
+                    stack: stack.concat(action),
+                  },
+                },
+              };
+            } else {
+              const newBranchId = v4();
+              return {
+                ...prev,
+                currentIndex: 0,
+                currentBranchId: newBranchId,
+                branches: {
+                  ...prev.branches,
+                  [branch.id]: {
+                    ...branch,
+                    nextChild: {
+                      branchId: newBranchId,
+                      actionIndex: index,
+                    },
+                  },
+                  [newBranchId]: {
+                    created: new Date(),
+                    id: newBranchId,
+                    stack: [action],
+                    parent: {
+                      branchId: branch.id,
+                      actionIndex: index,
+                    },
+                  },
+                },
+              };
+            }
+          });
         },
       ]),
-    [
-      latestCallbacksRef,
-      onDoRedo,
-      onDo,
-      getMAH,
-      storeActionCreatedDate,
-      setStack,
-    ]
+    [latestCallbacksRef, onDoRedo, onDo, getMAH, storeActionCreatedDate]
   );
 
   return {
@@ -316,6 +380,6 @@ export const useUndoRedo = <
     timeTravel,
     getMetaActionHandlers,
     createUndoables,
-    setStack,
+    setHistory,
   };
 };

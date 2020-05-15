@@ -43,6 +43,7 @@
     "@types/jest": "^24.0.24",
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
+    "@types/uuid": "^7.0.3",
     "babel-loader": "^8.0.6",
     "emotion": "^10.0.27",
     "husky": "^3.1.0",
@@ -53,5 +54,8 @@
     "tsdx": "^0.12.3",
     "tslib": "^1.10.0",
     "typescript": "^3.8.2"
+  },
+  "dependencies": {
+    "uuid": "^8.0.0"
   }
 }

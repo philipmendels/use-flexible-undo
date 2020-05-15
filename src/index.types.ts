@@ -228,7 +228,7 @@ export interface UFUProps<
     latest?: Callbacks<PBT, MR>;
   };
   options?: UFUOptions;
-  initialStack?: Stack<ActionUnion<PBT>>;
+  initialHistory?: History<PBT>;
 }
 
 export interface UFULightProps<
@@ -240,7 +240,7 @@ export interface UFULightProps<
     latest?: CallbacksLight<PBT, MR>;
   };
   options?: UFUOptions;
-  initialStack?: Stack<ActionUnion<PBT>>;
+  initialHistory?: History<PBT>;
 }
 
 export interface UseUndoRedoProps<
@@ -254,5 +254,28 @@ export interface UseUndoRedoProps<
     latest?: CallbacksLight<PBT, MR>;
   };
   options?: UFUOptions;
-  initialStack?: Stack<ActionUnion<PBT>>;
+  initialHistory?: History<PBT>;
+}
+
+interface Branch<PBT extends PayloadByType> {
+  id: string;
+  parent?: {
+    branchId: string;
+    actionIndex: number;
+  };
+  nextChild?: {
+    branchId: string;
+    actionIndex: number;
+  };
+  created: Date;
+  stack: ActionUnion<PBT>[];
+}
+
+export interface History<PBT extends PayloadByType> {
+  branches: {
+    [id: string]: Branch<PBT>;
+  };
+  currentBranchId: string;
+  currentIndex: number;
+  mainBranchId: string;
 }

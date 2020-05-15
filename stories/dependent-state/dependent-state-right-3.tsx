@@ -7,7 +7,7 @@ import {
   makeUndoableStateDepHandler,
   invertHandlers,
   merge,
-} from '../../.';
+} from '../../src';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -39,7 +39,11 @@ export const DependentStateRight3Example: FC = () => {
     redo,
     stack,
     timeTravel,
-  } = useFlexibleUndo();
+  } = useFlexibleUndo({
+    options: {
+      unstable_callHandlersFrom: 'UPDATER',
+    },
+  });
 
   const makeCountHandler = (um: UpdaterMaker<number>) => () =>
     setState(prev =>
