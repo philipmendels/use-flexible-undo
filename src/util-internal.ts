@@ -1,4 +1,4 @@
-import { Entry, UAction, Action } from './index.types';
+import { Entry, UAction, BaseAction } from './index.types';
 
 export const mapObject = <O extends object, O2 extends object>(
   obj: O,
@@ -19,4 +19,4 @@ export const makeActionCreator = <T extends string>(
     type,
     payload,
     ...(isUndo ? { meta: { isUndo } } : {}),
-  } as Action) as UAction<T, P>);
+  } as BaseAction) as UAction<T, P>);

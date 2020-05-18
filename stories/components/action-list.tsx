@@ -179,8 +179,19 @@ const StackItem = <A extends Action>({
   modus,
 }: StackItemProps<A>): ReactElement | null => {
   const { created, type, payload } = action;
+  const connections: any[] = (action as any).connections || [];
   return (
     <StackItemRoot modus={modus}>
+      <div
+        style={{ width: '30px' }}
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          connections.length && (action as any).switchTo(connections[0].id);
+        }}
+      >
+        {connections.length}
+      </div>
       {Boolean(created) && (
         <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created!, now)}

@@ -22,6 +22,8 @@ import {
   StringOnlyKeyOf,
   Action,
   History,
+  BranchConnection,
+  Branch,
 } from '../index.types';
 
 import { useLatest } from './use-latest';
@@ -32,12 +34,14 @@ import { defaultOptions } from '../constants';
 const createInitialHistory = <PBT extends PayloadByType>(): History<PBT> => {
   const id = v4();
   return {
-    currentBranchId: id,
-    currentIndex: -1,
+    currentPosition: {
+      actionId: 'none',
+      globalIndex: -1,
+    },
     branches: {
       [id]: { id, created: new Date(), stack: [] },
     },
-    mainBranchId: id,
+    currentBranchId: id,
   };
 };
 
@@ -54,7 +58,7 @@ export const useUndoRedo = <
 
   const { onDo, onRedo, onUndo, onDoRedo, latest } = callbacks;
 
-  const { storeActionCreatedDate, unstable_callHandlersFrom } = {
+  const { unstable_callHandlersFrom } = {
     ...defaultOptions,
     ...options,
   };
@@ -62,47 +66,6 @@ export const useUndoRedo = <
   const latestCallbacksRef = useLatest(latest);
 
   const [history, setHistory] = useState(initialHistory);
-
-  useEffect(() => console.log(history), [history]);
-
-  const stack = useMemo(() => {
-    let stack: ActionUnion<PBT>[] = [];
-    const { currentBranchId, mainBranchId, branches, currentIndex } = history;
-    let branch = branches[mainBranchId];
-    while (true) {
-      if (branch.nextChild) {
-        stack = stack.concat(
-          branch.stack.slice(0, branch.nextChild.actionIndex + 1)
-        );
-        branch = branches[branch.nextChild.branchId];
-      } else {
-        stack = stack.concat(branch.stack);
-        break;
-      }
-    }
-
-    let globalIndex = currentIndex;
-    branch = branches[currentBranchId];
-    while (true) {
-      if (branch.parent) {
-        globalIndex += branch.parent.actionIndex + 1;
-        branch = branches[branch.parent.branchId];
-      } else {
-        break;
-      }
-    }
-    return {
-      past: stack.slice(0, globalIndex + 1).reverse(),
-      future: stack.slice(globalIndex + 1, stack.length).reverse(),
-    };
-  }, [history]);
-
-  const canUndo = useMemo(() => Boolean(stack.past.length), [
-    stack.past.length,
-  ]);
-  const canRedo = useMemo(() => Boolean(stack.future.length), [
-    stack.future.length,
-  ]);
 
   // For internal use
   const getMAH = useCallback(
@@ -183,31 +146,26 @@ export const useUndoRedo = <
   const undo = useCallback(() => {
     let hasSideEffectRun = false;
     setHistory(prev => {
-      const index = prev.currentIndex;
-      const branch = prev.branches[prev.currentBranchId];
-      const parent = branch.parent;
-      if (index < 0) {
-        return prev;
-      } else {
+      const index = prev.currentPosition.globalIndex;
+      const stack = prev.branches[prev.currentBranchId].stack;
+      if (index >= 0) {
         if (!hasSideEffectRun) {
           hasSideEffectRun = true;
-          const action = branch.stack[index];
+          const action = stack[index];
           unstable_callHandlersFrom === 'UPDATER'
             ? handleUndo(action)
             : batchedUpdatesRef.current.push({ type: 'undo', action });
         }
-        if (index === 0 && parent) {
-          return {
-            ...prev,
-            currentIndex: parent.actionIndex,
-            currentBranchId: parent.branchId,
-          };
-        } else {
-          return {
-            ...prev,
-            currentIndex: index - 1,
-          };
-        }
+        const newIndex = index - 1;
+        return {
+          ...prev,
+          currentPosition: {
+            actionId: newIndex < 0 ? 'none' : stack[newIndex].id,
+            globalIndex: newIndex,
+          },
+        };
+      } else {
+        return prev;
       }
     });
   }, [handleUndo, unstable_callHandlersFrom]);
@@ -215,35 +173,24 @@ export const useUndoRedo = <
   const redo = useCallback(() => {
     let hasSideEffectRun = false;
     setHistory(prev => {
-      const index = prev.currentIndex;
-      const branch = prev.branches[prev.currentBranchId];
-      if (index < branch.stack.length - 1) {
-        if (branch.nextChild?.actionIndex === index) {
-          if (!hasSideEffectRun) {
-            hasSideEffectRun = true;
-            const action = prev.branches[branch.nextChild.branchId].stack[0];
-            unstable_callHandlersFrom === 'UPDATER'
-              ? handleRedo(action)
-              : batchedUpdatesRef.current.push({ type: 'redo', action });
-          }
-          return {
-            ...prev,
-            currentBranchId: branch.nextChild.branchId,
-            currentIndex: 0,
-          };
-        } else {
-          if (!hasSideEffectRun) {
-            hasSideEffectRun = true;
-            const action = branch.stack[index + 1];
-            unstable_callHandlersFrom === 'UPDATER'
-              ? handleRedo(action)
-              : batchedUpdatesRef.current.push({ type: 'redo', action });
-          }
-          return {
-            ...prev,
-            currentIndex: index + 1,
-          };
+      const index = prev.currentPosition.globalIndex;
+      const stack = prev.branches[prev.currentBranchId].stack;
+      if (index < stack.length - 1) {
+        const newIndex = index + 1;
+        const action = stack[newIndex];
+        if (!hasSideEffectRun) {
+          hasSideEffectRun = true;
+          unstable_callHandlersFrom === 'UPDATER'
+            ? handleRedo(action)
+            : batchedUpdatesRef.current.push({ type: 'redo', action });
         }
+        return {
+          ...prev,
+          currentPosition: {
+            actionId: action.id,
+            globalIndex: newIndex,
+          },
+        };
       } else {
         return prev;
       }
@@ -268,6 +215,164 @@ export const useUndoRedo = <
       handleUndoRedoFromEffect();
     }
   });
+
+  const getSideBranches = useCallback(
+    (branchId: string, flatten: boolean) =>
+      Object.values(history.branches)
+        .filter(b => b.parent?.branchId === branchId)
+        .reduce<BranchConnection<PBT>[]>((prev, curr) => {
+          const position = curr.parent!.position;
+          const connection = prev.find(
+            c => c.position.actionId === position.actionId
+          );
+          const flattenedBranches = flatten
+            ? getSideBranches(curr.id, true).flatMap(con => con.branches)
+            : [];
+          if (connection) {
+            connection.branches.push(curr, ...flattenedBranches);
+          } else {
+            prev.push({
+              position,
+              branches: [curr, ...flattenedBranches],
+            });
+          }
+          return prev;
+        }, []),
+    [history.branches]
+  );
+
+  useEffect(() => {
+    console.log(history);
+    console.log(getSideBranches(history.currentBranchId, true));
+  }, [getSideBranches, history]);
+
+  const getPathFromCa = useCallback(
+    (branchId: string, path: Branch<PBT>[] = []): Branch<PBT>[] => {
+      const branch = history.branches[branchId];
+      if (branch.parent) {
+        const newPath = [...path, branch];
+        if (branch.parent.branchId === history.currentBranchId) {
+          return newPath;
+        } else {
+          return getPathFromCa(branch.parent.branchId, newPath);
+        }
+      }
+      throw new Error('you cannot travel to the branch that you are on');
+    },
+    [history.branches, history.currentBranchId]
+  );
+
+  const switchTo = useCallback(
+    (branchId: string) => {
+      // 1. find common ancestor
+      // 2. time-travel to c.a.
+      // 3. switch branch
+      const path = getPathFromCa(branchId);
+      const newIndex = path[0].parent!.position.globalIndex;
+
+      for (let i = history.currentPosition.globalIndex; i > newIndex; i--) {
+        undo();
+      }
+      for (let i = history.currentPosition.globalIndex; i < newIndex; i++) {
+        redo();
+      }
+
+      setHistory(prevHistory =>
+        path.reduce((newHist, pathBranch) => {
+          const branch = newHist.branches[newHist.currentBranchId];
+          const stack = branch.stack;
+          const parent = pathBranch.parent!;
+          const newBranchId = pathBranch.id;
+          const index = parent.position.globalIndex;
+          const reparentedBranches = Object.values(newHist.branches).reduce<
+            typeof newHist.branches
+          >(
+            (repBranches, repBranch) =>
+              repBranch.parent?.branchId === parent.branchId &&
+              repBranch.parent.position.globalIndex <= index
+                ? {
+                    ...repBranches,
+                    [repBranch.id]: {
+                      ...repBranch,
+                      parent: {
+                        ...repBranch.parent,
+                        branchId: newBranchId,
+                      },
+                    },
+                  }
+                : repBranches,
+            {}
+          );
+          return {
+            ...newHist,
+            currentBranchId: newBranchId,
+            branches: {
+              ...newHist.branches,
+              ...reparentedBranches,
+              [branch.id]: {
+                ...branch,
+                stack: stack.slice(index + 1),
+                parent: {
+                  branchId: newBranchId,
+                  position: parent.position,
+                },
+                lastPosition:
+                  branch.id === prevHistory.currentBranchId
+                    ? prevHistory.currentPosition
+                    : branch.lastPosition,
+              },
+              [newBranchId]: {
+                ...pathBranch,
+                stack: stack.slice(0, index + 1).concat(pathBranch.stack),
+                parent: undefined,
+              },
+            },
+          };
+        }, prevHistory)
+      );
+    },
+    [getPathFromCa, history.currentPosition.globalIndex, redo, undo]
+  );
+
+  const stack = useMemo(() => {
+    const {
+      currentBranchId,
+      branches,
+      currentPosition: { globalIndex },
+    } = history;
+
+    const connections = getSideBranches(currentBranchId, true);
+
+    const stack = branches[currentBranchId].stack;
+
+    const mapConnections = (
+      cons: BranchConnection<PBT>[],
+      list: typeof stack
+    ) =>
+      list.map(item => ({
+        ...item,
+        connections: cons.find(c => c.position.actionId === item.id)?.branches,
+        switchTo,
+      }));
+
+    return {
+      past: mapConnections(
+        connections,
+        stack.slice(0, globalIndex + 1).reverse()
+      ),
+      future: mapConnections(
+        connections,
+        stack.slice(globalIndex + 1, stack.length).reverse()
+      ),
+    };
+  }, [getSideBranches, history, switchTo]);
+
+  const canUndo = useMemo(() => Boolean(stack.past.length), [
+    stack.past.length,
+  ]);
+  const canRedo = useMemo(() => Boolean(stack.future.length), [
+    stack.future.length,
+  ]);
 
   const timeTravel = useCallback(
     (range: 'past' | 'future' | 'full', index: number) => {
@@ -305,7 +410,8 @@ export const useUndoRedo = <
           const action = ({
             type,
             payload,
-            ...(storeActionCreatedDate ? { created: new Date() } : {}),
+            created: new Date(),
+            id: v4(),
           } as Action) as ActionUnion<PBT>;
           const onDoLatest = latestCallbacksRef.current?.onDo;
           const onDoRedoLatest = latestCallbacksRef.current?.onDoRedo;
@@ -325,11 +431,16 @@ export const useUndoRedo = <
           setHistory(prev => {
             const branch = prev.branches[prev.currentBranchId];
             const stack = branch.stack;
-            const index = prev.currentIndex;
+            const currentPosition = prev.currentPosition;
+            const index = currentPosition.globalIndex;
+            const newPosition = {
+              actionId: action.id,
+              globalIndex: index + 1,
+            };
             if (index === stack.length - 1) {
               return {
                 ...prev,
-                currentIndex: index + 1,
+                currentPosition: newPosition,
                 branches: {
                   ...prev.branches,
                   [branch.id]: {
@@ -340,26 +451,48 @@ export const useUndoRedo = <
               };
             } else {
               const newBranchId = v4();
+              const reparentedBranches = Object.values(prev.branches).reduce<
+                typeof prev.branches
+              >(
+                (prev, curr) =>
+                  curr.parent?.branchId === branch.id &&
+                  curr.parent.position.globalIndex <= index
+                    ? {
+                        ...prev,
+                        [curr.id]: {
+                          ...curr,
+                          parent: {
+                            ...curr.parent,
+                            branchId: newBranchId,
+                          },
+                        },
+                      }
+                    : prev,
+                {}
+              );
               return {
                 ...prev,
-                currentIndex: 0,
+                currentPosition: newPosition,
                 currentBranchId: newBranchId,
                 branches: {
                   ...prev.branches,
+                  ...reparentedBranches,
                   [branch.id]: {
                     ...branch,
-                    nextChild: {
+                    lastPosition: currentPosition,
+                    stack: stack.slice(index + 1),
+                    parent: {
                       branchId: newBranchId,
-                      actionIndex: index,
+                      position: currentPosition,
                     },
                   },
                   [newBranchId]: {
                     created: new Date(),
                     id: newBranchId,
-                    stack: [action],
-                    parent: {
+                    stack: stack.slice(0, index + 1).concat(action),
+                    parentOriginal: {
                       branchId: branch.id,
-                      actionIndex: index,
+                      position: currentPosition,
                     },
                   },
                 },
@@ -368,7 +501,7 @@ export const useUndoRedo = <
           });
         },
       ]),
-    [latestCallbacksRef, onDoRedo, onDo, getMAH, storeActionCreatedDate]
+    [latestCallbacksRef, onDoRedo, onDo, getMAH]
   );
 
   return {

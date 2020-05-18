@@ -92,9 +92,8 @@ export type LinkedMetaActions<MR extends NonNullable<MetaActionReturnTypes>> = {
   [K in StringOnlyKeyOf<MR>]: () => MR[K];
 };
 
-export type Action<T = string, P = any> = {
+export type BaseAction<T = string, P = any> = {
   type: T;
-  created?: Date;
 } & (P extends void | undefined
   ? {
       payload?: P;
@@ -102,6 +101,11 @@ export type Action<T = string, P = any> = {
   : {
       payload: P;
     });
+
+export type Action<T = string, P = any> = BaseAction<T, P> & {
+  created: Date;
+  id: string;
+};
 
 export type ActionUnion<PBT extends PayloadByType> = {
   [T in StringOnlyKeyOf<PBT>]: Action<T, PBT[T]>;
@@ -215,9 +219,7 @@ export type Callbacks<
 };
 
 export interface UFUOptions {
-  storeActionCreatedDate?: boolean;
   unstable_callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
-  unstable_waitForNextUpdate?: boolean;
 }
 
 export interface UFUProps<
@@ -257,18 +259,34 @@ export interface UseUndoRedoProps<
   initialHistory?: History<PBT>;
 }
 
-interface Branch<PBT extends PayloadByType> {
+export interface PositionOnBranch {
+  globalIndex: number;
+  actionId: string;
+}
+
+export interface ParentConnection {
+  branchId: string;
+  position: PositionOnBranch;
+}
+
+export interface Branch<PBT extends PayloadByType> {
   id: string;
   parent?: {
     branchId: string;
-    actionIndex: number;
+    position: PositionOnBranch;
   };
-  nextChild?: {
+  parentOriginal?: {
     branchId: string;
-    actionIndex: number;
+    position: PositionOnBranch;
   };
+  lastPosition?: PositionOnBranch;
   created: Date;
   stack: ActionUnion<PBT>[];
+}
+
+export interface BranchConnection<PBT extends PayloadByType> {
+  position: PositionOnBranch;
+  branches: Branch<PBT>[];
 }
 
 export interface History<PBT extends PayloadByType> {
@@ -276,6 +294,5 @@ export interface History<PBT extends PayloadByType> {
     [id: string]: Branch<PBT>;
   };
   currentBranchId: string;
-  currentIndex: number;
-  mainBranchId: string;
+  currentPosition: PositionOnBranch;
 }
