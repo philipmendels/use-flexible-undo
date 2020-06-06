@@ -1,102 +1,148 @@
-import { useCallback, useRef } from 'react';
-
-import { useLatest } from './hooks/use-latest';
-import { useUndoRedo } from './hooks/use-undo-redo';
-
-import { makeUndoableHandlersFromDispatch } from './util';
+import { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 
 import {
-  ExtractKeyByValue,
-  MetaActionHandlersByType,
-  MetaActionReturnTypes,
   PayloadByType,
-  StringOnlyKeyOf,
-  UDispatch,
-  UndoableHandlerWithMeta,
-  UndoableHandlerWithMetaAndType,
-  UndoableHandlerWithMetaByType,
-  UndoableUActionCreatorsByType,
-  ValueOf,
-  UFUProps,
-  PBT_Inferred,
-  PayloadHandler,
+  UFULightProps,
   HandlersByType,
+  History,
+  Updater,
 } from './index.types';
+import { mapObject } from './util-internal';
+import {
+  getCurrentBranch,
+  getCurrentIndex,
+  getPathFromCommonAncestor,
+  updatePath,
+  createInitialHistory,
+  createAction,
+  isUndoPossible,
+  isRedoPossible,
+  addAction,
+  undoUpdater,
+  redoUpdater,
+  getSideEffectForRedo,
+  getSideEffectForUndo,
+} from './updaters';
+import { defaultOptions } from './constants';
 
-export const useFlexibleUndo = <
-  PBT_All extends PayloadByType | undefined = undefined,
-  MR extends MetaActionReturnTypes = undefined
->({ callbacks = {}, ...rest }: UFUProps<PBT_Inferred<PBT_All>, MR> = {}) => {
-  type PBT_Inf = PBT_Inferred<PBT_All>;
-  type PBT_Partial = Partial<PBT_Inf>;
-  type P_All = ValueOf<PBT_Inf>;
-  type NMR = NonNullable<MR>;
+export const useFlexibleUndoLight = <PBT extends PayloadByType>({
+  handlers,
+  options,
+  initialHistory = createInitialHistory(),
+}: UFULightProps<PBT>) => {
+  const [history, setHistory] = useState(initialHistory);
 
-  type Handlers = UndoableHandlerWithMetaByType<PBT_Inf, MR>;
+  const { clearFutureOnDo } = {
+    ...defaultOptions,
+    ...options,
+  };
 
-  const handlersRef = useRef<Handlers>({} as Handlers);
+  const undoables: HandlersByType<PBT> = useMemo(
+    () =>
+      mapObject(handlers, ([type, handler]) => [
+        type,
+        payload => {
+          const action = createAction(type, payload);
+          handler.drdo(payload);
+          setHistory(addAction(action, clearFutureOnDo));
+        },
+      ]),
+    [clearFutureOnDo, handlers]
+  );
 
-  const { onMakeUndoables, latest = {}, ...callbacksRest } = callbacks;
-  const { onMakeUndoables: onMakeUndoablesLatest, ...latestRest } = latest;
-  const onMakeUndoablesLatestRef = useLatest(onMakeUndoablesLatest);
+  const canUndo = useMemo(() => isUndoPossible(history), [history]);
 
-  const { createUndoables, ...undoRedoRest } = useUndoRedo({
-    handlers: handlersRef,
-    callbacks: { ...callbacksRest, latest: latestRest },
-    ...rest,
+  const canRedo = useMemo(() => isRedoPossible(history), [history]);
+
+  const queuedSideEffectsRef = useRef<(() => void)[]>([]);
+
+  const handleUndoRedo = useCallback(
+    (
+      isPossible: (history: History<PBT>) => boolean,
+      getSideEffect: (history: History<PBT>) => () => void,
+      updater: Updater<History<PBT>>
+    ) => {
+      let hasSideEffectRun = false;
+      setHistory(prev => {
+        if (isPossible(prev)) {
+          if (!hasSideEffectRun) {
+            hasSideEffectRun = true;
+            queuedSideEffectsRef.current.push(getSideEffect(prev));
+          }
+          return updater(prev);
+        } else {
+          return prev;
+        }
+      });
+    },
+    []
+  );
+
+  const undo = useCallback(() => {
+    handleUndoRedo(isUndoPossible, getSideEffectForUndo(handlers), undoUpdater);
+  }, [handleUndoRedo, handlers]);
+
+  const redo = useCallback(() => {
+    handleUndoRedo(isRedoPossible, getSideEffectForRedo(handlers), redoUpdater);
+  }, [handleUndoRedo, handlers]);
+
+  useLayoutEffect(() => {
+    queuedSideEffectsRef.current.forEach(se => se());
+    queuedSideEffectsRef.current = [];
   });
 
-  const makeUndoables = useCallback(
-    <PBT extends PBT_Partial>(
-      handlers: {
-        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR>;
+  const timeTravel = useCallback(
+    (newIndex: number) => {
+      const currentIndex = getCurrentIndex(history);
+      if (newIndex < currentIndex) {
+        for (let i = currentIndex; i > newIndex; i--) {
+          undo();
+        }
+      } else if (newIndex > currentIndex) {
+        for (let i = currentIndex; i < newIndex; i++) {
+          redo();
+        }
       }
-    ): HandlersByType<PBT> => {
-      handlersRef.current = { ...handlersRef.current, ...handlers };
-      const types = Object.keys(handlers) as StringOnlyKeyOf<PBT_Inf>[];
-      onMakeUndoables?.(types);
-      onMakeUndoablesLatestRef.current?.(types);
-      return createUndoables(handlers);
     },
-    [onMakeUndoables, onMakeUndoablesLatestRef, createUndoables]
+    [history, redo, undo]
   );
 
-  const makeUndoable = useCallback(
-    <P extends P_All>(
-      handler: UndoableHandlerWithMetaAndType<
-        P,
-        ExtractKeyByValue<PBT_Inf, P>,
-        MR
-      >
-    ): PayloadHandler<P> => {
-      const { type, ...rest } = handler;
-      return makeUndoables({ [type]: rest } as any)[type as any];
+  const timeTravelById = useCallback(
+    (id: string) => {
+      const index = getCurrentBranch(history).stack.findIndex(
+        action => action.id === id
+      );
+      if (index >= 0) {
+        timeTravel(index);
+      } else {
+        throw new Error(`action with id ${id} not found on current branch`);
+      }
     },
-    [makeUndoables]
+    [history, timeTravel]
   );
 
-  const makeUndoablesFromDispatch = useCallback(
-    <PBT extends PBT_Partial>(
-      dispatch: UDispatch<PBT>,
-      actionCreators: UndoableUActionCreatorsByType<PBT>,
-      ...metaActionHandlers: MR extends undefined
-        ? []
-        : [MetaActionHandlersByType<PBT, NMR>]
-    ): HandlersByType<PBT> =>
-      makeUndoables(
-        makeUndoableHandlersFromDispatch(
-          dispatch,
-          actionCreators,
-          ...metaActionHandlers
-        )
-      ),
-    [makeUndoables]
+  const switchTo = useCallback(
+    (branchId: string) => {
+      const path = getPathFromCommonAncestor(history, branchId);
+      const newIndex = path[0].parent!.position.globalIndex;
+
+      timeTravel(newIndex);
+
+      setHistory(updatePath(path));
+    },
+    [history, timeTravel]
   );
 
   return {
-    makeUndoable,
-    makeUndoables,
-    makeUndoablesFromDispatch,
-    ...undoRedoRest,
+    undoables,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    timeTravel,
+    timeTravelById,
+    switchTo,
+    history,
+    setHistory,
   };
 };
