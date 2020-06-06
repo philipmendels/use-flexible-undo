@@ -14,8 +14,10 @@ import {
   UndoableHandlersByType,
   UndoableHandlerWithMeta,
   UpdaterMaker,
+  DeepPartial2,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
+import { mergeDeepLeft } from 'ramda';
 
 export const merge = <S, P extends Partial<S>>(
   partial: P
@@ -23,6 +25,13 @@ export const merge = <S, P extends Partial<S>>(
   ...state,
   ...partial,
 });
+
+export const mergeDeepC = <S, P extends DeepPartial2<S>>(
+  deepPartial: P
+): Updater<S> => mergeDeepLeft(deepPartial as any) as Updater<S>;
+
+export const mergeDeep = <S>(deepPartial: DeepPartial2<S>, state: S): S =>
+  mergeDeepLeft(deepPartial as any, state as any) as S;
 
 export const combineHandlers = <P, R>(
   drdo: PayloadHandler<P, R>,

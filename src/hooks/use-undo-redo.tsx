@@ -28,8 +28,9 @@ import {
 
 import { useLatest } from './use-latest';
 
-import { mapObject } from '../util-internal';
+import { mapObject, mapFilterObj } from '../util-internal';
 import { defaultOptions } from '../constants';
+import { mergeDeepC, mergeDeep } from '../util';
 
 const createInitialHistory = <PBT extends PayloadByType>(): History<PBT> => {
   const id = v4();
@@ -334,6 +335,12 @@ export const useUndoRedo = <
     [getPathFromCa, history.currentPosition.globalIndex, redo, undo]
   );
 
+  // const mapStack = useCallback(
+  //   <R extends any>(fn: (action: ActionUnion<PBT>) => R) =>
+  //     mapReverse(history.branches[history.currentBranchId].stack, fn),
+  //   [history.branches, history.currentBranchId]
+  // );
+
   const stack = useMemo(() => {
     const {
       currentBranchId,
@@ -399,11 +406,11 @@ export const useUndoRedo = <
   );
 
   const createUndoables = useCallback(
-    <PBT2 extends Partial<PBT>>(
+    (
       handlers: {
-        [K in StringOnlyKeyOf<PBT2>]: UndoableHandlerWithMeta<PBT2[K], K, MR>;
+        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR>;
       }
-    ): HandlersByType<PBT2> =>
+    ): HandlersByType<PBT> =>
       mapObject(handlers, ([type, handler]) => [
         type,
         payload => {
@@ -428,6 +435,80 @@ export const useUndoRedo = <
             onDoRedoLatest?.(event);
           }
           handler.drdo(payload);
+
+          const gcb = (prev: History<PBT>) =>
+            prev.branches[prev.currentBranchId];
+          const gi = (prev: History<PBT>) => prev.currentPosition.globalIndex;
+
+          const addAction = (prev: History<PBT>) =>
+            mergeDeep(
+              {
+                currentPosition: {
+                  actionId: action.id,
+                  globalIndex: gi(prev) + 1,
+                },
+                branches: {
+                  [gcb(prev).id]: {
+                    stack: gcb(prev).stack.concat(action) as any,
+                  },
+                },
+              },
+              prev
+            );
+
+          const getReparentedBranches = (newBranchId: string) => (
+            prev: History<PBT>
+          ) =>
+            mapFilterObj(
+              b =>
+                b.parent?.branchId === gcb(prev).id &&
+                b.parent.position.globalIndex <= gi(prev),
+              mergeDeepC({
+                parent: {
+                  branchId: newBranchId,
+                },
+              }),
+              prev.branches
+            );
+
+          const nb = (newBranchId: string) => (prev: History<PBT>) => {
+            const branch = gcb(prev);
+            const stack = branch.stack;
+            const currentPosition = prev.currentPosition;
+            const index = gi(prev);
+            return mergeDeep(
+              {
+                currentPosition: {
+                  actionId: action.id,
+                  globalIndex: gi(prev) + 1,
+                },
+                currentBranchId: newBranchId,
+                branches: {
+                  ...getReparentedBranches(newBranchId)(prev),
+                  [branch.id]: {
+                    ...branch,
+                    lastPosition: currentPosition,
+                    stack: stack.slice(gi(prev) + 1),
+                    parent: {
+                      branchId: newBranchId,
+                      position: currentPosition,
+                    },
+                  },
+                  [newBranchId]: {
+                    created: new Date(),
+                    id: newBranchId,
+                    stack: stack.slice(0, index + 1).concat(action) as any,
+                    parentOriginal: {
+                      branchId: branch.id,
+                      position: currentPosition,
+                    },
+                  },
+                },
+              },
+              prev
+            );
+          };
+
           setHistory(prev => {
             const branch = prev.branches[prev.currentBranchId];
             const stack = branch.stack;
@@ -438,65 +519,10 @@ export const useUndoRedo = <
               globalIndex: index + 1,
             };
             if (index === stack.length - 1) {
-              return {
-                ...prev,
-                currentPosition: newPosition,
-                branches: {
-                  ...prev.branches,
-                  [branch.id]: {
-                    ...branch,
-                    stack: stack.concat(action),
-                  },
-                },
-              };
+              return addAction(prev);
             } else {
               const newBranchId = v4();
-              const reparentedBranches = Object.values(prev.branches).reduce<
-                typeof prev.branches
-              >(
-                (prev, curr) =>
-                  curr.parent?.branchId === branch.id &&
-                  curr.parent.position.globalIndex <= index
-                    ? {
-                        ...prev,
-                        [curr.id]: {
-                          ...curr,
-                          parent: {
-                            ...curr.parent,
-                            branchId: newBranchId,
-                          },
-                        },
-                      }
-                    : prev,
-                {}
-              );
-              return {
-                ...prev,
-                currentPosition: newPosition,
-                currentBranchId: newBranchId,
-                branches: {
-                  ...prev.branches,
-                  ...reparentedBranches,
-                  [branch.id]: {
-                    ...branch,
-                    lastPosition: currentPosition,
-                    stack: stack.slice(index + 1),
-                    parent: {
-                      branchId: newBranchId,
-                      position: currentPosition,
-                    },
-                  },
-                  [newBranchId]: {
-                    created: new Date(),
-                    id: newBranchId,
-                    stack: stack.slice(0, index + 1).concat(action),
-                    parentOriginal: {
-                      branchId: branch.id,
-                      position: currentPosition,
-                    },
-                  },
-                },
-              };
+              return nb(newBranchId)(prev);
             }
           });
         },

@@ -25,6 +25,16 @@ export type UndoableHandlersByType<PBT extends PayloadByType> = {
   [K in StringOnlyKeyOf<PBT>]: UndoableHandler<PBT[K]>;
 };
 
+export type UndoableHandlersByType2<A extends Action> = {
+  [T in A['type']]: UndoableHandler<
+    (A extends Record<'type', T> ? A : never)['payload']
+  >;
+};
+
+export type PBT2<A extends Action> = {
+  [T in A['type']]: (A extends Record<'type', T> ? A : never)['payload'];
+};
+
 type UndoableStateUpdater<P, S> = Undoable<StateUpdater<P, S>>;
 
 type WithType<O extends object, T extends string> = O & {
@@ -92,15 +102,32 @@ export type LinkedMetaActions<MR extends NonNullable<MetaActionReturnTypes>> = {
   [K in StringOnlyKeyOf<MR>]: () => MR[K];
 };
 
-export type BaseAction<T = string, P = any> = {
-  type: T;
-} & (P extends void | undefined
+export type DeepPartial2<T> = {
+  [K in keyof T]?: T[K] extends Array<any>
+    ? T[K]
+    : T[K] extends {} | undefined
+    ? DeepPartial2<T[K]>
+    : T[K];
+};
+
+export type BaseAction<T = string, P = any> = P extends void | undefined
   ? {
+      type: T;
       payload?: P;
     }
   : {
+      type: T;
       payload: P;
-    });
+    };
+
+// export type BaseAction<T = string, P = any> = {
+//   type: T;
+//   payload: P;
+// };
+
+// type MakeOptional<T extends any> = {
+//   [k in keyof T]: ;
+// };
 
 export type Action<T = string, P = any> = BaseAction<T, P> & {
   created: Date;
@@ -219,7 +246,7 @@ export type Callbacks<
 };
 
 export interface UFUOptions {
-  unstable_callHandlersFrom?: 'UPDATER' | 'EFFECT' | 'LAYOUT_EFFECT';
+  clearFutureOnDo?: boolean;
 }
 
 export interface UFUProps<
@@ -233,14 +260,8 @@ export interface UFUProps<
   initialHistory?: History<PBT>;
 }
 
-export interface UFULightProps<
-  PBT extends PayloadByType,
-  MR extends MetaActionReturnTypes
-> {
-  handlers: UndoableHandlerWithMetaByType<PBT, MR>;
-  callbacks?: CallbacksLight<PBT, MR> & {
-    latest?: CallbacksLight<PBT, MR>;
-  };
+export interface UFULightProps<PBT extends PayloadByType> {
+  handlers: UndoableHandlersByType<PBT>;
   options?: UFUOptions;
   initialHistory?: History<PBT>;
 }
@@ -290,9 +311,7 @@ export interface BranchConnection<PBT extends PayloadByType> {
 }
 
 export interface History<PBT extends PayloadByType> {
-  branches: {
-    [id: string]: Branch<PBT>;
-  };
+  branches: Record<string, Branch<PBT>>;
   currentBranchId: string;
   currentPosition: PositionOnBranch;
 }
