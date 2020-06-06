@@ -1,11 +1,4 @@
-import {
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-} from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 
 import { v4 } from 'uuid';
 
@@ -17,10 +10,7 @@ import {
   CB_ArgsWithMeta,
   PayloadByType,
   MetaActionReturnTypes,
-  HandlersByType,
   UseUndoRedoProps,
-  StringOnlyKeyOf,
-  Action,
   History,
   BranchConnection,
   Branch,
@@ -28,9 +18,7 @@ import {
 
 import { useLatest } from './use-latest';
 
-import { mapObject, mapFilterObj } from '../util-internal';
-import { defaultOptions } from '../constants';
-import { mergeDeepC, mergeDeep } from '../util';
+import { mapObject } from '../util-internal';
 
 const createInitialHistory = <PBT extends PayloadByType>(): History<PBT> => {
   const id = v4();
@@ -52,17 +40,13 @@ export const useUndoRedo = <
 >({
   handlers,
   callbacks = {},
-  options,
   initialHistory = createInitialHistory(),
 }: UseUndoRedoProps<PBT, MR>) => {
   type NMR = NonNullable<MR>;
 
-  const { onDo, onRedo, onUndo, onDoRedo, latest } = callbacks;
+  const { onRedo, onUndo, onDoRedo, latest } = callbacks;
 
-  const { unstable_callHandlersFrom } = {
-    ...defaultOptions,
-    ...options,
-  };
+  const unstable_callHandlersFrom = 'UPDATER';
 
   const latestCallbacksRef = useLatest(latest);
 
@@ -198,25 +182,6 @@ export const useUndoRedo = <
     });
   }, [handleRedo, unstable_callHandlersFrom]);
 
-  const handleUndoRedoFromEffect = useCallback(() => {
-    while (batchedUpdatesRef.current.length) {
-      const { action, type } = batchedUpdatesRef.current.shift()!;
-      type === 'undo' ? handleUndo(action) : handleRedo(action);
-    }
-  }, [handleRedo, handleUndo]);
-
-  useEffect(() => {
-    if (unstable_callHandlersFrom === 'EFFECT') {
-      handleUndoRedoFromEffect();
-    }
-  });
-
-  useLayoutEffect(() => {
-    if (unstable_callHandlersFrom === 'LAYOUT_EFFECT') {
-      handleUndoRedoFromEffect();
-    }
-  });
-
   const getSideBranches = useCallback(
     (branchId: string, flatten: boolean) =>
       Object.values(history.branches)
@@ -241,11 +206,6 @@ export const useUndoRedo = <
         }, []),
     [history.branches]
   );
-
-  useEffect(() => {
-    console.log(history);
-    console.log(getSideBranches(history.currentBranchId, true));
-  }, [getSideBranches, history]);
 
   const getPathFromCa = useCallback(
     (branchId: string, path: Branch<PBT>[] = []): Branch<PBT>[] => {
@@ -381,164 +341,13 @@ export const useUndoRedo = <
     stack.future.length,
   ]);
 
-  const timeTravel = useCallback(
-    (range: 'past' | 'future' | 'full', index: number) => {
-      const lastFutureIndex = stack.future.length - 1;
-      if (range === 'full') {
-        if (index > lastFutureIndex) {
-          range = 'past';
-          index = index - stack.future.length;
-        } else {
-          range = 'future';
-        }
-      }
-      if (range === 'past') {
-        for (let i = 0; i < index; i++) {
-          undo();
-        }
-      } else if (range === 'future') {
-        for (let i = lastFutureIndex; i >= index; i--) {
-          redo();
-        }
-      }
-    },
-    [undo, redo, stack.future.length]
-  );
-
-  const createUndoables = useCallback(
-    (
-      handlers: {
-        [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR>;
-      }
-    ): HandlersByType<PBT> =>
-      mapObject(handlers, ([type, handler]) => [
-        type,
-        payload => {
-          const action = ({
-            type,
-            payload,
-            created: new Date(),
-            id: v4(),
-          } as Action) as ActionUnion<PBT>;
-          const onDoLatest = latestCallbacksRef.current?.onDo;
-          const onDoRedoLatest = latestCallbacksRef.current?.onDoRedo;
-          if (onDo || onDoRedo || onDoLatest || onDoRedoLatest) {
-            const meta = getMAH(action);
-            const event = {
-              action,
-              eventName: 'do',
-              ...(meta ? { meta } : {}),
-            } as CB_ArgsWithMeta<PBT, MR, 'do'>;
-            onDo?.(event);
-            onDoRedo?.(event);
-            onDoLatest?.(event);
-            onDoRedoLatest?.(event);
-          }
-          handler.drdo(payload);
-
-          const gcb = (prev: History<PBT>) =>
-            prev.branches[prev.currentBranchId];
-          const gi = (prev: History<PBT>) => prev.currentPosition.globalIndex;
-
-          const addAction = (prev: History<PBT>) =>
-            mergeDeep(
-              {
-                currentPosition: {
-                  actionId: action.id,
-                  globalIndex: gi(prev) + 1,
-                },
-                branches: {
-                  [gcb(prev).id]: {
-                    stack: gcb(prev).stack.concat(action) as any,
-                  },
-                },
-              },
-              prev
-            );
-
-          const getReparentedBranches = (newBranchId: string) => (
-            prev: History<PBT>
-          ) =>
-            mapFilterObj(
-              b =>
-                b.parent?.branchId === gcb(prev).id &&
-                b.parent.position.globalIndex <= gi(prev),
-              mergeDeepC({
-                parent: {
-                  branchId: newBranchId,
-                },
-              }),
-              prev.branches
-            );
-
-          const nb = (newBranchId: string) => (prev: History<PBT>) => {
-            const branch = gcb(prev);
-            const stack = branch.stack;
-            const currentPosition = prev.currentPosition;
-            const index = gi(prev);
-            return mergeDeep(
-              {
-                currentPosition: {
-                  actionId: action.id,
-                  globalIndex: gi(prev) + 1,
-                },
-                currentBranchId: newBranchId,
-                branches: {
-                  ...getReparentedBranches(newBranchId)(prev),
-                  [branch.id]: {
-                    ...branch,
-                    lastPosition: currentPosition,
-                    stack: stack.slice(gi(prev) + 1),
-                    parent: {
-                      branchId: newBranchId,
-                      position: currentPosition,
-                    },
-                  },
-                  [newBranchId]: {
-                    created: new Date(),
-                    id: newBranchId,
-                    stack: stack.slice(0, index + 1).concat(action) as any,
-                    parentOriginal: {
-                      branchId: branch.id,
-                      position: currentPosition,
-                    },
-                  },
-                },
-              },
-              prev
-            );
-          };
-
-          setHistory(prev => {
-            const branch = prev.branches[prev.currentBranchId];
-            const stack = branch.stack;
-            const currentPosition = prev.currentPosition;
-            const index = currentPosition.globalIndex;
-            const newPosition = {
-              actionId: action.id,
-              globalIndex: index + 1,
-            };
-            if (index === stack.length - 1) {
-              return addAction(prev);
-            } else {
-              const newBranchId = v4();
-              return nb(newBranchId)(prev);
-            }
-          });
-        },
-      ]),
-    [latestCallbacksRef, onDoRedo, onDo, getMAH]
-  );
-
   return {
     undo,
     redo,
     canUndo,
     canRedo,
     stack,
-    timeTravel,
     getMetaActionHandlers,
-    createUndoables,
     setHistory,
   };
 };
