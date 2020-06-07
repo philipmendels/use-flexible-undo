@@ -1,20 +1,11 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../../.';
-import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
 
 export const MakeUndoableNegate: FC = () => {
   const [count, setCount] = useState(0);
 
-  const {
-    makeUndoable,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
+  const { makeUndoable, canUndo, undo, canRedo, redo } = useFlexibleUndo();
 
   const add = makeUndoable<number>({
     type: 'add',
@@ -37,7 +28,7 @@ export const MakeUndoableNegate: FC = () => {
           redo
         </button>
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      {/* <ActionList history={stack} timeTravel={timeTravel} /> */}
     </div>
   );
 };

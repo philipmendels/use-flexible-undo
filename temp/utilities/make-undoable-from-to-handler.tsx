@@ -1,16 +1,31 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo, PayloadFromTo } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import {
+  useFlexibleUndo,
+  PayloadFromTo,
+  makeUndoableFTObjHandler,
+} from '../../dist';
+import { rootClass, uiContainerClass } from '../../stories/styles';
+import { ActionList } from '../../stories/components/action-list';
 
-export const MakeUndoableFromToExample: React.FC = () => {
+interface PayloadByType {
+  updateCount: PayloadFromTo<number>;
+}
+
+export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
-  const { makeUndoable, canUndo, undo, canRedo, redo } = useFlexibleUndo();
+  const {
+    makeUndoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    stack,
+    timeTravel,
+  } = useFlexibleUndo();
 
-  const updateCount = makeUndoable<PayloadFromTo<number>>({
-    type: 'updateCount',
-    drdo: ({ to }) => setCount(to),
-    undo: ({ from }) => setCount(from),
+  const { updateCount } = makeUndoables<PayloadByType>({
+    updateCount: makeUndoableFTObjHandler(setCount),
   });
 
   const multiply = (amount: number) =>
@@ -31,7 +46,7 @@ export const MakeUndoableFromToExample: React.FC = () => {
           redo
         </button>
       </div>
-      {/* <ActionList history={stack} timeTravel={timeTravel} /> */}
+      <ActionList history={stack} timeTravel={timeTravel} />
     </div>
   );
 };

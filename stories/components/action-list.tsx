@@ -6,32 +6,64 @@ import React, {
   ReactNode,
 } from 'react';
 import styled from '@emotion/styled';
-import { Action, TimeTravelFn, Stack } from '../../.';
+import { Action, PayloadByType, ActionUnion } from '../../dist';
+import { History, BranchConnection } from '../../src';
+import {
+  isUndoPossible,
+  isRedoPossible,
+  getCurrentBranch,
+  getCurrentIndex,
+  getSideBranches,
+} from '../../src/updaters';
 
 type ConvertFn<A> = (action: A) => ReactNode;
 
-interface ActionListProps<A extends Action> {
-  stack: Stack<A>;
-  timeTravel: TimeTravelFn;
+interface ActionListProps<PBT extends PayloadByType> {
+  history: History<PBT>;
+  timeTravel: (index: number) => void;
+  switchToBranch: (branchId: string) => void;
   startTime?: Date;
-  convert?: ConvertFn<A>;
+  convert?: ConvertFn<ActionUnion<PBT>>;
 }
 
 type Modus = 'clickBetween' | 'clickOn';
 
-export const ActionList = <A extends Action>({
-  stack,
+export const ActionList = <PBT extends PayloadByType>({
+  history,
   timeTravel,
+  switchToBranch,
   convert,
   startTime,
-}: ActionListProps<A>): ReactElement | null => {
+}: ActionListProps<PBT>): ReactElement | null => {
   const [modus, setModus] = useState<Modus>('clickOn');
   const startTimeRef = useRef(new Date());
   const [now, setNow] = useState(new Date());
   const [mouseMoved, setMouseMoved] = useState(false);
   useInterval(() => setNow(new Date()), 5000);
-  const hasPast = stack.past.length > 0;
-  const hasFuture = stack.future.length > 0;
+  const hasPast = isUndoPossible(history);
+  const hasFuture = isRedoPossible(history);
+  const currentBranch = getCurrentBranch(history);
+  const stack = currentBranch.stack;
+  const currentIndex = getCurrentIndex(history);
+
+  const connections = getSideBranches(currentBranch.id, true)(history);
+
+  const mapConnections = (cons: BranchConnection<PBT>[], list: typeof stack) =>
+    list.map(item => ({
+      ...item,
+      connections: cons.find(c => c.position.actionId === item.id)?.branches,
+      switchToBranch,
+    }));
+
+  const past = mapConnections(
+    connections,
+    stack.slice(0, currentIndex + 1).reverse()
+  );
+  const future = mapConnections(
+    connections,
+    stack.slice(currentIndex + 1, stack.length).reverse()
+  );
+
   return (
     <>
       {(hasPast || hasFuture) && (
@@ -57,14 +89,14 @@ export const ActionList = <A extends Action>({
         </>
       )}
       <div style={{ position: 'relative' }}>
-        {stack.future.map((action, index) => (
+        {future.map((action, index) => (
           <StackItemWrapper
             key={index}
             mouseMoved={mouseMoved}
             onMouseMove={() => setMouseMoved(true)}
             onClick={() => {
               setMouseMoved(false);
-              timeTravel('future', index);
+              timeTravel(past.length + (future.length - 1 - index));
             }}
           >
             {modus === 'clickBetween' && (
@@ -88,13 +120,14 @@ export const ActionList = <A extends Action>({
             {(hasPast || hasFuture) && ' - click to time travel'}
           </Present>
         )}
-        {stack.past.map((action, index) => (
+        {past.map((action, index) => (
           <StackItemWrapper
             key={index}
             onMouseMove={() => setMouseMoved(true)}
             onClick={() => {
               setMouseMoved(false);
-              timeTravel('past', modus === 'clickOn' ? index : index + 1);
+              const indexR = past.length - 1 - index;
+              timeTravel(modus === 'clickOn' ? indexR : indexR - 1);
             }}
             mouseMoved={mouseMoved}
             isCurrent={index === 0 && modus === 'clickOn'}
@@ -118,10 +151,10 @@ export const ActionList = <A extends Action>({
               onMouseMove={() => setMouseMoved(true)}
               onClick={() => {
                 setMouseMoved(false);
-                timeTravel('past', stack.past.length);
+                timeTravel(-1);
               }}
               mouseMoved={mouseMoved}
-              isCurrent={stack.past.length === 0}
+              isCurrent={past.length === 0}
             >
               <StackItemRoot modus="clickOn">
                 <div className="time" style={{ minWidth: '120px' }}>
@@ -135,7 +168,7 @@ export const ActionList = <A extends Action>({
                 </div>
               </StackItemRoot>
             </StackItemWrapper>
-            <Indicator style={{ top: 2 + stack.future.length * 32 + 'px' }}>
+            <Indicator style={{ top: 2 + future.length * 32 + 'px' }}>
               &#11157;
             </Indicator>
           </>
@@ -187,7 +220,8 @@ const StackItem = <A extends Action>({
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
-          connections.length && (action as any).switchTo(connections[0].id);
+          connections.length &&
+            (action as any).switchToBranch(connections[0].id);
         }}
       >
         {connections.length}

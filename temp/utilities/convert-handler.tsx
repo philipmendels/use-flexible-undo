@@ -1,22 +1,28 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import { useFlexibleUndo, convertHandler } from '../../dist';
+import { ActionList } from '../../stories/components/action-list';
+import { rootClass, uiContainerClass } from '../../stories/styles';
 
-export const MakeUndoableMulti: FC = () => {
+export const ConvertHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
-  const { makeUndoable, canUndo, undo, canRedo, redo } = useFlexibleUndo();
+  const {
+    makeUndoable,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    stack,
+    timeTravel,
+  } = useFlexibleUndo();
 
   const add = makeUndoable<number>({
     type: 'add',
     drdo: amount => setCount(prev => prev + amount),
     undo: amount => setCount(prev => prev - amount),
   });
-  const subtract = makeUndoable<number>({
-    type: 'subtract',
-    drdo: amount => setCount(prev => prev - amount),
-    undo: amount => setCount(prev => prev + amount),
-  });
+
+  const subtract = convertHandler(add)(amount => -amount);
 
   return (
     <div className={rootClass}>
@@ -31,7 +37,7 @@ export const MakeUndoableMulti: FC = () => {
           redo
         </button>
       </div>
-      {/* <ActionList history={stack} timeTravel={timeTravel} /> */}
+      <ActionList history={stack} timeTravel={timeTravel} />
     </div>
   );
 };

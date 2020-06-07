@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from '../../.';
-import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
 
 interface PayloadByType {
@@ -11,15 +10,7 @@ interface PayloadByType {
 export const MakeUndoablesExtract: FC = () => {
   const [count, setCount] = useState(0);
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
+  const { makeUndoables, canUndo, undo, canRedo, redo } = useFlexibleUndo();
 
   const addHandler = (amount: number) => setCount(prev => prev + amount);
   const subHandler = (amount: number) => setCount(prev => prev - amount);
@@ -48,7 +39,7 @@ export const MakeUndoablesExtract: FC = () => {
           redo
         </button>
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      {/* <ActionList history={stack} timeTravel={timeTravel} /> */}
     </div>
   );
 };

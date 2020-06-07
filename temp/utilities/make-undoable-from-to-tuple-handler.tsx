@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import { useFlexibleUndo, makeUndoableFTTupleHandler } from '../../dist';
+import { rootClass, uiContainerClass } from '../../stories/styles';
+import { ActionList } from '../../stories/components/action-list';
 
-export const MakeUndoableFromToTuple: React.FC = () => {
+interface PayloadByType {
+  updateCount: [number, number];
+}
+
+export const MakeUndoableFTTupleHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
-  const { makeUndoable, canUndo, undo, canRedo, redo } = useFlexibleUndo();
+  const {
+    makeUndoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    stack,
+    timeTravel,
+  } = useFlexibleUndo();
 
-  const updateCount = makeUndoable<[number, number]>({
-    type: 'updateCount',
-    drdo: ([_, to]) => setCount(to),
-    undo: ([from]) => setCount(from),
+  const { updateCount } = makeUndoables<PayloadByType>({
+    updateCount: makeUndoableFTTupleHandler(setCount),
   });
 
   const multiply = (amount: number) => updateCount([count, count * amount]);
@@ -29,7 +40,7 @@ export const MakeUndoableFromToTuple: React.FC = () => {
           redo
         </button>
       </div>
-      {/* <ActionList history={stack} timeTravel={timeTravel} /> */}
+      <ActionList history={stack} timeTravel={timeTravel} />
     </div>
   );
 };

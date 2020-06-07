@@ -25,7 +25,7 @@ import {
 } from './updaters';
 import { defaultOptions } from './constants';
 
-export const useFlexibleUndoLight = <PBT extends PayloadByType>({
+export const useFlexibleUndo = <PBT extends PayloadByType>({
   handlers,
   options,
   initialHistory = createInitialHistory(),
@@ -121,7 +121,7 @@ export const useFlexibleUndoLight = <PBT extends PayloadByType>({
     [history, timeTravel]
   );
 
-  const switchTo = useCallback(
+  const switchToBranch = useCallback(
     (branchId: string) => {
       const path = getPathFromCommonAncestor(history, branchId);
       const newIndex = path[0].parent!.position.globalIndex;
@@ -141,7 +141,7 @@ export const useFlexibleUndoLight = <PBT extends PayloadByType>({
     redo,
     timeTravel,
     timeTravelById,
-    switchTo,
+    switchToBranch,
     history,
     setHistory,
   };

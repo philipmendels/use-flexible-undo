@@ -190,11 +190,6 @@ export type Updater<T> = (prev: T) => T;
 export type CurriedUpdater<T> = (payload: T) => Updater<T>;
 export type UpdaterMaker<P, S = P> = (payload: P) => Updater<S>;
 
-export type TimeTravelFn = (
-  direction: 'past' | 'future',
-  index: number
-) => void;
-
 export type Stack<T = Action> = {
   past: T[];
   future: T[];
