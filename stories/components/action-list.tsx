@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from 'react';
 import styled from '@emotion/styled';
-import { Action, PayloadByType, ActionUnion } from '../../dist';
+import { PayloadByType, ActionUnion } from '../../dist';
 import { History, BranchConnection } from '../../src';
 import {
   isUndoPossible,
@@ -16,14 +16,16 @@ import {
   getSideBranches,
 } from '../../src/updaters';
 
-type ConvertFn<A> = (action: A) => ReactNode;
+type ConvertFn<PBT extends PayloadByType> = (
+  action: ActionUnion<PBT>
+) => ReactNode;
 
 interface ActionListProps<PBT extends PayloadByType> {
   history: History<PBT>;
   timeTravel: (index: number) => void;
   switchToBranch: (branchId: string) => void;
   startTime?: Date;
-  convert?: ConvertFn<ActionUnion<PBT>>;
+  convert?: ConvertFn<PBT>;
 }
 
 type Modus = 'clickBetween' | 'clickOn';
@@ -48,21 +50,8 @@ export const ActionList = <PBT extends PayloadByType>({
 
   const connections = getSideBranches(currentBranch.id, true)(history);
 
-  const mapConnections = (cons: BranchConnection<PBT>[], list: typeof stack) =>
-    list.map(item => ({
-      ...item,
-      connections: cons.find(c => c.position.actionId === item.id)?.branches,
-      switchToBranch,
-    }));
-
-  const past = mapConnections(
-    connections,
-    stack.slice(0, currentIndex + 1).reverse()
-  );
-  const future = mapConnections(
-    connections,
-    stack.slice(currentIndex + 1, stack.length).reverse()
-  );
+  const past = stack.slice(0, currentIndex + 1).reverse();
+  const future = stack.slice(currentIndex + 1, stack.length).reverse();
 
   return (
     <>
@@ -109,6 +98,10 @@ export const ActionList = <PBT extends PayloadByType>({
               now={now}
               convert={convert}
               modus={modus}
+              connections={connections.filter(
+                c => c.position.actionId === action.id
+              )}
+              switchToBranch={switchToBranch}
             />
           </StackItemWrapper>
         ))}
@@ -137,6 +130,10 @@ export const ActionList = <PBT extends PayloadByType>({
               now={now}
               convert={convert}
               modus={modus}
+              connections={connections.filter(
+                c => c.position.actionId === action.id
+              )}
+              switchToBranch={switchToBranch}
             />
             {modus === 'clickBetween' && (
               <Spacer>
@@ -197,35 +194,46 @@ const Present = styled.div`
   padding: 8px 0px;
 `;
 
-interface StackItemProps<A extends Action> {
-  action: A;
+interface StackItemProps<PBT extends PayloadByType> {
+  action: ActionUnion<PBT>;
   now: Date;
   modus: Modus;
+  connections: BranchConnection<PBT>[];
+  switchToBranch: (branchId: string) => void;
   isCurrent?: boolean;
-  convert?: ConvertFn<A>;
+  convert?: ConvertFn<PBT>;
 }
 
-const StackItem = <A extends Action>({
+const StackItem = <PBT extends PayloadByType>({
   action,
   now,
   convert,
   modus,
-}: StackItemProps<A>): ReactElement | null => {
+  connections,
+  switchToBranch,
+}: StackItemProps<PBT>): ReactElement | null => {
   const { created, type, payload } = action;
-  const connections: any[] = (action as any).connections || [];
   return (
     <StackItemRoot modus={modus}>
-      <div
-        style={{ width: '30px' }}
-        onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-          connections.length &&
-            (action as any).switchToBranch(connections[0].id);
-        }}
-      >
-        {connections.length}
-      </div>
+      {connections.map(con => (
+        <div
+          key={con.branches[0].id}
+          style={{
+            border: '1px solid #48a7f6',
+            padding: '2px 6px',
+            alignSelf: 'center',
+            borderRadius: '6px',
+            marginRight: '16px',
+          }}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            switchToBranch(con.branches[0].id);
+          }}
+        >
+          {con.branches.length}
+        </div>
+      ))}
       {Boolean(created) && (
         <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created!, now)}

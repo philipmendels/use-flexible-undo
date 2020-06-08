@@ -8,8 +8,11 @@ import {
   Action,
   UndoableHandlersByType,
   BranchConnection,
+  PositionOnBranch,
 } from './index.types';
 import { v4 } from 'uuid';
+
+const NONE = 'none';
 
 export const createInitialHistory = <
   PBT extends PayloadByType
@@ -17,7 +20,7 @@ export const createInitialHistory = <
   const id = v4();
   return {
     currentPosition: {
-      actionId: 'none',
+      actionId: NONE,
       globalIndex: -1,
     },
     branches: {
@@ -148,15 +151,19 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
   );
 };
 
+export const getNewPosition = (newIndex: number) => <PBT extends PayloadByType>(
+  stack: ActionUnion<PBT>[]
+): PositionOnBranch => ({
+  actionId: newIndex < 0 ? NONE : stack[newIndex].id,
+  globalIndex: newIndex,
+});
+
 export const undoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => {
   const newIndex = getCurrentIndex(prev) - 1;
   const stack = getCurrentBranch(prev).stack;
   return {
     ...prev,
-    currentPosition: {
-      actionId: newIndex < 0 ? 'none' : stack[newIndex].id,
-      globalIndex: newIndex,
-    },
+    currentPosition: getNewPosition(newIndex)(stack),
   };
 };
 
@@ -164,7 +171,14 @@ export const getSideEffectForUndo = <PBT extends PayloadByType>(
   handlers: UndoableHandlersByType<PBT>
 ) => (history: History<PBT>) => {
   const stack = getCurrentBranch(history).stack;
-  const { type, payload } = stack[getCurrentIndex(history)];
+  const action = stack[getCurrentIndex(history)];
+  return getSideEffectForUndoAction(handlers)(action);
+};
+
+export const getSideEffectForUndoAction = <PBT extends PayloadByType>(
+  handlers: UndoableHandlersByType<PBT>
+) => (action: ActionUnion<PBT>) => {
+  const { type, payload } = action;
   return () => handlers[type].undo(payload);
 };
 
@@ -187,7 +201,14 @@ const getActionForRedo = <PBT extends PayloadByType>(history: History<PBT>) => {
 export const getSideEffectForRedo = <PBT extends PayloadByType>(
   handlers: UndoableHandlersByType<PBT>
 ) => (history: History<PBT>) => {
-  const { type, payload } = getActionForRedo(history);
+  const action = getActionForRedo(history);
+  return getSideEffectForRedoAction(handlers)(action);
+};
+
+export const getSideEffectForRedoAction = <PBT extends PayloadByType>(
+  handlers: UndoableHandlersByType<PBT>
+) => (action: ActionUnion<PBT>) => {
+  const { type, payload } = action;
   return () => handlers[type].drdo(payload);
 };
 
@@ -198,7 +219,7 @@ export const getPathFromCommonAncestor = <PBT extends PayloadByType>(
 ): Branch<PBT>[] => {
   const branch = history.branches[branchId];
   if (branch.parent) {
-    const newPath = [...path, branch];
+    const newPath = [branch, ...path];
     if (branch.parent.branchId === history.currentBranchId) {
       return newPath;
     } else {
@@ -213,13 +234,15 @@ export const getPathFromCommonAncestor = <PBT extends PayloadByType>(
   throw new Error('you cannot travel to the branch that you are on');
 };
 
-export const updatePath = <PBT extends PayloadByType>(path: Branch<PBT>[]) => (
+export const updatePath = (path: string[]) => <PBT extends PayloadByType>(
   prevHistory: History<PBT>
 ) =>
-  path.reduce((newHist, pathBranch) => {
+  path.reduce((newHist, pathBranchId) => {
     const branch = newHist.branches[newHist.currentBranchId];
     const stack = branch.stack;
+    const pathBranch = newHist.branches[pathBranchId];
     const parent = pathBranch.parent!;
+
     const newBranchId = pathBranch.id;
     const index = parent.position.globalIndex;
     const reparentedBranches = getReparentedBranches(
@@ -236,11 +259,11 @@ export const updatePath = <PBT extends PayloadByType>(path: Branch<PBT>[]) => (
             stack: stack.slice(index + 1),
             parent: {
               branchId: newBranchId,
-              position: parent.position,
+              position: { ...parent.position },
             },
             lastPosition:
               branch.id === prevHistory.currentBranchId
-                ? prevHistory.currentPosition
+                ? { ...prevHistory.currentPosition }
                 : branch.lastPosition,
           },
           [newBranchId]: {
@@ -290,24 +313,15 @@ export const getSideBranches = (branchId: string, flatten: boolean) => <
   PBT extends PayloadByType
 >(
   history: History<PBT>
-) =>
+): BranchConnection<PBT>[] =>
   Object.values(history.branches)
     .filter(b => b.parent?.branchId === branchId)
-    .reduce<BranchConnection<PBT>[]>((prev, curr) => {
-      const position = curr.parent!.position;
-      const connection = prev.find(
-        c => c.position.actionId === position.actionId
-      );
+    .map(b => {
       const flattenedBranches = flatten
-        ? getSideBranches(curr.id, true)(history).flatMap(con => con.branches)
+        ? getSideBranches(b.id, true)(history).flatMap(con => con.branches)
         : [];
-      if (connection) {
-        connection.branches.push(curr, ...flattenedBranches);
-      } else {
-        prev.push({
-          position,
-          branches: [curr, ...flattenedBranches],
-        });
-      }
-      return prev;
-    }, []);
+      return {
+        position: b.parent!.position,
+        branches: [b, ...flattenedBranches],
+      };
+    });
