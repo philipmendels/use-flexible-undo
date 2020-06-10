@@ -1,11 +1,7 @@
 import React, { FC, useState } from 'react';
-import {
-  useFlexibleUndo,
-  invertHandlers,
-  makeUndoableHandler,
-} from '../../dist';
-import { ActionList } from '../../stories/components/action-list';
-import { rootClass, uiContainerClass } from '../../stories/styles';
+import { useFlexibleUndo, invertHandlers, makeUndoableHandler } from '../../.';
+import { ActionList } from '../components/action-list';
+import { rootClass, uiContainerClass } from '../styles';
 
 interface PayloadByType {
   add: number;
@@ -15,25 +11,28 @@ interface PayloadByType {
 export const MakeUndoableHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
-
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+    },
   });
+
+  const { add, subtract } = undoables;
 
   return (
     <div className={rootClass}>
@@ -48,7 +47,11 @@ export const MakeUndoableHandlerExample: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

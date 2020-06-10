@@ -1,18 +1,39 @@
 import React, { useState } from 'react';
 import { useFlexibleUndo, PayloadFromTo } from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
+import { ActionList } from '../components/action-list';
+
+interface PayloadByType {
+  updateCount: PayloadFromTo<number>;
+}
 
 export const MakeUndoableFromToExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
-  const { makeUndoable, canUndo, undo, canRedo, redo } = useFlexibleUndo();
-
-  const updateCount = makeUndoable<PayloadFromTo<number>>({
-    type: 'updateCount',
-    drdo: ({ to }) => setCount(to),
-    undo: ({ from }) => setCount(from),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      updateCount: {
+        drdo: ({ to }) => setCount(to),
+        undo: ({ from }) => setCount(from),
+      },
+    },
   });
 
+  const { updateCount } = undoables;
+
+  const add = (amount: number) =>
+    updateCount({ from: count, to: count + amount });
+  const subtract = (amount: number) =>
+    updateCount({ from: count, to: count - amount });
   const multiply = (amount: number) =>
     updateCount({ from: count, to: count * amount });
   const divide = (amount: number) =>
@@ -22,6 +43,8 @@ export const MakeUndoableFromToExample: React.FC = () => {
     <div className={rootClass}>
       <div>count = {count}</div>
       <div className={uiContainerClass}>
+        <button onClick={() => add(2)}>add 2</button>
+        <button onClick={() => subtract(1)}>subtract 1</button>
         <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
         <button onClick={() => divide(Math.PI)}>di&pi;de</button>
         <button disabled={!canUndo} onClick={() => undo()}>
@@ -31,7 +54,11 @@ export const MakeUndoableFromToExample: React.FC = () => {
           redo
         </button>
       </div>
-      {/* <ActionList history={stack} timeTravel={timeTravel} /> */}
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

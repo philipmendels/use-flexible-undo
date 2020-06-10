@@ -4,9 +4,22 @@ import { storiesOf } from '@storybook/react';
 import { MakeUndoableExample } from './make-undoable-delta';
 import MakeUndoableDeltaIntro from './make-undoable-delta-intro.md';
 import MakeUndoableDeltaReadme from './make-undoable-delta.md';
-// import { MakeUndoableFromToExample } from './make-undoable-from-to';
+
+import { MakeHandlerExample } from './make-handler';
+import MakeHandlerReadme from './make-handler.md';
+
+import { MakeUndoableHandlerExample } from './make-undoable-handler';
+import MakeUndoableHandlerIntro from './make-undoable-handler-intro.md';
+import MakeUndoableHandlerReadme from './make-undoable-handler.md';
+
+import { MakeUndoableFromToExample } from './make-undoable-from-to';
 // import MakeUndoableFromToIntro from './make-undoable-from-to-intro.md';
-// import MakeUndoableFromToReadme from './make-undoable-from-to.md';
+import MakeUndoableFromToReadme from './make-undoable-from-to.md';
+
+import { MakeUndoableFTObjHandlerExample } from './make-undoable-from-to-handler';
+import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
+import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md';
+
 // import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple';
 // import MakeUndoableFromToTupleIntro from './make-undoable-from-to-tuple-intro.md';
 // import MakeUndoableFromToTupleReadme from './make-undoable-from-to-tuple.md';
@@ -26,37 +39,40 @@ import MakeUndoableDeltaReadme from './make-undoable-delta.md';
 storiesOf('useFlexibleUndo/basics', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
+  .add('state delta as payload ', () => <MakeUndoableExample />, {
+    readme: {
+      content: MakeUndoableDeltaIntro,
+      sidebar: MakeUndoableDeltaReadme,
+    },
+  })
+  .add('makeHandler & combineHandlers', () => <MakeHandlerExample />, {
+    readme: {
+      // content: MakeHandlerIntro,
+      sidebar: MakeHandlerReadme,
+    },
+  })
+  .add('makeUndoableHandler', () => <MakeUndoableHandlerExample />, {
+    readme: {
+      content: MakeUndoableHandlerIntro,
+      sidebar: MakeUndoableHandlerReadme,
+    },
+  })
+  .add('from- and to-state as payload', () => <MakeUndoableFromToExample />, {
+    readme: {
+      // content: MakeUndoableFromToIntro,
+      sidebar: MakeUndoableFromToReadme,
+    },
+  })
   .add(
-    'makeUndoable',
-
-    () => <MakeUndoableExample />,
+    'makeUndoableFTObjHandler & wrapFTObjHandler',
+    () => <MakeUndoableFTObjHandlerExample />,
     {
       readme: {
-        content: MakeUndoableDeltaIntro,
-        sidebar: MakeUndoableDeltaReadme,
+        content: MakeUndoableFromToHandlerIntro,
+        sidebar: MakeUndoableFromToHandlerReadme,
       },
     }
   );
-// .add(
-//   'object payload with from and to state',
-//   () => <MakeUndoableFromToExample />,
-//   {
-//     readme: {
-//       content: MakeUndoableFromToIntro,
-//       sidebar: MakeUndoableFromToReadme,
-//     },
-//   }
-// )
-// .add(
-//   'tuple payload with from and to state',
-//   () => <MakeUndoableFromToTuple />,
-//   {
-//     readme: {
-//       content: MakeUndoableFromToTupleIntro,
-//       sidebar: MakeUndoableFromToTupleReadme,
-//     },
-//   }
-// )
 // .add('multiple calls to makeUndoable', () => <MakeUndoableMulti />, {
 //   readme: {
 //     content: MakeUndoableMultiIntro,

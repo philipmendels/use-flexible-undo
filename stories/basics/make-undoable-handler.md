@@ -1,28 +1,13 @@
 The utility **makeUndoableHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument and returns a function that takes two (do/redo and undo) curried functions for updating the state based on the payload and the previous state. The final return value is an object with do/redo and undo handlers.
 
 ```typescript
-const [count, setCount] = useState(0);
-
-const undoableAddHandler = makeUndoableHandler(setCount)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
-
-const { add, subtract } = makeUndoables<PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
-});
 ```
 
 Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import {
-  useFlexibleUndo,
-  invertHandlers,
-  makeUndoableHandler,
-} from 'use-flexible-undo';
+import { useFlexibleUndo, invertHandlers, makeUndoableHandler } from '../../.';
 import { ActionList } from '../components/action-list';
 import { rootClass, uiContainerClass } from '../styles';
 
@@ -34,25 +19,28 @@ interface PayloadByType {
 export const MakeUndoableHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
-
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+    },
   });
+
+  const { add, subtract } = undoables;
 
   return (
     <div className={rootClass}>
@@ -67,7 +55,11 @@ export const MakeUndoableHandlerExample: FC = () => {
           redo
         </button>
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

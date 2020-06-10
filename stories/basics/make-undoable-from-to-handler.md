@@ -1,10 +1,18 @@
+The utility **makeUndoableFTObjHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument. It returns an object with do/redo and undo handlers that take an object with the current 'from' state and the new 'to' state as payload.
+
+```typescript
+```
+
+Full code:
+
+```typescript
 import React, { useState } from 'react';
 import {
   useFlexibleUndo,
   PayloadFromTo,
   makeUndoableFTObjHandler,
   wrapFTObjHandler,
-} from '../../dist';
+} from '../../.';
 import { rootClass, uiContainerClass } from '../../stories/styles';
 import { ActionList } from '../../stories/components/action-list';
 
@@ -12,24 +20,30 @@ interface PayloadByType {
   updateCount: PayloadFromTo<number>;
 }
 
-export const WrapFTObjHandlerExample: React.FC = () => {
+export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
-    makeUndoables,
+    undoables,
     canUndo,
     undo,
     canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-  } = useFlexibleUndo();
-
-  const { updateCount } = makeUndoables<PayloadByType>({
-    updateCount: makeUndoableFTObjHandler(setCount),
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      updateCount: makeUndoableFTObjHandler(setCount),
+    },
   });
 
+  const { updateCount } = undoables;
+
   const countHandler = wrapFTObjHandler(updateCount, count);
+
+  const add = countHandler(amount => prev => prev + amount);
+  const subtract = countHandler(amount => prev => prev - amount);
   const multiply = countHandler(amount => prev => prev * amount);
   const divide = countHandler(amount => prev => prev / amount);
 
@@ -37,6 +51,8 @@ export const WrapFTObjHandlerExample: React.FC = () => {
     <div className={rootClass}>
       <div>count = {count}</div>
       <div className={uiContainerClass}>
+        <button onClick={() => add(2)}>add 2</button>
+        <button onClick={() => subtract(1)}>subtract 1</button>
         <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
         <button onClick={() => divide(Math.PI)}>di&pi;de</button>
         <button disabled={!canUndo} onClick={() => undo()}>
@@ -46,7 +62,12 @@ export const WrapFTObjHandlerExample: React.FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };
+```

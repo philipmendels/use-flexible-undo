@@ -6,7 +6,6 @@ import {
   HandlersByType,
   History,
   Updater,
-  ActionUnion,
 } from './index.types';
 import { mapObject } from './util-internal';
 import {

@@ -3,47 +3,47 @@ If the payload is a decimal number that represents the delta (i.e. the state cha
 Instead you can choose to store the current 'from' state and the new 'to' state in the payload. This makes the payload a bit bigger, but it does give you the guarantee that you can restore the exact same state after undo/redo.
 
 ```typescript
-const [count, setCount] = useState(1);
-
-const updateCount = makeUndoable<PayloadFromTo<number>>({
-  type: 'updateCount',
-  drdo: ({ to }) => setCount(to),
-  undo: ({ from }) => setCount(from),
-});
-
-const multiply = (amount: number) =>
-  updateCount({ from: count, to: count * amount });
-const divide = (amount: number) =>
-  updateCount({ from: count, to: count / amount });
 ```
 
 Full code:
 
 ```typescript
 import React, { useState } from 'react';
-import { useFlexibleUndo, PayloadFromTo } from '../.';
+import { useFlexibleUndo, PayloadFromTo } from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 
-export const MakeUndoableFromTo: React.FC = () => {
+interface PayloadByType {
+  updateCount: PayloadFromTo<number>;
+}
+
+export const MakeUndoableFromToExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
-    makeUndoable,
+    undoables,
     canUndo,
     undo,
     canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-  } = useFlexibleUndo();
-
-  const updateCount = makeUndoable<PayloadFromTo<number>>({
-    type: 'updateCount',
-    drdo: ({ to }) => setCount(to),
-    undo: ({ from }) => setCount(from),
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      updateCount: {
+        drdo: ({ to }) => setCount(to),
+        undo: ({ from }) => setCount(from),
+      },
+    },
   });
 
+  const { updateCount } = undoables;
+
+  const add = (amount: number) =>
+    updateCount({ from: count, to: count + amount });
+  const subtract = (amount: number) =>
+    updateCount({ from: count, to: count - amount });
   const multiply = (amount: number) =>
     updateCount({ from: count, to: count * amount });
   const divide = (amount: number) =>
@@ -53,6 +53,8 @@ export const MakeUndoableFromTo: React.FC = () => {
     <div className={rootClass}>
       <div>count = {count}</div>
       <div className={uiContainerClass}>
+        <button onClick={() => add(2)}>add 2</button>
+        <button onClick={() => subtract(1)}>subtract 1</button>
         <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
         <button onClick={() => divide(Math.PI)}>di&pi;de</button>
         <button disabled={!canUndo} onClick={() => undo()}>
@@ -62,7 +64,11 @@ export const MakeUndoableFromTo: React.FC = () => {
           redo
         </button>
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

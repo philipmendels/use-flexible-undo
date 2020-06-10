@@ -3,27 +3,13 @@ The utility **makeHandler** takes a state setter function (e.g. the one returned
 The utility **combineHandlers** takes the do/redo handler as first argument and the undo handler as second argument, and returns an object with 'drdo' and 'undo' as keys and the handlers as values.
 
 ```typescript
-const [count, setCount] = useState(0);
-
-const countHandler = makeHandler(setCount);
-const addHandler = countHandler(amount => prev => prev + amount);
-const subHandler = countHandler(amount => prev => prev - amount);
-
-const { add, subtract } = makeUndoables<PayloadByType>({
-  add: combineHandlers(addHandler, subHandler),
-  subtract: combineHandlers(subHandler, addHandler),
-});
 ```
 
 Full code:
 
 ```typescript
 import React, { FC, useState } from 'react';
-import {
-  useFlexibleUndo,
-  makeHandler,
-  combineHandlers,
-} from 'use-flexible-undo';
+import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 
@@ -32,27 +18,30 @@ interface PayloadByType {
   subtract: number;
 }
 
-export const MakeUndoablesUtils: FC = () => {
+export const MakeHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
-
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
 
   const countHandler = makeHandler(setCount);
   const addHandler = countHandler(amount => prev => prev + amount);
   const subHandler = countHandler(amount => prev => prev - amount);
 
-  const { add, subtract } = makeUndoables<PayloadByType>({
-    add: combineHandlers(addHandler, subHandler),
-    subtract: combineHandlers(subHandler, addHandler),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: combineHandlers(addHandler, subHandler),
+      subtract: combineHandlers(subHandler, addHandler),
+    },
   });
+
+  const { add, subtract } = undoables;
 
   return (
     <div className={rootClass}>
@@ -67,7 +56,11 @@ export const MakeUndoablesUtils: FC = () => {
           redo
         </button>
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

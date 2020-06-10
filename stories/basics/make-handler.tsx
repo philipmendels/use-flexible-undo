@@ -1,15 +1,19 @@
 import React, { FC, useState } from 'react';
-import { ActionList } from '../components/action-list';
+import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
-import { useFlexibleUndo } from '../../.';
+import { ActionList } from '../components/action-list';
 
 interface PayloadByType {
   add: number;
   subtract: number;
 }
 
-export const MakeUndoableExample: FC = () => {
+export const MakeHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
+
+  const countHandler = makeHandler(setCount);
+  const addHandler = countHandler(amount => prev => prev + amount);
+  const subHandler = countHandler(amount => prev => prev - amount);
 
   const {
     undoables,
@@ -22,14 +26,8 @@ export const MakeUndoableExample: FC = () => {
     switchToBranch,
   } = useFlexibleUndo<PayloadByType>({
     handlers: {
-      add: {
-        drdo: amount => setCount(prev => prev + amount),
-        undo: amount => setCount(prev => prev - amount),
-      },
-      subtract: {
-        drdo: amount => setCount(prev => prev - amount),
-        undo: amount => setCount(prev => prev + amount),
-      },
+      add: combineHandlers(addHandler, subHandler),
+      subtract: combineHandlers(subHandler, addHandler),
     },
   });
 
@@ -39,8 +37,8 @@ export const MakeUndoableExample: FC = () => {
     <div className={rootClass}>
       <div>count = {count}</div>
       <div className={uiContainerClass}>
-        <button onClick={() => add(2)}>add 2</button>
-        <button onClick={() => subtract(1)}>subtract 1</button>
+        <button onClick={() => add(1)}>add 1</button>
+        <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>
           undo
         </button>
