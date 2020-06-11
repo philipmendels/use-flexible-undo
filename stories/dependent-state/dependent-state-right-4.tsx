@@ -7,10 +7,10 @@ import {
   makeUndoableStateDepHandler,
   invertHandlers,
   merge,
-} from '../../dist';
-import { rootClass, uiContainerClass } from '../../stories/styles';
-import { ActionList } from '../../stories/components/action-list';
-import { NumberInput } from '../../stories/components/number-input';
+} from '../../.';
+import { rootClass, uiContainerClass } from '../styles';
+import { ActionList } from '../components/action-list';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
@@ -31,16 +31,6 @@ export const DependentStateRight4Example: FC = () => {
     amount: 1,
   });
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
-
   const makeCountHandler = (um: UpdaterMaker<number>) => (
     shouldDouble: boolean
   ) =>
@@ -58,13 +48,26 @@ export const DependentStateRight4Example: FC = () => {
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTObjHandler(amount =>
-      setState(merge({ amount }))
-    ),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTObjHandler(amount =>
+        setState(merge({ amount }))
+      ),
+    },
   });
+
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -98,7 +101,11 @@ export const DependentStateRight4Example: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

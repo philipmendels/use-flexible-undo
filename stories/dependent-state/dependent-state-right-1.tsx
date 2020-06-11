@@ -5,10 +5,10 @@ import {
   makeUndoableFTObjHandler,
   makeUndoableHandler,
   invertHandlers,
-} from '../../dist';
-import { rootClass, uiContainerClass } from '../../stories/styles';
-import { ActionList } from '../../stories/components/action-list';
-import { NumberInput } from '../../stories/components/number-input';
+} from '../../.';
+import { rootClass, uiContainerClass } from '../styles';
+import { ActionList } from '../components/action-list';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
@@ -22,26 +22,29 @@ export const DependentStateRight1Example: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
-
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTObjHandler(setAmount),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTObjHandler(setAmount),
+    },
   });
+
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -72,7 +75,11 @@ export const DependentStateRight1Example: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

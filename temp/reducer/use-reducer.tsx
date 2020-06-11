@@ -4,6 +4,7 @@ import {
   PayloadFromTo,
   UReducer,
   UpdaterMaker,
+  Updater,
 } from '../../dist';
 import { ActionList } from '../../stories/components/action-list';
 import { rootClass, uiContainerClass } from '../../stories/styles';
@@ -22,18 +23,19 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const countUpdater = (prev: State, um: UpdaterMaker<number>): State =>
+const makeCountUpdater = (um: UpdaterMaker<number>): Updater<State> => prev =>
   prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
+
+const addUpdater = makeCountUpdater(amount => prev => prev + amount);
+const subUpdater = makeCountUpdater(amount => prev => prev - amount);
 
 const reducer: UReducer<State, PayloadByType> = (prevState, action) => {
   const isUndo = action.meta?.isUndo;
-  const addHandler = countUpdater(prevState, amount => prev => prev + amount);
-  const subHandler = countUpdater(prevState, amount => prev => prev - amount);
   switch (action.type) {
     case 'add':
-      return isUndo ? subHandler : addHandler;
+      return isUndo ? subUpdater(prevState) : addUpdater(prevState);
     case 'subtract':
-      return isUndo ? addHandler : subHandler;
+      return isUndo ? addUpdater(prevState) : subUpdater(prevState);
     case 'updateAmount':
       const { from, to } = action.payload;
       return { ...prevState, amount: isUndo ? from : to };

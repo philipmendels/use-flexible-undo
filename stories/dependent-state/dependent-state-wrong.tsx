@@ -4,10 +4,10 @@ import {
   useFlexibleUndo,
   makeUndoableFTObjHandler,
   combineHandlers,
-} from '../../dist';
-import { rootClass, uiContainerClass } from '../../stories/styles';
-import { ActionList } from '../../stories/components/action-list';
-import { NumberInput } from '../../stories/components/number-input';
+} from '../../.';
+import { rootClass, uiContainerClass } from '../styles';
+import { ActionList } from '../components/action-list';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
@@ -21,26 +21,29 @@ export const DependentStateWrong: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
-
   //Do NOT do this! Move 'amount' to the action payload or combine it
   //with the 'count' state so that you can get it from the prev state.
   const addHandler = () => amount && setCount(prev => prev + amount);
   const subHandler = () => amount && setCount(prev => prev - amount);
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: combineHandlers(addHandler, subHandler),
-    subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFTObjHandler(setAmount),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: combineHandlers(addHandler, subHandler),
+      subtract: combineHandlers(subHandler, addHandler),
+      updateAmount: makeUndoableFTObjHandler(setAmount),
+    },
   });
+
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -71,7 +74,11 @@ export const DependentStateWrong: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };
