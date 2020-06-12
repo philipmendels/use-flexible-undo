@@ -245,11 +245,13 @@ export const updatePath = (path: string[]) => <PBT extends PayloadByType>(
 
     const newBranchId = pathBranch.id;
     const index = parent.position.globalIndex;
+
     const reparentedBranches = getReparentedBranches(
       newBranchId,
       parent.branchId,
       index
-    );
+    )(newHist);
+
     return mergeDeep(
       {
         currentBranchId: newBranchId,

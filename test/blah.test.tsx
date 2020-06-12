@@ -63,9 +63,52 @@ const history: History<PBT> = {
   },
 };
 
-const path = getPathFromCommonAncestor(history, 'd');
+// const path = getPathFromCommonAncestor(history, 'd');
+// console.log('path', path);
+// console.log(updatePath(path.map(b => b.id))(history));
+
+const history2: History<PBT> = {
+  branches: {
+    a: {
+      created: new Date(),
+      id: 'a',
+      stack: createStack('a'),
+    },
+    b: {
+      created: new Date(),
+      id: 'b',
+      stack: createStack('b'),
+      parent: {
+        branchId: 'a',
+        position: {
+          actionId: 'a2',
+          globalIndex: 2,
+        },
+      },
+    },
+    c: {
+      created: new Date(),
+      id: 'b',
+      stack: createStack('b'),
+      parent: {
+        branchId: 'a',
+        position: {
+          actionId: 'a2',
+          globalIndex: 2,
+        },
+      },
+    },
+  },
+  currentBranchId: 'a',
+  currentPosition: {
+    actionId: 'a0',
+    globalIndex: 0,
+  },
+};
+
+const path = getPathFromCommonAncestor(history2, 'b');
 console.log('path', path);
-console.log(updatePath(path.map(b => b.id))(history));
+console.log(updatePath(path.map(b => b.id))(history2));
 
 // describe('it', () => {
 //   it('does it', () => {

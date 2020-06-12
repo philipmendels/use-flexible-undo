@@ -1,20 +1,5 @@
 {
-  "include": [
-    "src",
-    "types",
-    "test",
-    "stories",
-    "temp/callbacks",
-    "temp/components",
-    "temp/memoization",
-    "temp/dependent-state",
-    "temp/meta-actions",
-    "temp/time-travel",
-    "temp/light",
-    "temp/reducer",
-    "temp/utilities",
-    "temp/persistence"
-  ],
+  "include": ["src", "types", "test", "stories"],
   "files": ["./index.d.ts"],
   "compilerOptions": {
     "target": "es5",
