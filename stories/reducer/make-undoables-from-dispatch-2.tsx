@@ -1,19 +1,19 @@
-import React, { FC } from 'react';
+import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
   PayloadFromTo,
-  useUndoableReducer,
-  makeUndoableFTObjHandler,
-  UpdaterMaker,
   Updater,
+  UpdaterMaker,
   makeUndoableStateDepHandler,
-  invertHandlers,
   merge,
-} from '../../dist';
-import { ActionList } from '../../stories/components/action-list';
-import { uiContainerClass, rootClass } from '../../stories/styles';
-import { NumberInput } from '../../stories/components/number-input';
+  invertHandlers,
+  makeUndoableFTObjHandler,
+  bindUndoableActionCreators,
+} from '../../.';
+import { ActionList } from '../components/action-list';
+import { uiContainerClass, rootClass } from '../styles';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
@@ -44,32 +44,28 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
 });
 
-export const UseUndoableReducer: FC = () => {
-  const {
-    state: { count, amount },
-    boundActionCreators,
-  } = useUndoableReducer(
-    reducer,
-    {
-      count: 0,
-      amount: 1,
-    },
-    actionCreators
-  );
+export const MakeUndoablesFromDispatchExample2: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
+    count: 0,
+    amount: 1,
+  });
+
+  const handlers = bindUndoableActionCreators(dispatch, actionCreators);
 
   const {
-    makeUndoables,
+    undoables,
     canUndo,
     undo,
     canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-  } = useFlexibleUndo();
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers,
+  });
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>(
-    boundActionCreators
-  );
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -100,7 +96,11 @@ export const UseUndoableReducer: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

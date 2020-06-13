@@ -1,17 +1,19 @@
-import React, { FC, useReducer } from 'react';
+import React, { FC } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
   PayloadFromTo,
-  Updater,
-  UpdaterMaker,
+  useUndoableReducer,
   makeUndoableFTObjHandler,
-  combineHandlers,
+  UpdaterMaker,
+  Updater,
+  makeUndoableStateDepHandler,
+  invertHandlers,
   merge,
-} from '../../dist';
-import { ActionList } from '../../stories/components/action-list';
-import { uiContainerClass, rootClass } from '../../stories/styles';
-import { NumberInput } from '../../stories/components/number-input';
+} from '../../.';
+import { ActionList } from '../components/action-list';
+import { uiContainerClass, rootClass } from '../styles';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
@@ -31,35 +33,41 @@ const makeCountHandler = (um: UpdaterMaker<number>) => (): Updater<
 > => prev =>
   prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
 
-const addHandler = makeCountHandler(amount => prev => prev + amount);
-const subHandler = makeCountHandler(amount => prev => prev - amount);
+const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+  amount => prev => prev + amount,
+  amount => prev => prev - amount
+);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: combineHandlers(addHandler, subHandler),
-  subtract: combineHandlers(subHandler, addHandler),
+  add: undoableAddHandler,
+  subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
 });
 
-export const MakeUndoablesFromDispatchExample: FC = () => {
-  const [{ count, amount }, dispatch] = useReducer(reducer, {
-    count: 0,
-    amount: 1,
-  });
+export const UseUndoableReducer: FC = () => {
+  const [{ count, amount }, handlers] = useUndoableReducer(
+    reducer,
+    {
+      count: 0,
+      amount: 1,
+    },
+    actionCreators
+  );
 
   const {
-    makeUndoablesFromDispatch,
+    undoables,
     canUndo,
     undo,
     canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-  } = useFlexibleUndo();
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers,
+  });
 
-  const { add, subtract, updateAmount } = makeUndoablesFromDispatch(
-    dispatch,
-    actionCreators
-  );
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -90,7 +98,11 @@ export const MakeUndoablesFromDispatchExample: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import './basics/basics.index';
 import './dependent-state/dependent-state.index';
-// import './reducer/reducer.index';
+import './reducer/reducer.index';
 // import './time-travel/time-travel.index';
 // import './meta-actions/meta-actions.index';
 // import './callbacks/callbacks.index';

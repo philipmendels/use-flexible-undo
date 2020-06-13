@@ -3,6 +3,7 @@ import {
   UReducer,
   PayloadByType,
   UndoableUActionCreatorsByType,
+  UndoableHandlersByType,
 } from './index.types';
 import { bindUndoableActionCreators } from './util';
 
@@ -10,16 +11,11 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>(
   reducer: UReducer<S, PBT>,
   initialState: S,
   actionCreators: UndoableUActionCreatorsByType<PBT>
-) => {
+): [S, UndoableHandlersByType<PBT>] => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  // Is it ok to memoize in a custom hook, i.e. to assume
-  // that the user does not mutate actionCreators?
-  const boundActionCreators = useMemo(
+  const handlers = useMemo(
     () => bindUndoableActionCreators(dispatch, actionCreators),
     [actionCreators]
   );
-  return {
-    state,
-    boundActionCreators,
-  };
+  return [state, handlers];
 };

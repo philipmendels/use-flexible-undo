@@ -140,7 +140,7 @@ export type ActionUnion<PBT extends PayloadByType> = {
 
 export type StackSetter<A extends Action> = Dispatch<React.SetStateAction<A[]>>;
 
-export type UAction<T, P> = Action<T, P> & {
+export type UAction<T, P> = BaseAction<T, P> & {
   meta?: {
     isUndo?: boolean;
   };

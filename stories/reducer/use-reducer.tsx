@@ -5,10 +5,10 @@ import {
   UReducer,
   UpdaterMaker,
   Updater,
-} from '../../dist';
-import { ActionList } from '../../stories/components/action-list';
-import { rootClass, uiContainerClass } from '../../stories/styles';
-import { NumberInput } from '../../stories/components/number-input';
+} from '../../.';
+import { ActionList } from '../components/action-list';
+import { rootClass, uiContainerClass } from '../styles';
+import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
 
@@ -51,30 +51,33 @@ export const UsingReducer: FC = () => {
   });
 
   const {
-    makeUndoables,
+    undoables,
     canUndo,
     undo,
     canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-  } = useFlexibleUndo();
-
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: {
-      drdo: () => dispatch({ type: 'add' }),
-      undo: () => dispatch({ type: 'add', meta: { isUndo: true } }),
-    },
-    subtract: {
-      drdo: () => dispatch({ type: 'subtract' }),
-      undo: () => dispatch({ type: 'subtract', meta: { isUndo: true } }),
-    },
-    updateAmount: {
-      drdo: payload => dispatch({ type: 'updateAmount', payload }),
-      undo: payload =>
-        dispatch({ type: 'updateAmount', payload, meta: { isUndo: true } }),
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: {
+        drdo: () => dispatch({ type: 'add' }),
+        undo: () => dispatch({ type: 'add', meta: { isUndo: true } }),
+      },
+      subtract: {
+        drdo: () => dispatch({ type: 'subtract' }),
+        undo: () => dispatch({ type: 'subtract', meta: { isUndo: true } }),
+      },
+      updateAmount: {
+        drdo: payload => dispatch({ type: 'updateAmount', payload }),
+        undo: payload =>
+          dispatch({ type: 'updateAmount', payload, meta: { isUndo: true } }),
+      },
     },
   });
+
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -105,7 +108,11 @@ export const UsingReducer: FC = () => {
           redo
         </button>
       </div>
-      <ActionList history={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };
