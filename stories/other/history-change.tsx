@@ -1,14 +1,11 @@
-Full code:
-
-```typescript
-import React, { FC, useState, ReactNode } from 'react';
+import React, { FC, useState, useRef, useEffect } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTObjHandler,
   makeUndoableHandler,
   invertHandlers,
-} from 'use-flexible-undo';
+} from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -21,40 +18,42 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-type PayloadDescribers = {
-  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
-};
-
-const payloadDescribers: PayloadDescribers = {
-  add: amount => `Increase count by ${amount}`,
-  subtract: amount => `Decrease count by ${amount}`,
-  updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
-};
-
-export const MakeUndoablesMeta1: FC = () => {
+export const StackChangeExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
-
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo<PayloadByType>();
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTObjHandler(setAmount),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTObjHandler(setAmount),
+    },
   });
+
+  const { add, subtract, updateAmount } = undoables;
+
+  const prevHistoryRef = useRef(history);
+  useEffect(() => {
+    console.log('history change', {
+      from: prevHistoryRef.current,
+      to: history,
+    });
+    prevHistoryRef.current = history;
+  }, [history]);
 
   return (
     <div className={rootClass}>
@@ -86,14 +85,10 @@ export const MakeUndoablesMeta1: FC = () => {
         </button>
       </div>
       <ActionList
-        stack={stack}
+        history={history}
         timeTravel={timeTravel}
-        convert={action =>
-          // TypeScript does not properly narrow the payload type
-          payloadDescribers[action.type](action.payload as any)
-        }
+        switchToBranch={switchToBranch}
       />
     </div>
   );
 };
-```

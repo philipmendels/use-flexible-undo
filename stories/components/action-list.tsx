@@ -6,8 +6,7 @@ import React, {
   ReactNode,
 } from 'react';
 import styled from '@emotion/styled';
-import { PayloadByType, ActionUnion } from '../../dist';
-import { History, BranchConnection } from '../../src';
+import { PayloadByType, ActionUnion, History, BranchConnection } from '../../.';
 import {
   isUndoPossible,
   isRedoPossible,
@@ -25,7 +24,7 @@ interface ActionListProps<PBT extends PayloadByType> {
   timeTravel: (index: number) => void;
   switchToBranch: (branchId: string) => void;
   startTime?: Date;
-  convert?: ConvertFn<PBT>;
+  describeAction?: ConvertFn<PBT>;
 }
 
 type Modus = 'clickBetween' | 'clickOn';
@@ -34,7 +33,7 @@ export const ActionList = <PBT extends PayloadByType>({
   history,
   timeTravel,
   switchToBranch,
-  convert,
+  describeAction: convert,
   startTime,
 }: ActionListProps<PBT>): ReactElement | null => {
   const [modus, setModus] = useState<Modus>('clickOn');

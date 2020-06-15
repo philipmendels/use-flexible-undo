@@ -1,15 +1,12 @@
-Full code:
-
-```typescript
-import React, { FC, useState } from 'react';
+import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTObjHandler,
   makeUndoableHandler,
   invertHandlers,
-  combineUHandlerWithMeta,
-} from 'use-flexible-undo';
+  ActionUnion,
+} from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -22,41 +19,45 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-interface MetaActionReturnTypes {
-  describe: string;
-}
+const describeAction = (action: ActionUnion<PayloadByType>): ReactNode => {
+  switch (action.type) {
+    case 'add':
+      return `Increase count by ${action.payload}`;
+    case 'subtract':
+      return `Decrease count by ${action.payload}`;
+    case 'updateAmount':
+      const { from, to } = action.payload;
+      return `Update amount from ${from} to ${to}`;
+  }
+};
 
-export const CombineUHandlerWithMetaExample: FC = () => {
+export const MakeUndoablesMeta1: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
-
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-    getMetaActionHandlers,
-  } = useFlexibleUndo<PayloadByType, MetaActionReturnTypes>();
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: combineUHandlerWithMeta(undoableAddHandler, {
-      describe: amount => `Increase count by ${amount}`,
-    }),
-    subtract: combineUHandlerWithMeta(invertHandlers(undoableAddHandler), {
-      describe: amount => `Decrease count by ${amount}`,
-    }),
-    updateAmount: combineUHandlerWithMeta(makeUndoableFTObjHandler(setAmount), {
-      describe: ({ from, to }) => `Update amount from ${from} to ${to}`,
-    }),
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTObjHandler(setAmount),
+    },
   });
+
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -88,11 +89,11 @@ export const CombineUHandlerWithMetaExample: FC = () => {
         </button>
       </div>
       <ActionList
-        stack={stack}
+        history={history}
         timeTravel={timeTravel}
-        convert={action => getMetaActionHandlers(action).describe()}
+        switchToBranch={switchToBranch}
+        describeAction={describeAction}
       />
     </div>
   );
 };
-```

@@ -1,15 +1,12 @@
-Full code:
-
-```typescript
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTObjHandler,
   makeUndoableHandler,
   invertHandlers,
-  combineUHandlerWithMeta,
-} from 'use-flexible-undo';
+  ActionUnion,
+} from '../../dist';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -22,51 +19,46 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-interface MetaActionReturnTypes {
-  describe: string;
-}
+type PayloadDescribers = {
+  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
+};
 
-export const MemoizationExample: FC = () => {
+const payloadDescribers: PayloadDescribers = {
+  add: amount => `Increase count by ${amount}`,
+  subtract: amount => `Decrease count by ${amount}`,
+  updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
+};
+
+const describeAction = (action: ActionUnion<PayloadByType>) =>
+  payloadDescribers[action.type](action.payload as any);
+
+export const MakeUndoablesMeta1: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
+  );
+
   const {
-    makeUndoables,
+    undoables,
     canUndo,
     undo,
     canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-    getMetaActionHandlers,
-  } = useFlexibleUndo<PayloadByType, MetaActionReturnTypes>({
-    callbacks: {
-      onMakeUndoables: types => console.log('makeUndoables', types),
-      onDoRedo: ({ eventName, meta }) =>
-        console.log(`${eventName}:`, meta.describe()),
+    switchToBranch,
+  } = useFlexibleUndo<PayloadByType>({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTObjHandler(setAmount),
     },
   });
 
-  const { add, subtract, updateAmount } = useMemo(() => {
-    const undoableAddHandler = makeUndoableHandler(setCount)(
-      amount => prev => prev + amount,
-      amount => prev => prev - amount
-    );
-    return makeUndoables<PayloadByType>({
-      add: combineUHandlerWithMeta(undoableAddHandler, {
-        describe: amount => `Increase count by ${amount}`,
-      }),
-      subtract: combineUHandlerWithMeta(invertHandlers(undoableAddHandler), {
-        describe: amount => `Decrease count by ${amount}`,
-      }),
-      updateAmount: combineUHandlerWithMeta(
-        makeUndoableFTObjHandler(setAmount),
-        {
-          describe: ({ from, to }) => `Update amount from ${from} to ${to}`,
-        }
-      ),
-    });
-  }, [makeUndoables]);
+  const { add, subtract, updateAmount } = undoables;
 
   return (
     <div className={rootClass}>
@@ -98,11 +90,11 @@ export const MemoizationExample: FC = () => {
         </button>
       </div>
       <ActionList
-        stack={stack}
+        history={history}
         timeTravel={timeTravel}
-        convert={action => getMetaActionHandlers(action).describe()}
+        switchToBranch={switchToBranch}
+        describeAction={describeAction}
       />
     </div>
   );
 };
-```
