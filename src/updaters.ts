@@ -327,3 +327,15 @@ export const getSideBranches = (branchId: string, flatten: boolean) => <
         branches: [b, ...flattenedBranches],
       };
     });
+
+export const getBranchSwitchProps = <PBT extends PayloadByType>(
+  history: History<PBT>,
+  branchId: string
+) => {
+  const path = getPathFromCommonAncestor(history, branchId);
+  return {
+    path,
+    parentIndex: path[path.length - 1].parent!.position.globalIndex,
+    caIndex: path[0].parent!.position.globalIndex,
+  };
+};

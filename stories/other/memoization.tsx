@@ -21,8 +21,9 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-// Define the options outside of the component,
-// or if they are dynamic them then wrap them in useMemo.
+// Define constant options outside of the component.
+// It they are dynamic (stateful) then wrap them
+// in useMemo just like the handlers below.
 const options: UFUOptions = {
   clearFutureOnDo: false,
 };

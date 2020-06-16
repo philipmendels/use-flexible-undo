@@ -310,3 +310,9 @@ export interface History<PBT extends PayloadByType> {
   currentBranchId: string;
   currentPosition: PositionOnBranch;
 }
+
+export type BranchSwitchModus =
+  | 'LAST_COMMON_ACTION_IF_PAST'
+  | 'LAST_COMMON_ACTION'
+  | 'HEAD_OF_BRANCH'
+  | 'LAST_KNOWN_POSITION_ON_BRANCH';

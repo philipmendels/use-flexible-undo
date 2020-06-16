@@ -6,12 +6,12 @@ import {
   HandlersByType,
   History,
   Updater,
+  BranchSwitchModus,
 } from './index.types';
 import { mapObject } from './util-internal';
 import {
   getCurrentBranch,
   getCurrentIndex,
-  getPathFromCommonAncestor,
   updatePath,
   createInitialHistory,
   createAction,
@@ -25,6 +25,7 @@ import {
   getSideEffectForUndoAction,
   getSideEffectForRedoAction,
   getNewPosition,
+  getBranchSwitchProps,
 } from './updaters';
 import { defaultOptions } from './constants';
 
@@ -70,11 +71,11 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
       getSideEffect: (history: History<PBT>) => () => void,
       updater: Updater<History<PBT>>
     ) => {
-      let hasSideEffectRun = false;
+      let isSideEffectQueued = false;
       setHistory(prev => {
         if (isPossible(prev)) {
-          if (!hasSideEffectRun) {
-            hasSideEffectRun = true;
+          if (!isSideEffectQueued) {
+            isSideEffectQueued = true;
             queuedSideEffectsRef.current.push(getSideEffect(prev));
           }
           return updater(prev);
@@ -94,9 +95,9 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
     handleUndoRedo(isRedoPossible, getSideEffectForRedo(handlers), redoUpdater);
   }, [handleUndoRedo, handlers]);
 
-  const timeTravel = useCallback(
+  const timeTravelCurrentBranch = useCallback(
     (newIndex: number) => {
-      let hasSideEffectRun = false;
+      let areSideEffectsQueued = false;
       setHistory(prev => {
         const currentIndex = getCurrentIndex(prev);
         const currentStack = getCurrentBranch(prev).stack;
@@ -105,8 +106,8 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
         } else if (newIndex > currentStack.length - 1 || newIndex < -1) {
           throw new Error(`Invalid index ${newIndex}`);
         } else {
-          if (!hasSideEffectRun) {
-            hasSideEffectRun = true;
+          if (!areSideEffectsQueued) {
+            areSideEffectsQueued = true;
             if (newIndex < currentIndex) {
               const actions = currentStack
                 .slice(newIndex + 1, currentIndex + 1)
@@ -138,30 +139,73 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
     [handlers]
   );
 
+  const timeTravel = useCallback(
+    (indexOnBranch: number, branchId = history.currentBranchId) => {
+      if (branchId === history.currentBranchId) {
+        timeTravelCurrentBranch(indexOnBranch);
+      } else {
+        const { caIndex, path, parentIndex } = getBranchSwitchProps(
+          history,
+          branchId
+        );
+        if (caIndex < history.currentPosition.globalIndex) {
+          timeTravelCurrentBranch(caIndex);
+        }
+        setHistory(updatePath(path.map(b => b.id)));
+        // current branch is updated
+        timeTravelCurrentBranch(parentIndex + 1 + indexOnBranch);
+      }
+    },
+    [history, timeTravelCurrentBranch]
+  );
+
   const timeTravelById = useCallback(
-    (id: string) => {
-      const index = getCurrentBranch(history).stack.findIndex(
-        action => action.id === id
+    (actionId: string, branchId = history.currentBranchId) => {
+      const index = history.branches[branchId].stack.findIndex(
+        action => action.id === actionId
       );
       if (index >= 0) {
-        timeTravel(index);
+        timeTravel(index, branchId);
       } else {
-        throw new Error(`action with id ${id} not found on current branch`);
+        throw new Error(
+          `action with id ${actionId} not found on branch with id ${branchId}${
+            branchId === history.currentBranchId ? '(current branch)' : ''
+          }`
+        );
       }
     },
     [history, timeTravel]
   );
 
   const switchToBranch = useCallback(
-    (branchId: string) => {
-      const path = getPathFromCommonAncestor(history, branchId);
-      const newIndex = path[path.length - 1].parent!.position.globalIndex;
-      const ca = path[0].parent!.position.globalIndex;
-      timeTravel(ca);
-      setHistory(updatePath(path.map(b => b.id)));
-      timeTravel(newIndex);
+    (
+      branchId: string,
+      travelTo: BranchSwitchModus = 'LAST_COMMON_ACTION_IF_PAST'
+    ) => {
+      if (branchId === history.currentBranchId) {
+        throw new Error('You cannot switch to the current branch.');
+      } else {
+        const targetBranch = history.branches[branchId];
+        const { caIndex, path, parentIndex } = getBranchSwitchProps(
+          history,
+          branchId
+        );
+        if (
+          caIndex < history.currentPosition.globalIndex ||
+          travelTo === 'LAST_COMMON_ACTION'
+        ) {
+          timeTravelCurrentBranch(caIndex);
+        }
+        setHistory(updatePath(path.map(b => b.id)));
+        // current branch is updated
+        if (travelTo === 'LAST_KNOWN_POSITION_ON_BRANCH') {
+          timeTravelCurrentBranch(targetBranch.lastPosition!.globalIndex);
+        } else if (travelTo === 'HEAD_OF_BRANCH') {
+          timeTravelCurrentBranch(parentIndex + targetBranch.stack.length);
+        }
+      }
     },
-    [history, timeTravel]
+    [history, timeTravelCurrentBranch]
   );
 
   return {

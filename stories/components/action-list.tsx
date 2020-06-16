@@ -6,10 +6,14 @@ import React, {
   ReactNode,
 } from 'react';
 import styled from '@emotion/styled';
-import { PayloadByType, ActionUnion, History, BranchConnection } from '../../.';
 import {
-  isUndoPossible,
-  isRedoPossible,
+  PayloadByType,
+  ActionUnion,
+  History,
+  BranchConnection,
+  BranchSwitchModus,
+} from '../../.';
+import {
   getCurrentBranch,
   getCurrentIndex,
   getSideBranches,
@@ -21,156 +25,69 @@ type ConvertFn<PBT extends PayloadByType> = (
 
 interface ActionListProps<PBT extends PayloadByType> {
   history: History<PBT>;
-  timeTravel: (index: number) => void;
-  switchToBranch: (branchId: string) => void;
+  timeTravel: (index: number, branchId?: string) => void;
+  switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
   startTime?: Date;
   describeAction?: ConvertFn<PBT>;
 }
-
-type Modus = 'clickBetween' | 'clickOn';
 
 export const ActionList = <PBT extends PayloadByType>({
   history,
   timeTravel,
   switchToBranch,
-  describeAction: convert,
+  describeAction,
   startTime,
 }: ActionListProps<PBT>): ReactElement | null => {
-  const [modus, setModus] = useState<Modus>('clickOn');
   const startTimeRef = useRef(new Date());
   const [now, setNow] = useState(new Date());
-  const [mouseMoved, setMouseMoved] = useState(false);
   useInterval(() => setNow(new Date()), 5000);
-  const hasPast = isUndoPossible(history);
-  const hasFuture = isRedoPossible(history);
+
   const currentBranch = getCurrentBranch(history);
   const stack = currentBranch.stack;
   const currentIndex = getCurrentIndex(history);
 
   const connections = getSideBranches(currentBranch.id, true)(history);
 
-  const past = stack.slice(0, currentIndex + 1).reverse();
-  const future = stack.slice(currentIndex + 1, stack.length).reverse();
-
   return (
-    <>
-      {(hasPast || hasFuture) && (
-        <>
-          <div
-            style={{
-              marginTop: '30px',
-              marginBottom: '16px',
+    <div style={{ position: 'relative' }}>
+      {stack
+        .slice()
+        .reverse()
+        .map((action, index) => (
+          <StackItem
+            action={action}
+            isCurrent={history.currentPosition.actionId === action.id}
+            timeTravel={() => {
+              timeTravel(stack.length - 1 - index);
             }}
-          >
-            <label>
-              time-travel modus: &nbsp;
-              <select
-                value={modus}
-                onChange={e => setModus(e.currentTarget.value as any)}
-                style={{ fontSize: '14px', padding: '4px' }}
-              >
-                <option value="clickOn">Last of the past</option>
-                <option value="clickBetween">Move the present</option>
-              </select>
-            </label>
-          </div>
-        </>
-      )}
-      <div style={{ position: 'relative' }}>
-        {future.map((action, index) => (
-          <StackItemWrapper
-            key={index}
-            mouseMoved={mouseMoved}
-            onMouseMove={() => setMouseMoved(true)}
-            onClick={() => {
-              setMouseMoved(false);
-              timeTravel(past.length + (future.length - 1 - index));
-            }}
-          >
-            {modus === 'clickBetween' && (
-              <Spacer>
-                <div className="line"></div>
-              </Spacer>
+            now={now}
+            describeAction={describeAction}
+            connections={connections.filter(
+              c => c.position.actionId === action.id
             )}
-            <StackItem
-              action={action}
-              now={now}
-              convert={convert}
-              modus={modus}
-              connections={connections.filter(
-                c => c.position.actionId === action.id
-              )}
-              switchToBranch={switchToBranch}
-            />
-          </StackItemWrapper>
+            switchToBranch={switchToBranch}
+          />
         ))}
-        {modus === 'clickBetween' && (
-          <Present>
-            {hasPast && <>undoable past &darr;</>}
-            {hasPast && hasFuture && ' '}
-            {hasFuture && <>&uarr; redoable future</>}
-            {(hasPast || hasFuture) && ' - click to time travel'}
-          </Present>
-        )}
-        {past.map((action, index) => (
-          <StackItemWrapper
-            key={index}
-            onMouseMove={() => setMouseMoved(true)}
-            onClick={() => {
-              setMouseMoved(false);
-              const indexR = past.length - 1 - index;
-              timeTravel(modus === 'clickOn' ? indexR : indexR - 1);
-            }}
-            mouseMoved={mouseMoved}
-            isCurrent={index === 0 && modus === 'clickOn'}
-          >
-            <StackItem
-              action={action}
-              now={now}
-              convert={convert}
-              modus={modus}
-              connections={connections.filter(
-                c => c.position.actionId === action.id
-              )}
-              switchToBranch={switchToBranch}
-            />
-            {modus === 'clickBetween' && (
-              <Spacer>
-                <div className="line"></div>
-              </Spacer>
-            )}
-          </StackItemWrapper>
-        ))}
-        {modus === 'clickOn' && (hasPast || hasFuture) && (
-          <>
-            <StackItemWrapper
-              onMouseMove={() => setMouseMoved(true)}
-              onClick={() => {
-                setMouseMoved(false);
-                timeTravel(-1);
-              }}
-              mouseMoved={mouseMoved}
-              isCurrent={past.length === 0}
-            >
-              <StackItemRoot modus="clickOn">
-                <div className="time" style={{ minWidth: '120px' }}>
-                  {formatTime(startTime || startTimeRef.current, now)}
-                </div>
-                <div
-                  className="description"
-                  style={{ flex: 1, whiteSpace: 'nowrap' }}
-                >
-                  start
-                </div>
-              </StackItemRoot>
-            </StackItemWrapper>
-            <Indicator style={{ top: 2 + future.length * 32 + 'px' }}>
-              &#11157;
-            </Indicator>
-          </>
-        )}
-      </div>
-    </>
+      <StackItem
+        action={{
+          created: startTime || startTimeRef.current,
+          type: 'start',
+          id: 'start',
+        }}
+        isCurrent={currentIndex === -1}
+        timeTravel={() => timeTravel(-1)}
+        now={now}
+        describeAction={() => 'start'}
+        connections={[]}
+        switchToBranch={() => {}}
+      />
+
+      <Indicator
+        style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
+      >
+        &#11157;
+      </Indicator>
+    </div>
   );
 };
 
@@ -188,32 +105,28 @@ const Indicator = styled.div`
   transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 `;
 
-const Present = styled.div`
-  color: #48a7f6;
-  padding: 8px 0px;
-`;
-
 interface StackItemProps<PBT extends PayloadByType> {
   action: ActionUnion<PBT>;
   now: Date;
-  modus: Modus;
   connections: BranchConnection<PBT>[];
   switchToBranch: (branchId: string) => void;
-  isCurrent?: boolean;
-  convert?: ConvertFn<PBT>;
+  timeTravel: () => void;
+  isCurrent: boolean;
+  describeAction?: ConvertFn<PBT>;
 }
 
 const StackItem = <PBT extends PayloadByType>({
   action,
+  isCurrent,
   now,
-  convert,
-  modus,
+  describeAction,
   connections,
+  timeTravel,
   switchToBranch,
 }: StackItemProps<PBT>): ReactElement | null => {
   const { created, type, payload } = action;
   return (
-    <StackItemRoot modus={modus}>
+    <StackItemRoot isCurrent={isCurrent} onClick={timeTravel}>
       {connections.map(con => (
         <div
           key={con.branches[0].id}
@@ -233,38 +146,29 @@ const StackItem = <PBT extends PayloadByType>({
           {con.branches.length}
         </div>
       ))}
-      {Boolean(created) && (
+      <div style={{ flex: 1, display: 'flex' }}>
         <div className="time" style={{ minWidth: '120px' }}>
-          {formatTime(created!, now)}
+          {formatTime(created, now)}
         </div>
-      )}
-      <div className="description" style={{ flex: 1, whiteSpace: 'nowrap' }}>
-        {convert ? convert(action) : JSON.stringify({ type, payload })}
+        <div className="description" style={{ flex: 1, whiteSpace: 'nowrap' }}>
+          {describeAction
+            ? describeAction(action)
+            : JSON.stringify({ type, payload })}
+        </div>
       </div>
     </StackItemRoot>
   );
 };
 
-const StackItemRoot = styled.div<{ modus: Modus }>`
+const StackItemRoot = styled.div<{ isCurrent: boolean }>`
   display: flex;
   padding: 8px 0px;
   height: 32px;
   box-sizing: border-box;
-  ${({ modus }) =>
-    modus === 'clickOn' &&
-    `
-    padding: 8px 25px;
-    &:hover {
-      background: #f7f8fa;
-    }`}
-`;
-
-interface StackItemWrapperProps {
-  isCurrent?: boolean;
-  mouseMoved: boolean;
-}
-
-const StackItemWrapper = styled.div<StackItemWrapperProps>`
+  padding: 8px 25px;
+  &:hover {
+    background: #f7f8fa;
+  }
   cursor: pointer;
   .time {
     color: ${({ isCurrent }) => (isCurrent ? '#48a7f6' : '#BBB')};
@@ -275,25 +179,6 @@ const StackItemWrapper = styled.div<StackItemWrapperProps>`
     color: #48a7f6;
     cursor: default;
     `}
-  ${({ mouseMoved }) =>
-    mouseMoved &&
-    `&:hover .line {
-    border-bottom: 1px dashed #48a7f6;
-  }`}
-`;
-
-const Spacer = styled.div`
-  position: relative;
-  height: 32px;
-  margin: -16px 0;
-  z-index: 1;
-  cursor: pointer;
-  div {
-    height: 50%;
-  }
-  &:hover div {
-    border-bottom: 1px dashed #48a7f6;
-  }
 `;
 
 // From: https://overreacted.io/making-setinterval-declarative-with-react-hooks/
