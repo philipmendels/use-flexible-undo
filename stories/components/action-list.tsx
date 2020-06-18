@@ -18,6 +18,7 @@ import {
   getCurrentIndex,
   getSideBranches,
 } from '../../src/updaters';
+import { BranchIcon } from './branch-icon';
 
 type ConvertFn<PBT extends PayloadByType> = (
   action: ActionUnion<PBT>
@@ -100,7 +101,7 @@ const Indicator = styled.div`
   font-size: 16px;
   opacity: 0.8;
   position: absolute;
-  left: 0px;
+  left: 30px;
   border-radius: 50%;
   transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 `;
@@ -126,27 +127,31 @@ const StackItem = <PBT extends PayloadByType>({
 }: StackItemProps<PBT>): ReactElement | null => {
   const { created, type, payload } = action;
   return (
-    <StackItemRoot isCurrent={isCurrent} onClick={timeTravel}>
-      {connections.map(con => (
-        <div
-          key={con.branches[0].id}
-          style={{
-            border: '1px solid #48a7f6',
-            padding: '2px 6px',
-            alignSelf: 'center',
-            borderRadius: '6px',
-            marginRight: '16px',
-          }}
-          onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            switchToBranch(con.branches[0].id);
-          }}
-        >
-          {con.branches.length}
-        </div>
-      ))}
-      <div style={{ flex: 1, display: 'flex' }}>
+    <StackItemRoot>
+      <div
+        style={{
+          color: '#48a7f6',
+          padding: '8px 0',
+          flex: '0 0 52px',
+        }}
+      >
+        {connections.length > 0 && (
+          <div
+            style={{
+              cursor: 'pointer',
+              width: 'auto',
+            }}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              switchToBranch(connections[0].branches[0].id);
+            }}
+          >
+            <BranchIcon />
+          </div>
+        )}
+      </div>
+      <StackItemContent isCurrent={isCurrent} onClick={timeTravel}>
         <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created, now)}
         </div>
@@ -155,17 +160,20 @@ const StackItem = <PBT extends PayloadByType>({
             ? describeAction(action)
             : JSON.stringify({ type, payload })}
         </div>
-      </div>
+      </StackItemContent>
     </StackItemRoot>
   );
 };
 
-const StackItemRoot = styled.div<{ isCurrent: boolean }>`
+const StackItemRoot = styled.div`
   display: flex;
-  padding: 8px 0px;
   height: 32px;
   box-sizing: border-box;
-  padding: 8px 25px;
+`;
+
+const StackItemContent = styled.div<{ isCurrent: boolean }>`
+  padding: 8px;
+  display: flex;
   &:hover {
     background: #f7f8fa;
   }
