@@ -12,7 +12,7 @@ import {
 } from './index.types';
 import { v4 } from 'uuid';
 
-const NONE = 'none';
+const START = 'start';
 
 export const createInitialHistory = <
   PBT extends PayloadByType
@@ -20,11 +20,15 @@ export const createInitialHistory = <
   const id = v4();
   return {
     currentPosition: {
-      actionId: NONE,
-      globalIndex: -1,
+      actionId: START,
+      globalIndex: 0,
     },
     branches: {
-      [id]: { id, created: new Date(), stack: [] },
+      [id]: {
+        id,
+        created: new Date(),
+        stack: [createAction(START, undefined)],
+      },
     },
     currentBranchId: id,
   };
@@ -154,7 +158,7 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
 export const getNewPosition = (newIndex: number) => <PBT extends PayloadByType>(
   stack: ActionUnion<PBT>[]
 ): PositionOnBranch => ({
-  actionId: newIndex < 0 ? NONE : stack[newIndex].id,
+  actionId: stack[newIndex].id,
   globalIndex: newIndex,
 });
 
@@ -295,7 +299,7 @@ export const createAction = <
 
 export const isUndoPossible = <PBT extends PayloadByType>(
   history: History<PBT>
-) => getCurrentIndex(history) >= 0;
+) => getCurrentIndex(history) > 0;
 
 export const isRedoPossible = <PBT extends PayloadByType>(
   history: History<PBT>

@@ -6,7 +6,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
   ActionUnion,
-} from '../../dist';
+} from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -21,18 +21,21 @@ interface PayloadByType {
 
 type PayloadDescribers = {
   [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
+} & {
+  start: () => ReactNode;
 };
 
 const payloadDescribers: PayloadDescribers = {
   add: amount => `Increase count by ${amount}`,
   subtract: amount => `Decrease count by ${amount}`,
   updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
+  start: () => 'Start',
 };
 
 const describeAction = (action: ActionUnion<PayloadByType>) =>
   payloadDescribers[action.type](action.payload as any);
 
-export const MakeUndoablesMeta1: FC = () => {
+export const DescribeActionsMap: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 

@@ -6,6 +6,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
   ActionUnion,
+  Action,
 } from '../../.';
 import { rootClass, uiContainerClass } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -19,7 +20,9 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const describeAction = (action: ActionUnion<PayloadByType>): ReactNode => {
+const describeAction = (
+  action: ActionUnion<PayloadByType> | Action<'start'>
+): ReactNode => {
   switch (action.type) {
     case 'add':
       return `Increase count by ${action.payload}`;
@@ -28,10 +31,12 @@ const describeAction = (action: ActionUnion<PayloadByType>): ReactNode => {
     case 'updateAmount':
       const { from, to } = action.payload;
       return `Update amount from ${from} to ${to}`;
+    case 'start':
+      return 'Start';
   }
 };
 
-export const MakeUndoablesMeta1: FC = () => {
+export const DescribeActionsSwitch: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 

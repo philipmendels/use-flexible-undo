@@ -28,7 +28,6 @@ interface ActionListProps<PBT extends PayloadByType> {
   history: History<PBT>;
   timeTravel: (index: number, branchId?: string) => void;
   switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
-  startTime?: Date;
   describeAction?: ConvertFn<PBT>;
 }
 
@@ -37,9 +36,7 @@ export const ActionList = <PBT extends PayloadByType>({
   timeTravel,
   switchToBranch,
   describeAction,
-  startTime,
 }: ActionListProps<PBT>): ReactElement | null => {
-  const startTimeRef = useRef(new Date());
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 5000);
 
@@ -56,6 +53,7 @@ export const ActionList = <PBT extends PayloadByType>({
         .reverse()
         .map((action, index) => (
           <StackItem
+            key={action.id}
             action={action}
             isCurrent={history.currentPosition.actionId === action.id}
             timeTravel={() => {
@@ -69,19 +67,6 @@ export const ActionList = <PBT extends PayloadByType>({
             switchToBranch={switchToBranch}
           />
         ))}
-      <StackItem
-        action={{
-          created: startTime || startTimeRef.current,
-          type: 'start',
-          id: 'start',
-        }}
-        isCurrent={currentIndex === -1}
-        timeTravel={() => timeTravel(-1)}
-        now={now}
-        describeAction={() => 'start'}
-        connections={[]}
-        switchToBranch={() => {}}
-      />
 
       <Indicator
         style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
