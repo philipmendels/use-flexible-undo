@@ -6,6 +6,8 @@ import React, {
   ReactNode,
 } from 'react';
 import styled from '@emotion/styled';
+import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
+import '@reach/menu-button/styles.css';
 import {
   PayloadByType,
   ActionUnion,
@@ -121,19 +123,22 @@ const StackItem = <PBT extends PayloadByType>({
         }}
       >
         {connections.length > 0 && (
-          <div
-            style={{
-              cursor: 'pointer',
-              width: 'auto',
-            }}
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              switchToBranch(connections[0].branches[0].id);
-            }}
-          >
-            <BranchIcon />
-          </div>
+          <Menu>
+            <MenuButton>
+              <BranchIcon />
+            </MenuButton>
+            <MenuListStyled className="slide-down">
+              {connections.map(c => (
+                <MenuItemStyled
+                  onSelect={() => switchToBranch(c.branches[0].id)}
+                >
+                  {`Switch to ${
+                    c.branches.length > 1 ? 'branches' : 'branch'
+                  } ${c.branches.map(b => b.id).join(', ')}`}
+                </MenuItemStyled>
+              ))}
+            </MenuListStyled>
+          </Menu>
         )}
       </div>
       <StackItemContent isCurrent={isCurrent} onClick={timeTravel}>
@@ -154,6 +159,35 @@ const StackItemRoot = styled.div`
   display: flex;
   height: 32px;
   box-sizing: border-box;
+  [data-reach-menu-button] {
+    color: #48a7f6;
+    background: transparent;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    &:focus {
+      outline: none;
+    }
+    &:hover {
+      background: #f7f8fa;
+    }
+  }
+`;
+
+const MenuListStyled = styled(MenuList)`
+  padding: 0;
+  border: 1px solid #ddd;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 3px -2px,
+    rgba(0, 0, 0, 0.14) 0px 3px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 8px 0px;
+`;
+
+const MenuItemStyled = styled(MenuItem)`
+  font-family: Verdana, sans-serif;
+  padding: 8px 16px;
+  &[data-selected] {
+    background: #f7f8fa;
+    color: black;
+  }
 `;
 
 const StackItemContent = styled.div<{ isCurrent: boolean }>`
