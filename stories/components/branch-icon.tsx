@@ -5,7 +5,7 @@ export const BranchIcon = () => (
     viewBox="0 0 24 24"
     width="16"
     height="16"
-    stroke="currentColor"
+    fill="currentColor"
   >
     <path
       fillRule="evenodd"

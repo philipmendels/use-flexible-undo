@@ -83,7 +83,6 @@ const Indicator = styled.div`
   height: 32px;
   display: flex;
   align-items: center;
-  z-index: 10;
   color: #48a7f6;
   font-size: 16px;
   opacity: 0.8;
@@ -132,9 +131,10 @@ const StackItem = <PBT extends PayloadByType>({
                 <MenuItemStyled
                   onSelect={() => switchToBranch(c.branches[0].id)}
                 >
-                  {`Switch to ${
-                    c.branches.length > 1 ? 'branches' : 'branch'
-                  } ${c.branches.map(b => b.id).join(', ')}`}
+                  {`Switch to branch ${c.branches
+                    .map(b => b.number)
+                    .join(', ')
+                    .replace(/,(?=[^,]*$)/, ' and')}`}
                 </MenuItemStyled>
               ))}
             </MenuListStyled>
@@ -160,6 +160,7 @@ const StackItemRoot = styled.div`
   height: 32px;
   box-sizing: border-box;
   [data-reach-menu-button] {
+    display: flex;
     color: #48a7f6;
     background: transparent;
     border: none;
@@ -171,14 +172,17 @@ const StackItemRoot = styled.div`
     &:hover {
       background: #f7f8fa;
     }
+    &[aria-expanded='true'] {
+      color: white;
+      background: #48a7f6;
+    }
   }
 `;
 
 const MenuListStyled = styled(MenuList)`
   padding: 0;
-  border: 1px solid #ddd;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 3px -2px,
-    rgba(0, 0, 0, 0.14) 0px 3px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 8px 0px;
+  border: 1px solid #48a7f6;
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1);
 `;
 
 const MenuItemStyled = styled(MenuItem)`

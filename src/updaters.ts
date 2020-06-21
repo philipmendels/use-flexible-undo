@@ -28,6 +28,7 @@ export const createInitialHistory = <
         id,
         created: new Date(),
         stack: [createAction(START, undefined)],
+        number: 1,
       },
     },
     currentBranchId: id,
@@ -123,6 +124,16 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
     currentBranch.id,
     currentIndex
   )(prev);
+  const newBranch: Branch<PBT> = {
+    created: new Date(),
+    id: newBranchId,
+    number: Math.max(...Object.values(prev.branches).map(b => b.number)) + 1,
+    stack: currentStack.slice(0, currentIndex + 1).concat(action),
+    parentOriginal: {
+      branchId: currentBranch.id,
+      position: currentPosition,
+    },
+  };
   return mergeDeep(
     {
       currentPosition: {
@@ -140,15 +151,7 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
             position: currentPosition,
           },
         },
-        [newBranchId]: {
-          created: new Date(),
-          id: newBranchId,
-          stack: currentStack.slice(0, currentIndex + 1).concat(action),
-          parentOriginal: {
-            branchId: currentBranch.id,
-            position: currentPosition,
-          },
-        },
+        [newBranchId]: newBranch,
       },
     },
     prev

@@ -287,6 +287,7 @@ export interface ParentConnection {
 
 export interface Branch<PBT extends PayloadByType> {
   id: string;
+  number: number;
   parent?: {
     branchId: string;
     position: PositionOnBranch;
