@@ -9,18 +9,26 @@ import styled from '@emotion/styled';
 import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
 import '@reach/menu-button/styles.css';
 import {
+  ListboxInput,
+  ListboxButton,
+  ListboxPopover,
+  ListboxList,
+  ListboxOption,
+} from '@reach/listbox';
+import '@reach/listbox/styles.css';
+import {
   PayloadByType,
   ActionUnion,
   History,
   BranchConnection,
   BranchSwitchModus,
 } from '../../.';
+import { GitBranchIcon, TriangleDownIcon } from '@primer/octicons-react';
 import {
   getCurrentBranch,
   getCurrentIndex,
   getSideBranches,
 } from '../../src/updaters';
-import { BranchIcon } from './branch-icon';
 
 type ConvertFn<PBT extends PayloadByType> = (
   action: ActionUnion<PBT>
@@ -47,37 +55,107 @@ export const ActionList = <PBT extends PayloadByType>({
   const currentIndex = getCurrentIndex(history);
 
   const connections = getSideBranches(currentBranch.id, true)(history);
-
+  const branchList = Object.values(history.branches);
   return (
-    <div style={{ position: 'relative' }}>
-      {stack
-        .slice()
-        .reverse()
-        .map((action, index) => (
-          <StackItem
-            key={action.id}
-            action={action}
-            isCurrent={history.currentPosition.actionId === action.id}
-            timeTravel={() => {
-              timeTravel(stack.length - 1 - index);
-            }}
-            now={now}
-            describeAction={describeAction}
-            connections={connections.filter(
-              c => c.position.actionId === action.id
-            )}
-            switchToBranch={switchToBranch}
-          />
-        ))}
+    <>
+      <div style={{ marginBottom: '8px' }}>
+        <ListboxStyled
+          disabled={branchList.length === 1}
+          value={currentBranch.id}
+          onChange={id => id !== currentBranch.id && switchToBranch(id)}
+        >
+          <ListboxButton arrow={<TriangleDownIcon size={16} />} />
+          <ListboxPopover style={{ padding: 0, border: 0, outline: 'none' }}>
+            <ListboxListStyled>
+              {branchList.map(b => (
+                <ListboxOptionStyled
+                  key={b.id}
+                  value={b.id}
+                  label={`branch ${b.number}`}
+                >
+                  {`branch ${b.number} (size ${
+                    b.parent
+                      ? b.parent.position.globalIndex + b.stack.length
+                      : b.stack.length
+                  })`}
+                </ListboxOptionStyled>
+              ))}
+            </ListboxListStyled>
+          </ListboxPopover>
+        </ListboxStyled>
+      </div>
 
-      <Indicator
-        style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
-      >
-        &#11157;
-      </Indicator>
-    </div>
+      <div style={{ position: 'relative' }}>
+        {stack
+          .slice()
+          .reverse()
+          .map((action, index) => (
+            <StackItem
+              key={action.id}
+              action={action}
+              isCurrent={history.currentPosition.actionId === action.id}
+              timeTravel={() => {
+                timeTravel(stack.length - 1 - index);
+              }}
+              now={now}
+              describeAction={describeAction}
+              connections={connections.filter(
+                c => c.position.actionId === action.id
+              )}
+              switchToBranch={switchToBranch}
+            />
+          ))}
+
+        <Indicator
+          style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
+        >
+          &#11157;
+        </Indicator>
+      </div>
+    </>
   );
 };
+
+const ListboxStyled = styled(ListboxInput)`
+  [data-reach-listbox-button] {
+    background: white;
+    padding: 4px 8px;
+    cursor: pointer;
+    &[aria-disabled] {
+      cursor: default;
+    }
+    &:focus {
+      outline: 1px solid #48a7f6;
+    }
+    &:hover {
+      background: #f7f8fa;
+    }
+  }
+`;
+
+const ListboxListStyled = styled(ListboxList)`
+  padding: 0;
+  border: 1px solid #48a7f6;
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1);
+`;
+
+const ListboxOptionStyled = styled(ListboxOption)`
+  font-family: Verdana, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border: 0;
+  &[aria-selected='true'] {
+    background: #f7f8fa;
+    color: black;
+  }
+  &[data-current] {
+    color: white;
+    background: #48a7f6;
+    font-weight: normal;
+    cursor: default;
+  }
+`;
 
 const Indicator = styled.div`
   height: 32px;
@@ -124,9 +202,9 @@ const StackItem = <PBT extends PayloadByType>({
         {connections.length > 0 && (
           <Menu>
             <MenuButton>
-              <BranchIcon />
+              <GitBranchIcon size={16} />
             </MenuButton>
-            <MenuListStyled className="slide-down">
+            <MenuListStyled>
               {connections.map(c => (
                 <MenuItemStyled
                   onSelect={() => switchToBranch(c.branches[0].id)}

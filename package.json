@@ -57,6 +57,8 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
+    "@primer/octicons-react": "^10.0.0",
+    "@reach/listbox": "^0.10.4",
     "@reach/menu-button": "^0.10.4",
     "ramda": "^0.27.0",
     "uuid": "^8.0.0"

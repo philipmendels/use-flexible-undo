@@ -17,21 +17,27 @@ const START = 'start';
 export const createInitialHistory = <
   PBT extends PayloadByType
 >(): History<PBT> => {
-  const id = v4();
+  const initialAction = ({
+    id: v4(),
+    created: new Date(),
+    type: START,
+    payload: undefined,
+  } as Action) as ActionUnion<PBT>;
+  const initialBranchId = v4();
   return {
     currentPosition: {
-      actionId: START,
+      actionId: initialAction.id,
       globalIndex: 0,
     },
     branches: {
-      [id]: {
-        id,
+      [initialBranchId]: {
+        id: initialBranchId,
         created: new Date(),
-        stack: [createAction(START, undefined)],
+        stack: [initialAction],
         number: 1,
       },
     },
-    currentBranchId: id,
+    currentBranchId: initialBranchId,
   };
 };
 
