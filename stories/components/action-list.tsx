@@ -1,21 +1,7 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import React, { useState, ReactElement, ReactNode } from 'react';
 import styled from '@emotion/styled';
 import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
 import '@reach/menu-button/styles.css';
-import {
-  ListboxInput,
-  ListboxButton,
-  ListboxPopover,
-  ListboxList,
-  ListboxOption,
-} from '@reach/listbox';
-import '@reach/listbox/styles.css';
 import {
   PayloadByType,
   ActionUnion,
@@ -23,12 +9,13 @@ import {
   BranchConnection,
   BranchSwitchModus,
 } from '../../.';
-import { GitBranchIcon, TriangleDownIcon } from '@primer/octicons-react';
+import { GitBranchIcon } from '@primer/octicons-react';
 import {
   getCurrentBranch,
   getCurrentIndex,
   getSideBranches,
 } from '../../src/updaters';
+import { formatTime, useInterval } from './util';
 
 type ConvertFn<PBT extends PayloadByType> = (
   action: ActionUnion<PBT>
@@ -55,107 +42,37 @@ export const ActionList = <PBT extends PayloadByType>({
   const currentIndex = getCurrentIndex(history);
 
   const connections = getSideBranches(currentBranch.id, true)(history);
-  const branchList = Object.values(history.branches);
+
   return (
-    <>
-      <div style={{ marginBottom: '8px' }}>
-        <ListboxStyled
-          disabled={branchList.length === 1}
-          value={currentBranch.id}
-          onChange={id => id !== currentBranch.id && switchToBranch(id)}
-        >
-          <ListboxButton arrow={<TriangleDownIcon size={16} />} />
-          <ListboxPopover style={{ padding: 0, border: 0, outline: 'none' }}>
-            <ListboxListStyled>
-              {branchList.map(b => (
-                <ListboxOptionStyled
-                  key={b.id}
-                  value={b.id}
-                  label={`branch ${b.number}`}
-                >
-                  {`branch ${b.number} (size ${
-                    b.parent
-                      ? b.parent.position.globalIndex + b.stack.length
-                      : b.stack.length
-                  })`}
-                </ListboxOptionStyled>
-              ))}
-            </ListboxListStyled>
-          </ListboxPopover>
-        </ListboxStyled>
-      </div>
+    <div style={{ position: 'relative', marginTop: '10px' }}>
+      {stack
+        .slice()
+        .reverse()
+        .map((action, index) => (
+          <StackItem
+            key={action.id}
+            action={action}
+            isCurrent={history.currentPosition.actionId === action.id}
+            timeTravel={() => {
+              timeTravel(stack.length - 1 - index);
+            }}
+            now={now}
+            describeAction={describeAction}
+            connections={connections.filter(
+              c => c.position.actionId === action.id
+            )}
+            switchToBranch={switchToBranch}
+          />
+        ))}
 
-      <div style={{ position: 'relative' }}>
-        {stack
-          .slice()
-          .reverse()
-          .map((action, index) => (
-            <StackItem
-              key={action.id}
-              action={action}
-              isCurrent={history.currentPosition.actionId === action.id}
-              timeTravel={() => {
-                timeTravel(stack.length - 1 - index);
-              }}
-              now={now}
-              describeAction={describeAction}
-              connections={connections.filter(
-                c => c.position.actionId === action.id
-              )}
-              switchToBranch={switchToBranch}
-            />
-          ))}
-
-        <Indicator
-          style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
-        >
-          &#11157;
-        </Indicator>
-      </div>
-    </>
+      <Indicator
+        style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
+      >
+        &#11157;
+      </Indicator>
+    </div>
   );
 };
-
-const ListboxStyled = styled(ListboxInput)`
-  [data-reach-listbox-button] {
-    background: white;
-    padding: 4px 8px;
-    cursor: pointer;
-    &[aria-disabled] {
-      cursor: default;
-    }
-    &:focus {
-      outline: 1px solid #48a7f6;
-    }
-    &:hover {
-      background: #f7f8fa;
-    }
-  }
-`;
-
-const ListboxListStyled = styled(ListboxList)`
-  padding: 0;
-  border: 1px solid #48a7f6;
-  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1);
-`;
-
-const ListboxOptionStyled = styled(ListboxOption)`
-  font-family: Verdana, sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 8px 16px;
-  border: 0;
-  &[aria-selected='true'] {
-    background: #f7f8fa;
-    color: black;
-  }
-  &[data-current] {
-    color: white;
-    background: #48a7f6;
-    font-weight: normal;
-    cursor: default;
-  }
-`;
 
 const Indicator = styled.div`
   height: 32px;
@@ -174,7 +91,7 @@ interface StackItemProps<PBT extends PayloadByType> {
   action: ActionUnion<PBT>;
   now: Date;
   connections: BranchConnection<PBT>[];
-  switchToBranch: (branchId: string) => void;
+  switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
   timeTravel: () => void;
   isCurrent: boolean;
   describeAction?: ConvertFn<PBT>;
@@ -207,7 +124,9 @@ const StackItem = <PBT extends PayloadByType>({
             <MenuListStyled>
               {connections.map(c => (
                 <MenuItemStyled
-                  onSelect={() => switchToBranch(c.branches[0].id)}
+                  onSelect={() =>
+                    switchToBranch(c.branches[0].id, 'LAST_COMMON_ACTION')
+                  }
                 >
                   {`Switch to branch ${c.branches
                     .map(b => b.number)
@@ -289,42 +208,3 @@ const StackItemContent = styled.div<{ isCurrent: boolean }>`
     cursor: default;
     `}
 `;
-
-// From: https://overreacted.io/making-setinterval-declarative-with-react-hooks/
-const useInterval = (callback: (...args: any[]) => any, delay: number) => {
-  const savedCallback = useRef(callback);
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-    return undefined;
-  }, [delay]);
-};
-
-const formatTime = (created: Date, now: Date): string => {
-  const diffSecs = (now.getTime() - created.getTime()) / 1000;
-  if (diffSecs < 5) {
-    return `a moment ago`;
-  }
-  if (diffSecs < 57.5) {
-    return `${Math.round(diffSecs / 5) * 5} seconds ago`;
-  }
-  const diffMinutes = diffSecs / 60;
-  if (diffMinutes < 60) {
-    const d = Math.round(diffMinutes);
-    return `${d} minute${getPluralString(d)} ago`;
-  }
-  const diffHours = Math.round(diffMinutes / 60);
-  return `${diffHours} hour${getPluralString(diffHours)} ago`;
-};
-
-const getPluralString = (amount: number) => (amount === 1 ? '' : 's');

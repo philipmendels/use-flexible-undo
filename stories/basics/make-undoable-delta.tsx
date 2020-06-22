@@ -1,7 +1,8 @@
 import React, { FC, useState } from 'react';
 import { ActionList } from '../components/action-list';
-import { rootClass, uiContainerClass } from '../styles';
+import { rootClass, uiContainerClass, stickyClass } from '../styles';
 import { useFlexibleUndo } from '../../.';
+import { BranchNav } from '../components/branch-nav';
 
 interface PayloadByType {
   add: number;
@@ -37,16 +38,20 @@ export const MakeUndoableExample: FC = () => {
 
   return (
     <div className={rootClass}>
-      <div>count = {count}</div>
-      <div className={uiContainerClass}>
-        <button onClick={() => add(2)}>add 2</button>
-        <button onClick={() => subtract(1)}>subtract 1</button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+      <div className={stickyClass}>
+        <div>count = {count}</div>
+        <div className={uiContainerClass}>
+          <button onClick={() => add(2)}>add 2</button>
+          <button onClick={() => subtract(1)}>subtract 1</button>
+          <BranchNav
+            history={history}
+            switchToBranch={switchToBranch}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            undo={undo}
+            redo={redo}
+          />
+        </div>
       </div>
       <ActionList
         history={history}

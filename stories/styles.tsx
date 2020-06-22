@@ -4,8 +4,16 @@ export const rootClass = css`
   font-family: Verdana, sans-serif;
   font-size: 14px;
   margin-top: 20px;
+`;
+
+export const stickyClass = css`
   padding-top: 20px;
   border-top: 1px solid #eee;
+  z-index: 1;
+  background: white;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #eee;
 `;
 
 export const uiContainerClass = css`
