@@ -41,7 +41,14 @@ export const BranchNav = <PBT extends PayloadByType>({
   const currentBranch = getCurrentBranch(history);
 
   return (
-    <div style={{ marginTop: '20px' }}>
+    <div
+      style={{
+        margin: '15px 0',
+        paddingTop: '15px',
+        borderTop: '1px solid #eee',
+        display: 'flex',
+      }}
+    >
       <ListboxStyled
         disabled={branchList.length === 1}
         value={currentBranch.id}
@@ -62,7 +69,7 @@ export const BranchNav = <PBT extends PayloadByType>({
               >
                 {`branch ${b.number} (size ${
                   b.parent
-                    ? b.parent.position.globalIndex + b.stack.length
+                    ? b.parent.position.globalIndex + b.stack.length + 1
                     : b.stack.length
                 }, last-modified ${formatTime(
                   getLastItem(b.stack).created,
@@ -75,8 +82,28 @@ export const BranchNav = <PBT extends PayloadByType>({
       </ListboxStyled>
       <button disabled={!canUndo} onClick={() => undo()}>
         undo
+        <span
+          style={{
+            display: 'inline-block',
+            marginLeft: '8px',
+            transform: 'rotate(-90deg) scale(1.5)',
+            opacity: 0.5,
+          }}
+        >
+          &#9100;
+        </span>
       </button>
       <button disabled={!canRedo} onClick={() => redo()}>
+        <span
+          style={{
+            display: 'inline-block',
+            marginRight: '8px',
+            transform: 'rotate(90deg) scale(1.5)',
+            opacity: 0.5,
+          }}
+        >
+          &#9100;
+        </span>
         redo
       </button>
     </div>
@@ -89,6 +116,9 @@ const ListboxStyled = styled(ListboxInput)`
   [data-reach-listbox-button] {
     background: white;
     padding: 4px 8px;
+    font-size: 14px;
+    height: 19px;
+    border-radius: 2px;
     cursor: pointer;
     &[aria-disabled] {
       cursor: default;

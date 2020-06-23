@@ -5,7 +5,7 @@ import {
   makeUndoableFTObjHandler,
   wrapFTObjHandler,
 } from '../../.';
-import { rootClass, uiContainerClass } from '../../stories/styles';
+import { root, ui } from '../../stories/styles';
 import { ActionList } from '../../stories/components/action-list';
 
 interface PayloadByType {
@@ -40,9 +40,9 @@ export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const divide = countHandler(amount => prev => prev / amount);
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <button onClick={() => add(2)}>add 2</button>
         <button onClick={() => subtract(1)}>subtract 1</button>
         <button onClick={() => multiply(Math.PI)}>multi&pi;</button>

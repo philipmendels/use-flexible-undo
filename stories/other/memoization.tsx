@@ -9,7 +9,7 @@ import {
   makeUndoableFTObjHandler,
 } from '../../.';
 import { ActionList } from '../components/action-list';
-import { rootClass, uiContainerClass } from '../styles';
+import { root, ui } from '../styles';
 import { useMemo } from '@storybook/addons';
 import { NumberInput } from '../components/number-input';
 
@@ -69,9 +69,9 @@ export const MakeUndoableHandlerExample: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <label>
           amount:&nbsp;
           <NumberInput

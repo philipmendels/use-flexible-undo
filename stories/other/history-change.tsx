@@ -6,7 +6,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
 } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import { root, ui } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 
@@ -56,9 +56,9 @@ export const HistoryChangeExample: FC = () => {
   }, [history]);
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <label>
           amount:&nbsp;
           <NumberInput

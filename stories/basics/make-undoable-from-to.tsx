@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFlexibleUndo, PayloadFromTo } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import { root, ui } from '../styles';
 import { ActionList } from '../components/action-list';
 
 interface PayloadByType {
@@ -40,9 +40,9 @@ export const MakeUndoableFromToExample: React.FC = () => {
     updateCount({ from: count, to: count / amount });
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <button onClick={() => add(2)}>add 2</button>
         <button onClick={() => subtract(1)}>subtract 1</button>
         <button onClick={() => multiply(Math.PI)}>multi&pi;</button>

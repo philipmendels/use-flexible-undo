@@ -9,7 +9,7 @@ import {
   BranchConnection,
   BranchSwitchModus,
 } from '../../.';
-import { GitBranchIcon } from '@primer/octicons-react';
+import { GitBranchIcon, DotIcon } from '@primer/octicons-react';
 import {
   getCurrentBranch,
   getCurrentIndex,
@@ -116,7 +116,7 @@ const StackItem = <PBT extends PayloadByType>({
           flex: '0 0 52px',
         }}
       >
-        {connections.length > 0 && (
+        {connections.length > 0 ? (
           <Menu>
             <MenuButton>
               <GitBranchIcon size={16} />
@@ -136,6 +136,16 @@ const StackItem = <PBT extends PayloadByType>({
               ))}
             </MenuListStyled>
           </Menu>
+        ) : (
+          <span
+            style={{
+              color: '#bbb',
+              marginLeft: '1px',
+              display: 'inline-block',
+            }}
+          >
+            <DotIcon size={10} verticalAlign="middle" />
+          </span>
         )}
       </div>
       <StackItemContent isCurrent={isCurrent} onClick={timeTravel}>

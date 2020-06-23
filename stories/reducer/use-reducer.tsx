@@ -7,7 +7,7 @@ import {
   Updater,
 } from '../../.';
 import { ActionList } from '../components/action-list';
-import { rootClass, uiContainerClass } from '../styles';
+import { root, ui } from '../styles';
 import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
@@ -80,9 +80,9 @@ export const UsingReducer: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <label>
           amount:&nbsp;
           <NumberInput

@@ -8,7 +8,7 @@ import {
   invertHandlers,
   merge,
 } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import { root, ui } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 
@@ -63,9 +63,9 @@ export const DependentStateRight3Example: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <label>
           amount:&nbsp;
           <NumberInput

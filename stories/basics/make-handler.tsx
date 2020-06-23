@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import { root, ui } from '../styles';
 import { ActionList } from '../components/action-list';
 
 interface PayloadByType {
@@ -34,9 +34,9 @@ export const MakeHandlerExample: FC = () => {
   const { add, subtract } = undoables;
 
   return (
-    <div className={rootClass}>
+    <div className={root}>
       <div>count = {count}</div>
-      <div className={uiContainerClass}>
+      <div className={ui}>
         <button onClick={() => add(1)}>add 1</button>
         <button onClick={() => subtract(2)}>subtract 2</button>
         <button disabled={!canUndo} onClick={() => undo()}>

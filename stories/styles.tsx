@@ -1,12 +1,17 @@
 import { css } from 'emotion';
 
-export const rootClass = css`
+export const root = css`
   font-family: Verdana, sans-serif;
   font-size: 14px;
   margin-top: 20px;
 `;
 
-export const stickyClass = css`
+export const countContainer = css`
+  font-size: 16px;
+  margin-bottom: 20px;
+`;
+
+export const ui = css`
   padding-top: 20px;
   border-top: 1px solid #eee;
   z-index: 1;
@@ -14,9 +19,6 @@ export const stickyClass = css`
   position: sticky;
   top: 0;
   border-bottom: 1px solid #eee;
-`;
-
-export const uiContainerClass = css`
   margin: 20px 0;
   button,
   input[type='number'] {
@@ -24,7 +26,10 @@ export const uiContainerClass = css`
     margin-right: 10px;
     padding: 4px 8px;
     border-radius: 2px;
-    margin-top: 10px;
+    font-family: Verdana, sans-serif;
+    &:focus {
+      outline: 1px solid #48a7f6;
+    }
   }
   input[type='number'] {
     width: 40px;
