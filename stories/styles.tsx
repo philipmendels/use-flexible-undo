@@ -11,6 +11,10 @@ export const countContainer = css`
   margin-bottom: 20px;
 `;
 
+export const actionsContainer = css`
+  display: flex;
+`;
+
 export const ui = css`
   padding-top: 20px;
   border-top: 1px solid #eee;
@@ -30,10 +34,16 @@ export const ui = css`
     &:focus {
       outline: 1px solid #48a7f6;
     }
+    display: inline-block;
+  }
+  label {
+    font-size: 16px;
   }
   input[type='number'] {
-    width: 40px;
+    width: 50px;
     border: 1px solid gray;
+    font-size: 16px;
+    height: 17px;
   }
   button {
     border: 1px solid lightgray;

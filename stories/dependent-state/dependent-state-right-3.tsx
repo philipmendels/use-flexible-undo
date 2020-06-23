@@ -8,9 +8,10 @@ import {
   invertHandlers,
   merge,
 } from '../../.';
-import { root, ui } from '../styles';
+import { root, ui, countContainer, actionsContainer } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
 
 type Nullber = number | null;
 
@@ -64,32 +65,36 @@ export const DependentStateRight3Example: FC = () => {
 
   return (
     <div className={root}>
-      <div>count = {count}</div>
       <div className={ui}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => add()}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => subtract()}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+        <div className={countContainer}>count = {count}</div>
+        <div className={actionsContainer}>
+          <label>
+            amount = &nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => add()}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => subtract()}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}
