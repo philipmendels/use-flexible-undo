@@ -118,6 +118,7 @@ const ListboxStyled = styled(ListboxInput)`
     padding: 4px 8px;
     font-size: 14px;
     height: 19px;
+    min-width: 160px;
     border-radius: 2px;
     cursor: pointer;
     &[aria-disabled] {

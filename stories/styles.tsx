@@ -7,8 +7,9 @@ export const root = css`
 `;
 
 export const countContainer = css`
-  font-size: 16px;
+  font-size: 18px;
   margin-bottom: 20px;
+  font-family: monospace;
 `;
 
 export const actionsContainer = css`
@@ -37,12 +38,14 @@ export const ui = css`
     display: inline-block;
   }
   label {
-    font-size: 16px;
+    font-size: 18px;
+    font-family: monospace;
   }
   input[type='number'] {
-    width: 50px;
+    width: 74px;
     border: 1px solid gray;
-    font-size: 16px;
+    font-size: 18px;
+    font-family: monospace;
     height: 17px;
   }
   button {
@@ -55,6 +58,7 @@ export const ui = css`
       border-color: #eee;
       cursor: inherit;
     }
+    min-width: 80px;
   }
 `;
 

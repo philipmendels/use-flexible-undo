@@ -69,7 +69,7 @@ export const DependentStateRight3Example: FC = () => {
         <div className={countContainer}>count = {count}</div>
         <div className={actionsContainer}>
           <label>
-            amount = &nbsp;
+            delta =&nbsp;
             <NumberInput
               value={amount}
               onChange={value =>
