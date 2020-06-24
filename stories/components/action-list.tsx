@@ -44,7 +44,15 @@ export const ActionList = <PBT extends PayloadByType>({
   const connections = getSideBranches(currentBranch.id, true)(history);
 
   return (
-    <div style={{ position: 'relative', marginTop: '10px' }}>
+    <div
+      style={{
+        position: 'relative',
+        marginTop: '10px',
+        paddingBottom: '20px',
+        width: '100%',
+        overflow: 'auto',
+      }}
+    >
       {stack
         .slice()
         .reverse()
@@ -124,6 +132,7 @@ const StackItem = <PBT extends PayloadByType>({
             <MenuListStyled>
               {connections.map(c => (
                 <MenuItemStyled
+                  key={c.branches[0].id}
                   onSelect={() =>
                     switchToBranch(c.branches[0].id, 'LAST_COMMON_ACTION')
                   }

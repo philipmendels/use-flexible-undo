@@ -6,9 +6,10 @@ import {
   makeUndoableHandler,
   invertHandlers,
 } from '../../.';
-import { root, ui } from '../styles';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
 
 type Nullber = number | null;
 
@@ -29,9 +30,7 @@ export const DependentStateRight1Example: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -47,33 +46,35 @@ export const DependentStateRight1Example: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={root}>
-      <div>count = {count}</div>
-      <div className={ui}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => amount && add(amount)}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => amount && subtract(amount)}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count = {count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount:&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}

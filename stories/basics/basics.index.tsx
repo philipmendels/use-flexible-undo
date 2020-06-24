@@ -19,6 +19,7 @@ import MakeUndoableFromToReadme from './make-undoable-from-to.md';
 import { MakeUndoableFTObjHandlerExample } from './make-undoable-from-to-handler';
 import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
 import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md';
+import { DeltaPayloadBasic } from './make-undoable-delta-basic';
 
 // import { MakeUndoableFromToTuple } from './make-undoable-from-to-tuple';
 // import MakeUndoableFromToTupleIntro from './make-undoable-from-to-tuple-intro.md';
@@ -39,6 +40,12 @@ import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md'
 storiesOf('useFlexibleUndo/basics', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
+  .add('state delta as payload 1', () => <DeltaPayloadBasic />, {
+    readme: {
+      // content: MakeUndoableDeltaIntro,
+      // sidebar: MakeUndoableDeltaReadme,
+    },
+  })
   .add('state delta as payload ', () => <MakeUndoableExample />, {
     readme: {
       content: MakeUndoableDeltaIntro,

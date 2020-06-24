@@ -8,7 +8,7 @@ import {
   invertHandlers,
   merge,
 } from '../../.';
-import { root, ui, countContainer, actionsContainer } from '../styles';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -44,9 +44,7 @@ export const DependentStateRight3Example: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -64,10 +62,10 @@ export const DependentStateRight3Example: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={root}>
-      <div className={ui}>
-        <div className={countContainer}>count = {count}</div>
-        <div className={actionsContainer}>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count = {count}</div>
+        <div className={actionsStyle}>
           <label>
             delta =&nbsp;
             <NumberInput
@@ -90,8 +88,6 @@ export const DependentStateRight3Example: FC = () => {
         <BranchNav
           history={history}
           switchToBranch={switchToBranch}
-          canUndo={canUndo}
-          canRedo={canRedo}
           undo={undo}
           redo={redo}
         />

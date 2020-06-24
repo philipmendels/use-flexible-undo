@@ -12,7 +12,7 @@ import {
   bindUndoableActionCreators,
 } from '../../.';
 import { ActionList } from '../components/action-list';
-import { ui, root } from '../styles';
+import { topUIStyle, rootStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 
 type Nullber = number | null;
@@ -68,9 +68,9 @@ export const MakeUndoablesFromDispatchExample2: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={root}>
+    <div className={rootStyle}>
       <div>count = {count}</div>
-      <div className={ui}>
+      <div className={topUIStyle}>
         <label>
           amount:&nbsp;
           <NumberInput

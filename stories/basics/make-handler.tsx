@@ -1,7 +1,8 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
-import { root, ui } from '../styles';
+import { rootStyle, topUIStyle, actionsStyle, countStyle } from '../styles';
 import { ActionList } from '../components/action-list';
+import { BranchNav } from '../components/branch-nav';
 
 interface PayloadByType {
   add: number;
@@ -17,9 +18,7 @@ export const MakeHandlerExample: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -34,17 +33,19 @@ export const MakeHandlerExample: FC = () => {
   const { add, subtract } = undoables;
 
   return (
-    <div className={root}>
-      <div>count = {count}</div>
-      <div className={ui}>
-        <button onClick={() => add(1)}>add 1</button>
-        <button onClick={() => subtract(2)}>subtract 2</button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count = {count}</div>
+        <div className={actionsStyle}>
+          <button onClick={() => add(2)}>add 2</button>
+          <button onClick={() => subtract(1)}>subtract 1</button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}

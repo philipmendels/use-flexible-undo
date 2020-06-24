@@ -5,8 +5,14 @@ import {
   makeUndoableFTObjHandler,
   wrapFTObjHandler,
 } from '../../.';
-import { root, ui } from '../../stories/styles';
+import {
+  rootStyle,
+  topUIStyle,
+  countStyle,
+  actionsStyle,
+} from '../../stories/styles';
 import { ActionList } from '../../stories/components/action-list';
+import { BranchNav } from '../components/branch-nav';
 
 interface PayloadByType {
   updateCount: PayloadFromTo<number>;
@@ -17,9 +23,7 @@ export const MakeUndoableFTObjHandlerExample: React.FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -40,19 +44,21 @@ export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const divide = countHandler(amount => prev => prev / amount);
 
   return (
-    <div className={root}>
-      <div>count = {count}</div>
-      <div className={ui}>
-        <button onClick={() => add(2)}>add 2</button>
-        <button onClick={() => subtract(1)}>subtract 1</button>
-        <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
-        <button onClick={() => divide(Math.PI)}>di&pi;de</button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count = {count}</div>
+        <div className={actionsStyle}>
+          <button onClick={() => add(2)}>add 2</button>
+          <button onClick={() => subtract(1)}>subtract 1</button>
+          <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
+          <button onClick={() => divide(Math.PI)}>di&pi;de</button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}

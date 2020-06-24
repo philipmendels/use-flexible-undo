@@ -1,29 +1,19 @@
 import { css } from 'emotion';
 
-export const root = css`
+export const rootStyle = css`
   font-family: Verdana, sans-serif;
   font-size: 14px;
   margin-top: 20px;
 `;
 
-export const countContainer = css`
-  font-size: 18px;
-  margin-bottom: 20px;
-  font-family: monospace;
-`;
-
-export const actionsContainer = css`
-  display: flex;
-`;
-
-export const ui = css`
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+export const topUIStyle = css`
+  padding: 20px 0 0;
+  border-top: 1px solid #ddd;
   z-index: 1;
   background: white;
   position: sticky;
   top: 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #ddd;
   margin: 20px 0;
   button,
   input[type='number'] {
@@ -55,11 +45,22 @@ export const ui = css`
     }
     cursor: pointer;
     :disabled {
-      border-color: #eee;
+      border-color: #ddd;
       cursor: inherit;
     }
     min-width: 80px;
   }
+`;
+
+export const countStyle = css`
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-family: monospace;
+`;
+
+export const actionsStyle = css`
+  display: flex;
+  margin-bottom: 20px;
 `;
 
 export const getStackItemClass = (props: {

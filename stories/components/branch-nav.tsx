@@ -12,13 +12,15 @@ import { TriangleDownIcon } from '@primer/octicons-react';
 
 import { PayloadByType, BranchSwitchModus, History } from '../../.';
 import { getLastItem, formatTime, useInterval } from './util';
-import { getCurrentBranch } from '../../src/updaters';
+import {
+  getCurrentBranch,
+  isUndoPossible,
+  isRedoPossible,
+} from '../../src/updaters';
 
 interface BranchNavProps<PBT extends PayloadByType> {
   history: History<PBT>;
   switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
-  canUndo: boolean;
-  canRedo: boolean;
   undo: () => void;
   redo: () => void;
 }
@@ -26,8 +28,6 @@ interface BranchNavProps<PBT extends PayloadByType> {
 export const BranchNav = <PBT extends PayloadByType>({
   history,
   switchToBranch,
-  canUndo,
-  canRedo,
   undo,
   redo,
 }: BranchNavProps<PBT>): ReactElement | null => {
@@ -40,12 +40,16 @@ export const BranchNav = <PBT extends PayloadByType>({
   );
   const currentBranch = getCurrentBranch(history);
 
+  const canUndo = isUndoPossible(history);
+
+  const canRedo = isRedoPossible(history);
+
   return (
     <div
       style={{
-        margin: '15px 0',
-        paddingTop: '15px',
-        borderTop: '1px solid #eee',
+        marginBottom: '20px',
+        paddingTop: '20px',
+        borderTop: '1px solid #ddd',
         display: 'flex',
       }}
     >

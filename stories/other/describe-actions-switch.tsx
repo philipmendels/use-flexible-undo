@@ -8,7 +8,7 @@ import {
   ActionUnion,
   Action,
 } from '../../.';
-import { root, ui } from '../styles';
+import { rootStyle, topUIStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 
@@ -65,9 +65,9 @@ export const DescribeActionsSwitch: FC = () => {
   const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={root}>
+    <div className={rootStyle}>
       <div>count = {count}</div>
-      <div className={ui}>
+      <div className={topUIStyle}>
         <label>
           amount:&nbsp;
           <NumberInput
