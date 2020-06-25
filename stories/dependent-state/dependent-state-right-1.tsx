@@ -48,10 +48,10 @@ export const DependentStateRight1Example: FC = () => {
   return (
     <div className={rootStyle}>
       <div className={topUIStyle}>
-        <div className={countStyle}>count = {count}</div>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
         <div className={actionsStyle}>
           <label>
-            amount:&nbsp;
+            amount =&nbsp;
             <NumberInput
               value={amount}
               onChange={value =>

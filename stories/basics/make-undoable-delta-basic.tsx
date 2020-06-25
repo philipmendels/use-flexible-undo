@@ -15,12 +15,12 @@ export const DeltaPayloadBasic: FC = () => {
   >({
     handlers: {
       add: {
-        drdo: delta => setCount(prev => prev + delta),
-        undo: delta => setCount(prev => prev - delta),
+        drdo: amount => setCount(prev => prev + amount),
+        undo: amount => setCount(prev => prev - amount),
       },
       subtract: {
-        drdo: delta => setCount(prev => prev - delta),
-        undo: delta => setCount(prev => prev + delta),
+        drdo: amount => setCount(prev => prev - amount),
+        undo: amount => setCount(prev => prev + amount),
       },
     },
   });

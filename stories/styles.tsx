@@ -32,11 +32,12 @@ export const topUIStyle = css`
     font-family: monospace;
   }
   input[type='number'] {
-    width: 74px;
+    width: 62px;
     border: 1px solid gray;
     font-size: 18px;
     font-family: monospace;
     height: 17px;
+    padding-left: 10px;
   }
   button {
     border: 1px solid lightgray;
