@@ -7,8 +7,9 @@ import {
   Updater,
 } from '../../.';
 import { ActionList } from '../components/action-list';
-import { rootStyle, topUIStyle } from '../styles';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
 
 type Nullber = number | null;
 
@@ -52,9 +53,7 @@ export const UsingReducer: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -81,32 +80,34 @@ export const UsingReducer: FC = () => {
 
   return (
     <div className={rootStyle}>
-      <div>count = {count}</div>
       <div className={topUIStyle}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => add()}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => subtract()}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount =&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => add()}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => subtract()}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}

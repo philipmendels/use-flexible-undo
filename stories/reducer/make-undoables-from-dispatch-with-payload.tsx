@@ -11,9 +11,10 @@ import {
   makeUndoableFTObjHandler,
   useUndoableReducer,
 } from '../../.';
-import { ActionList } from '../components/action-list';
-import { topUIStyle, rootStyle } from '../styles';
+import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
 type Nullber = number | null;
 
@@ -61,9 +62,7 @@ export const MakeUndoablesFromDispatchWithPayloadExample: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -76,35 +75,37 @@ export const MakeUndoablesFromDispatchWithPayloadExample: FC = () => {
 
   return (
     <div className={rootStyle}>
-      <div>count = {count}</div>
       <div className={topUIStyle}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => add(false)}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => add(true)}>
-          add double
-        </button>
-        <button disabled={!amount} onClick={() => subtract(false)}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount =&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => add(false)}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => add(true)}>
+            add x 2
+          </button>
+          <button disabled={!amount} onClick={() => subtract(false)}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}

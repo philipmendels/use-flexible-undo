@@ -8,9 +8,10 @@ import {
   ActionUnion,
   Action,
 } from '../../.';
-import { rootStyle, topUIStyle } from '../styles';
-import { ActionList } from '../components/action-list';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
 type Nullber = number | null;
 
@@ -47,9 +48,7 @@ export const DescribeActionsSwitch: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
@@ -66,32 +65,34 @@ export const DescribeActionsSwitch: FC = () => {
 
   return (
     <div className={rootStyle}>
-      <div>count = {count}</div>
       <div className={topUIStyle}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => amount && add(amount)}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => amount && subtract(amount)}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount =&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}
