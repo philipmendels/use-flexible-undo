@@ -3,6 +3,7 @@ import { storiesOf } from '@storybook/react';
 import { DescribeActionsSwitch } from './describe-actions-switch';
 import { DescribeActionsMap } from './describe-actions-map';
 import { HistoryChangeExample } from './history-change';
+import { MemoizationExample } from './memoization';
 
 storiesOf('useFlexibleUndo/other', module)
   //@ts-ignore
@@ -20,6 +21,12 @@ storiesOf('useFlexibleUndo/other', module)
     },
   })
   .add('histrory-change', () => <HistoryChangeExample />, {
+    readme: {
+      // content: UsingReducerIntro,
+      // sidebar: UsingReducerReadme,
+    },
+  })
+  .add('memoization', () => <MemoizationExample />, {
     readme: {
       // content: UsingReducerIntro,
       // sidebar: UsingReducerReadme,

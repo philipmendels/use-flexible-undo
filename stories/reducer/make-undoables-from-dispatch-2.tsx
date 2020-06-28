@@ -6,11 +6,11 @@ import {
   Updater,
   UpdaterMaker,
   makeUndoableStateDepHandler,
-  merge,
   invertHandlers,
   makeUndoableFTObjHandler,
   bindUndoableActionCreators,
 } from '../../.';
+import { merge } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';

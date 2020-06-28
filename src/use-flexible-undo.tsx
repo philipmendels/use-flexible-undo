@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 
 import {
   PayloadByType,
-  UFULightProps,
+  UFUProps,
   HandlersByType,
   History,
   Updater,
@@ -33,7 +33,7 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
   handlers,
   options,
   initialHistory = createInitialHistory(),
-}: UFULightProps<PBT>) => {
+}: UFUProps<PBT>) => {
   const [history, setHistory] = useState(initialHistory);
 
   const { clearFutureOnDo } = {
@@ -41,9 +41,9 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
     ...options,
   };
 
-  const undoables: HandlersByType<PBT> = useMemo(
+  const undoables = useMemo(
     () =>
-      mapObject(handlers, ([type, handler]) => [
+      mapObject(handlers)<HandlersByType<PBT>>(([type, handler]) => [
         type,
         payload => {
           const action = createAction(type, payload);

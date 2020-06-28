@@ -29,7 +29,7 @@ const options: UFUOptions = {
   clearFutureOnDo: false,
 };
 
-export const MakeUndoableHandlerExample: FC = () => {
+export const MemoizationExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 

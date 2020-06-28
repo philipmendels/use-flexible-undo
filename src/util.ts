@@ -4,34 +4,15 @@ import {
   PayloadHandler,
   Undoable,
   PayloadByType,
-  MetaActionReturnTypes,
-  StringOnlyKeyOf,
-  UndoableStateUpdaterWithMeta,
   UReducer,
   UndoableUActionCreatorsByType,
-  MetaActionHandlersByType,
   UDispatch,
   UndoableHandlersByType,
-  UndoableHandlerWithMeta,
   UpdaterMaker,
-  DeepPartial2,
+  UndoableStateUpdatersByType,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
-import { mergeDeepLeft } from 'ramda';
-
-export const merge = <S, P extends Partial<S>>(
-  partial: P
-): Updater<S> => state => ({
-  ...state,
-  ...partial,
-});
-
-export const mergeDeepC = <S, P extends DeepPartial2<S>>(
-  deepPartial: P
-): Updater<S> => mergeDeepLeft(deepPartial as any) as Updater<S>;
-
-export const mergeDeep = <S>(deepPartial: DeepPartial2<S>, state: S): S =>
-  mergeDeepLeft(deepPartial as any, state as any) as S;
+import { SetStateAction } from 'react';
 
 export const combineHandlers = <P, R>(
   drdo: PayloadHandler<P, R>,
@@ -63,16 +44,16 @@ export const makeUndoableHandler = <S, R>(
     payload => stateSetter(updaterForUndoMaker(payload))
   );
 
-export const makeUndoableFTObjHandler = <S, R>(
-  stateSetter: (newState: S) => R
-) =>
-  combineHandlers<PayloadFromTo<S>, R>(
+type InferState<S> = S extends SetStateAction<infer S2> ? S2 : S;
+
+export const makeUndoableFTObjHandler = <S, R>(stateSetter: (s: S) => R) =>
+  combineHandlers<PayloadFromTo<InferState<S>>, R>(
     ({ to }) => stateSetter(to),
     ({ from }) => stateSetter(from)
   );
 
 export const makeUndoableFTTupleHandler = <S, R>(
-  stateSetter: (newState: S) => R
+  stateSetter: (s: SetStateAction<S>) => R
 ) =>
   combineHandlers<[S, S], R>(
     ([_, to]) => stateSetter(to),
@@ -106,22 +87,8 @@ export const wrapFTTupleHandler = <S, R>(
 ) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler([state, updater(payload)(state)]);
 
-export const combineUHandlerWithMeta = <P, R, MR extends MetaActionReturnTypes>(
-  undoableHandlers: Undoable<PayloadHandler<P, R>>,
-  meta: MR
-) => ({
-  ...undoableHandlers,
-  meta,
-});
-
-export const makeUndoableReducer = <
-  S,
-  PBT extends PayloadByType,
-  MR extends MetaActionReturnTypes = undefined
->(
-  stateUpdaters: {
-    [K in StringOnlyKeyOf<PBT>]: UndoableStateUpdaterWithMeta<PBT[K], S, MR, K>;
-  }
+export const makeUndoableReducer = <S, PBT extends PayloadByType>(
+  stateUpdaters: UndoableStateUpdatersByType<S, PBT>
 ) => ({
   reducer: ((state, { payload, type, meta }) => {
     const updater = stateUpdaters[type];
@@ -131,54 +98,25 @@ export const makeUndoableReducer = <
         : updater.drdo(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
   }) as UReducer<S, PBT>,
-  actionCreators: mapObject(stateUpdaters, ([type, _]) => [
-    type,
-    {
-      drdo: makeActionCreator(type),
-      undo: makeActionCreator(type, true),
-    },
-  ]) as UndoableUActionCreatorsByType<PBT>,
-  ...({
-    metaActionHandlers: mapObject(stateUpdaters, ([type, updater]) => [
+  actionCreators: mapObject(stateUpdaters)<UndoableUActionCreatorsByType<PBT>>(
+    ([type, _]) => [
       type,
-      (updater as UndoableStateUpdaterWithMeta<any, any, {}, string>).meta,
-    ]),
-  } as MR extends undefined
-    ? {}
-    : {
-        metaActionHandlers: MetaActionHandlersByType<PBT, NonNullable<MR>>;
-      }),
+      {
+        drdo: makeActionCreator(type),
+        undo: makeActionCreator(type, true),
+      },
+    ]
+  ),
 });
 
 export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   dispatch: UDispatch<PBT>,
   actionCreators: UndoableUActionCreatorsByType<PBT>
 ): UndoableHandlersByType<PBT> =>
-  mapObject(actionCreators, ([type, creator]) => [
+  mapObject(actionCreators)<UndoableHandlersByType<PBT>>(([type, creator]) => [
     type,
     {
       drdo: payload => dispatch(creator.drdo(payload)),
       undo: payload => dispatch(creator.undo(payload)),
     },
-  ]);
-
-export const makeUndoableHandlersFromDispatch = <
-  PBT extends PayloadByType,
-  MR extends MetaActionReturnTypes
->(
-  dispatch: UDispatch<PBT>,
-  actionCreators: UndoableUActionCreatorsByType<PBT>,
-  ...metaActionHandlers: MR extends undefined
-    ? []
-    : [MetaActionHandlersByType<PBT, NonNullable<MR>>]
-): { [K in StringOnlyKeyOf<PBT>]: UndoableHandlerWithMeta<PBT[K], K, MR> } =>
-  mapObject(actionCreators, ([type, action]) => [
-    type,
-    {
-      drdo: payload => dispatch(action.drdo(payload)),
-      undo: payload => dispatch(action.undo(payload)),
-      ...(metaActionHandlers.length
-        ? { meta: metaActionHandlers[0]![type] }
-        : {}),
-    } as UndoableHandlerWithMeta<PBT[typeof type], typeof type, MR>,
   ]);

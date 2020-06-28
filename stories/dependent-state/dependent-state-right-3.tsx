@@ -6,12 +6,12 @@ import {
   UpdaterMaker,
   makeUndoableStateDepHandler,
   invertHandlers,
-  merge,
 } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
+import { merge } from '../examples-util';
 
 type Nullber = number | null;
 

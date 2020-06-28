@@ -1,5 +1,5 @@
 import { mapFilterObj } from './util-internal';
-import { mergeDeepC, mergeDeep } from './util';
+import { mergeDeepC, mergeDeep } from './util-internal';
 import {
   History,
   PayloadByType,
@@ -291,13 +291,9 @@ export const updatePath = (path: string[]) => <PBT extends PayloadByType>(
     );
   }, prevHistory);
 
-export const createAction = <
-  T extends string,
-  P,
-  PBT extends PayloadByType<T, P>
->(
-  type: T,
-  payload: P
+export const createAction = <PBT extends PayloadByType>(
+  type: keyof PBT,
+  payload: PBT[keyof PBT]
 ) =>
   (({
     type,

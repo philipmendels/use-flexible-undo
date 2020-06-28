@@ -1,50 +1,21 @@
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
-  UpdaterMaker,
-  makeUndoableStateDepHandler,
   invertHandlers,
+  makeUndoableHandler,
+  makeUndoableFTObjHandler,
 } from '../../.';
+
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { merge } from '../examples-util';
+import { ActionList } from '../components/action-list';
 
-type Nullber = number | null;
+export const MemoizationExample: FC = () => {
+  const [count, setCount] = useState(0);
+  const [amount, setAmount] = useState<number | null>(1);
 
-interface State {
-  count: number;
-  amount: Nullber;
-}
-
-interface PayloadByType {
-  add: boolean;
-  subtract: boolean;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
-export const DependentStateRight4Example: FC = () => {
-  const [{ count, amount }, setState] = useState<State>({
-    count: 0,
-    amount: 1,
-  });
-
-  const makeCountHandler = (um: UpdaterMaker<number>) => (
-    shouldDouble: boolean
-  ) =>
-    setState(prev =>
-      prev.amount
-        ? {
-            ...prev,
-            count: um(shouldDouble ? prev.amount * 2 : prev.amount)(prev.count),
-          }
-        : prev
-    );
-
-  const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+  const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
@@ -56,13 +27,13 @@ export const DependentStateRight4Example: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
+    // No need to add the payload types,
+    // they will be inferred from the handlers.
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTObjHandler(amount =>
-        setState(merge({ amount }))
-      ),
+      updateAmount: makeUndoableFTObjHandler(setAmount),
     },
   });
 
@@ -85,13 +56,10 @@ export const DependentStateRight4Example: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add(false)}>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => add(true)}>
-            add x 2
-          </button>
-          <button disabled={!amount} onClick={() => subtract(false)}>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
             subtract
           </button>
         </div>
