@@ -62,12 +62,16 @@ storiesOf('useFlexibleUndo/basics', module)
       sidebar: MakeHandlerReadme,
     },
   })
-  .add('makeUndoableHandler', () => <MakeUndoableHandlerExample />, {
-    readme: {
-      content: MakeUndoableHandlerIntro,
-      sidebar: MakeUndoableHandlerReadme,
-    },
-  })
+  .add(
+    'makeUndoableHandler & invertHandlers',
+    () => <MakeUndoableHandlerExample />,
+    {
+      readme: {
+        content: MakeUndoableHandlerIntro,
+        sidebar: MakeUndoableHandlerReadme,
+      },
+    }
+  )
   .add('from- and to-state as payload', () => <MakeUndoableFromToExample />, {
     readme: {
       // content: MakeUndoableFromToIntro,

@@ -1,20 +1,19 @@
+### makeUndoableHandler & invertHandlers - Readme & Code
+
 The utility **makeUndoableHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument and returns a function that takes two (do/redo and undo) curried functions for updating the state based on the payload and the previous state. The final return value is an object with do/redo and undo handlers.
 
-```typescript
-```
-
-Full code:
+The utility **invertHandlers** takes an object with 'drdo' and 'undo' as keys and the handlers as values, and returns and object in wich the values are switched.
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, invertHandlers, makeUndoableHandler } from '../../.';
+import {
+  useFlexibleUndo,
+  makeUndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
+import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
-import { rootClass, uiContainerClass } from '../styles';
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-}
 
 export const MakeUndoableHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
@@ -26,14 +25,12 @@ export const MakeUndoableHandlerExample: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
@@ -43,17 +40,19 @@ export const MakeUndoableHandlerExample: FC = () => {
   const { add, subtract } = undoables;
 
   return (
-    <div className={rootClass}>
-      <div>count = {count}</div>
-      <div className={uiContainerClass}>
-        <button onClick={() => add(1)}>add 1</button>
-        <button onClick={() => subtract(2)}>subtract 2</button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count = {count}</div>
+        <div className={actionsStyle}>
+          <button onClick={() => add(1)}>add 1</button>
+          <button onClick={() => subtract(2)}>subtract 2</button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}
