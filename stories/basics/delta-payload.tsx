@@ -1,13 +1,8 @@
-### Intro - Readme & Code
-
-The **useFlexibleUndo** hook takes a **handlers** object with pairs of do/redo ("drdo") and undo handlers by action type, and returns an **undoables** object with undoable functions by action type. Additionally the hook returns **canUndo** and **canRedo** booleans, and of course ... the **undo** and **redo** functions.
-
-If you use TypeScript then you can type **useFlexibleUndo** with a record of payload by action type ("PBT"). Alternatively you could type the payloads within the handlers and let PBT be inferred.
-
-```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from 'use-flexible-undo';
+import { useFlexibleUndo } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
+import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
 // action Payload By action Type
 interface PBT {
@@ -15,10 +10,17 @@ interface PBT {
   subtract: number;
 }
 
-export const IntroExample: FC = () => {
+export const DeltaPayloadExample: FC = () => {
   const [count, setCount] = useState(0);
 
-  const { undoables, canUndo, undo, canRedo, redo } = useFlexibleUndo<PBT>({
+  const {
+    undoables,
+    undo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PBT>({
     handlers: {
       add: {
         drdo: amount => setCount(prev => prev + amount),
@@ -40,15 +42,19 @@ export const IntroExample: FC = () => {
         <div className={actionsStyle}>
           <button onClick={() => add(2)}>add 2</button>
           <button onClick={() => subtract(1)}>subtract 1</button>
-          <button disabled={!canUndo} onClick={undo}>
-            undo
-          </button>
-          <button disabled={!canRedo} onClick={redo}>
-            redo
-          </button>
         </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };
-```

@@ -1,15 +1,21 @@
-import React, { FC, useState } from 'react';
-import { ActionList } from '../components/action-list';
-import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { useFlexibleUndo } from '../../.';
-import { BranchNav } from '../components/branch-nav';
+### State delta as payload - Readme & Code
 
-interface PayloadByType {
+In addition to the previous example, we here use the **history** state and the **switchToBranch** and **timeTravel** functions returned by **useFlexibleUndo** to create an interactive, branching undo history. The UI for this is not part of the library, but we will address the functionality in more detail in later examples. Finally note that we do not necessarily need to use the **canUndo** and **canRedo** booleans. They are provided for convenience, but can be derived from the **history** state as well. Here this is hidden within the "BranchNav" component.
+
+```typescript
+import React, { FC, useState } from 'react';
+import { useFlexibleUndo } from 'use-flexible-undo';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
+import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
+
+// action Payload By action Type
+interface PBT {
   add: number;
   subtract: number;
 }
 
-export const MakeUndoableExample: FC = () => {
+export const DeltaPayloadExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const {
@@ -19,7 +25,7 @@ export const MakeUndoableExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo<PBT>({
     handlers: {
       add: {
         drdo: amount => setCount(prev => prev + amount),
@@ -57,3 +63,4 @@ export const MakeUndoableExample: FC = () => {
     </div>
   );
 };
+```

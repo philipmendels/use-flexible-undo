@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
+import { useFlexibleUndo } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { useFlexibleUndo } from '../../src';
 
 // action Payload By action Type
 interface PBT {

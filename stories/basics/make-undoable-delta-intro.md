@@ -1,1 +1,0 @@
-In this example we manually construct the do/redo and undo handlers for the undoable "add" and "subtract" to useFlexibleUndo, and receive the corresponding undoable "add" and "subtract" functions as part of the hooks return values.

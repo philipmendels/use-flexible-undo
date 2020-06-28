@@ -1,4 +1,4 @@
-### Intro Example
+### Intro - Example
 
 The React hook **useFlexibleUndo** keeps track of undoable actions, as opposed to snapshots of state. How you manage your application state is up to you and independent of the undo history state that is managed by the hook internally.
 

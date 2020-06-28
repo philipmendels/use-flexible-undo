@@ -5,9 +5,9 @@ import { IntroExample } from './intro';
 import IntroExampleIntro from './intro.intro.md';
 import IntroExampleReadme from './intro.md';
 
-import { MakeUndoableExample } from './make-undoable-delta';
-import MakeUndoableDeltaIntro from './make-undoable-delta-intro.md';
-import MakeUndoableDeltaReadme from './make-undoable-delta.md';
+import { DeltaPayloadExample } from './delta-payload';
+import DeltaPayloadIntro from './delta-payload-intro.md';
+import DeltaPayloadReadme from './delta-payload.md';
 
 import { MakeHandlerExample } from './make-handler';
 import MakeHandlerReadme from './make-handler.md';
@@ -49,10 +49,10 @@ storiesOf('useFlexibleUndo/basics', module)
       sidebar: IntroExampleReadme,
     },
   })
-  .add('state delta as payload', () => <MakeUndoableExample />, {
+  .add('state delta as payload', () => <DeltaPayloadExample />, {
     readme: {
-      content: MakeUndoableDeltaIntro,
-      sidebar: MakeUndoableDeltaReadme,
+      content: DeltaPayloadIntro,
+      sidebar: DeltaPayloadReadme,
     },
   })
   .add('makeHandler & combineHandlers', () => <MakeHandlerExample />, {
