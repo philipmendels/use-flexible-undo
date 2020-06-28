@@ -10,6 +10,7 @@ import DeltaPayloadIntro from './delta-payload-intro.md';
 import DeltaPayloadReadme from './delta-payload.md';
 
 import { MakeHandlerExample } from './make-handler';
+import MakeHandlerIntro from './make-handler-intro.md';
 import MakeHandlerReadme from './make-handler.md';
 
 import { MakeUndoableHandlerExample } from './make-undoable-handler';
@@ -57,7 +58,7 @@ storiesOf('useFlexibleUndo/basics', module)
   })
   .add('makeHandler & combineHandlers', () => <MakeHandlerExample />, {
     readme: {
-      // content: MakeHandlerIntro,
+      content: MakeHandlerIntro,
       sidebar: MakeHandlerReadme,
     },
   })

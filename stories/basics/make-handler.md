@@ -1,22 +1,21 @@
+### makeHandler & combineHandlers - Readme & Code
+
 The utility **makeHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument and returns a function that takes a curried function for updating the state based on the payload and the previous state. The final return value is a function that can be used as a do/redo or undo handler.
 
-The utility **combineHandlers** takes the do/redo handler as first argument and the undo handler as second argument, and returns an object with 'drdo' and 'undo' as keys and the handlers as values.
+The simple utility **combineHandlers** takes the do/redo handler as first argument and the undo handler as second argument, and returns an object with 'drdo' and 'undo' as keys and the handlers as values. Use at your own risk: It may save you some lines of code, but you are responsible for passing the arguments in the right order ;)
 
-```typescript
-```
-
-Full code:
+And for TypeScript users: Note that we do not need to type anything anymore. The payload type is inferred from "setCount" which in turn infers it from the initial state passed to useState. The action types are inferred from the names of the handlers. You can however still type the hook with a record of payload by type (see previous examples) if you want, for some extra guidance and safety.
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
-import { rootClass, uiContainerClass } from '../styles';
+import {
+  useFlexibleUndo,
+  makeHandler,
+  combineHandlers,
+} from 'use-flexible-undo';
+import { rootStyle, topUIStyle, actionsStyle, countStyle } from '../styles';
+import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-}
 
 export const MakeHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
@@ -27,14 +26,12 @@ export const MakeHandlerExample: FC = () => {
 
   const {
     undoables,
-    canUndo,
     undo,
-    canRedo,
     redo,
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
@@ -44,17 +41,19 @@ export const MakeHandlerExample: FC = () => {
   const { add, subtract } = undoables;
 
   return (
-    <div className={rootClass}>
-      <div>count = {count}</div>
-      <div className={uiContainerClass}>
-        <button onClick={() => add(1)}>add 1</button>
-        <button onClick={() => subtract(2)}>subtract 2</button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count = {count}</div>
+        <div className={actionsStyle}>
+          <button onClick={() => add(2)}>add 2</button>
+          <button onClick={() => subtract(1)}>subtract 1</button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
       <ActionList
         history={history}

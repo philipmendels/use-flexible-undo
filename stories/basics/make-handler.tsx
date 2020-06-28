@@ -1,13 +1,8 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
 import { rootStyle, topUIStyle, actionsStyle, countStyle } from '../styles';
-import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-}
+import { ActionList } from '../components/action-list';
 
 export const MakeHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
@@ -23,7 +18,7 @@ export const MakeHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
