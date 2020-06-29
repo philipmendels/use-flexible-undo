@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useFlexibleUndo, PayloadFromTo } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
-interface PayloadByType {
+// action Payload By action Type
+interface PBT {
+  // an object with 'from' and 'to' fields of type number:
   updateCount: PayloadFromTo<number>;
 }
 
-export const MakeUndoableFromToExample: React.FC = () => {
+export const FromToPayloadExample: React.FC = () => {
   const [count, setCount] = useState(1);
 
   const {
@@ -18,7 +20,7 @@ export const MakeUndoableFromToExample: React.FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo<PBT>({
     handlers: {
       updateCount: {
         drdo: ({ to }) => setCount(to),

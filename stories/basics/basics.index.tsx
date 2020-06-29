@@ -17,9 +17,9 @@ import { MakeUndoableHandlerExample } from './make-undoable-handler';
 import MakeUndoableHandlerIntro from './make-undoable-handler-intro.md';
 import MakeUndoableHandlerReadme from './make-undoable-handler.md';
 
-import { MakeUndoableFromToExample } from './make-undoable-from-to';
-// import MakeUndoableFromToIntro from './make-undoable-from-to-intro.md';
-import MakeUndoableFromToReadme from './make-undoable-from-to.md';
+import { FromToPayloadExample } from './from-to-payload';
+import FromToPayloadIntro from './from-to-payload-intro.md';
+import FromToPayloadReadme from './from-to-payload.md';
 
 import { MakeUndoableFTObjHandlerExample } from './make-undoable-from-to-handler';
 import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
@@ -72,10 +72,10 @@ storiesOf('useFlexibleUndo/basics', module)
       },
     }
   )
-  .add('from- and to-state as payload', () => <MakeUndoableFromToExample />, {
+  .add('from- and to-state as payload', () => <FromToPayloadExample />, {
     readme: {
-      // content: MakeUndoableFromToIntro,
-      sidebar: MakeUndoableFromToReadme,
+      content: FromToPayloadIntro,
+      sidebar: FromToPayloadReadme,
     },
   })
   .add(
