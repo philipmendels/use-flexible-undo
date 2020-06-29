@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  useFlexibleUndo,
-  PayloadFromTo,
-  makeUndoableFTObjHandler,
-  wrapFTObjHandler,
-} from '../../.';
+import { useFlexibleUndo, makeUndoableFTHandler, wrapFTHandler } from '../../.';
 import {
   rootStyle,
   topUIStyle,
@@ -13,10 +8,6 @@ import {
 } from '../../stories/styles';
 import { ActionList } from '../../stories/components/action-list';
 import { BranchNav } from '../components/branch-nav';
-
-interface PayloadByType {
-  updateCount: PayloadFromTo<number>;
-}
 
 export const MakeUndoableFTObjHandlerExample: React.FC = () => {
   const [count, setCount] = useState(1);
@@ -28,15 +19,15 @@ export const MakeUndoableFTObjHandlerExample: React.FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
-      updateCount: makeUndoableFTObjHandler(setCount),
+      updateCount: makeUndoableFTHandler(setCount),
     },
   });
 
   const { updateCount } = undoables;
 
-  const countHandler = wrapFTObjHandler(updateCount, count);
+  const countHandler = wrapFTHandler(updateCount, count);
 
   const add = countHandler(amount => prev => prev + amount);
   const subtract = countHandler(amount => prev => prev - amount);

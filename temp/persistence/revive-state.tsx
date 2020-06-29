@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect, useRef } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
 } from '../../dist';
@@ -45,7 +45,7 @@ export const ReviveStateExample: FC = () => {
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: undoableAddHandler,
     subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTObjHandler(setAmount),
+    updateAmount: makeUndoableFTHandler(setAmount),
   });
 
   const reviveToIndexRef = useRef(0);

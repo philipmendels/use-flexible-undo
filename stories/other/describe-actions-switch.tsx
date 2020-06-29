@@ -2,7 +2,7 @@ import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
   ActionUnion,
@@ -57,7 +57,7 @@ export const DescribeActionsSwitch: FC = () => {
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTObjHandler(setAmount),
+      updateAmount: makeUndoableFTHandler(setAmount),
     },
   });
 

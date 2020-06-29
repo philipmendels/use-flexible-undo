@@ -46,18 +46,10 @@ export const makeUndoableHandler = <S, R>(
 
 type InferState<S> = S extends SetStateAction<infer S2> ? S2 : S;
 
-export const makeUndoableFTObjHandler = <S, R>(stateSetter: (s: S) => R) =>
+export const makeUndoableFTHandler = <S, R>(stateSetter: (s: S) => R) =>
   combineHandlers<PayloadFromTo<InferState<S>>, R>(
     ({ to }) => stateSetter(to),
     ({ from }) => stateSetter(from)
-  );
-
-export const makeUndoableFTTupleHandler = <S, R>(
-  stateSetter: (s: SetStateAction<S>) => R
-) =>
-  combineHandlers<[S, S], R>(
-    ([_, to]) => stateSetter(to),
-    ([from]) => stateSetter(from)
   );
 
 export const makeUndoableStateDepHandler = <S1, S2, P, R>(
@@ -75,17 +67,11 @@ export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(
   convertor: (p2: P2) => P
 ) => (payload: P2) => handler(convertor(payload));
 
-export const wrapFTObjHandler = <S, R>(
+export const wrapFTHandler = <S, R>(
   handler: PayloadHandler<PayloadFromTo<S>, R>,
   state: S
 ) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler({ from: state, to: updater(payload)(state) });
-
-export const wrapFTTupleHandler = <S, R>(
-  handler: PayloadHandler<[S, S], R>,
-  state: S
-) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
-  handler([state, updater(payload)(state)]);
 
 export const makeUndoableReducer = <S, PBT extends PayloadByType>(
   stateUpdaters: UndoableStateUpdatersByType<S, PBT>

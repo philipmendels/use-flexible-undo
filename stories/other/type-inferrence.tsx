@@ -3,7 +3,7 @@ import {
   useFlexibleUndo,
   invertHandlers,
   makeUndoableHandler,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
 } from '../../.';
 
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -33,7 +33,7 @@ export const MemoizationExample: FC = () => {
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTObjHandler(setAmount),
+      updateAmount: makeUndoableFTHandler(setAmount),
     },
   });
 

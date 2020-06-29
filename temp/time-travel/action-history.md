@@ -5,7 +5,7 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
 } from 'use-flexible-undo';
@@ -44,7 +44,7 @@ export const ActionHistory: FC = () => {
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: undoableAddHandler,
     subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTObjHandler(setAmount),
+    updateAmount: makeUndoableFTHandler(setAmount),
   });
 
   return (

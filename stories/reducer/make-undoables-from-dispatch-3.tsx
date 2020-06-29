@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   PayloadFromTo,
   Updater,
   invertHandlers,
@@ -67,7 +67,7 @@ export const MakeUndoablesFromDispatchExample3: FC = () => {
   } = useFlexibleUndo<PayloadByType>({
     handlers: {
       ...handlers,
-      updateAmount: makeUndoableFTObjHandler(setAmount),
+      updateAmount: makeUndoableFTHandler(setAmount),
     },
   });
 

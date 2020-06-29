@@ -79,7 +79,7 @@ storiesOf('useFlexibleUndo/basics', module)
     },
   })
   .add(
-    'makeUndoableFTObjHandler & wrapFTObjHandler',
+    'makeUndoableFTHandler & wrapFTHandler',
     () => <MakeUndoableFTObjHandlerExample />,
     {
       readme: {

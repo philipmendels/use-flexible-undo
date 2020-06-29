@@ -6,7 +6,7 @@ import {
   UFUOptions,
   UndoableHandlersByType,
   PayloadFromTo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
 } from '../../.';
 
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -41,7 +41,7 @@ export const MemoizationExample: FC = () => {
     return {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTObjHandler(setAmount),
+      updateAmount: makeUndoableFTHandler(setAmount),
     };
   }, []);
 

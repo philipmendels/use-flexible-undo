@@ -7,7 +7,7 @@ import {
   makeUndoableReducer,
   PayloadFromTo,
   useUndoableReducer,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   UpdaterMaker,
   Updater,
   makeUndoableStateDepHandler,
@@ -44,7 +44,7 @@ const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
+  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
 export const UseUndoableReducer: FC = () => {

@@ -2,7 +2,7 @@ import React, { FC, useState, useRef, useEffect } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
 } from '../../.';
@@ -39,7 +39,7 @@ export const HistoryChangeExample: FC = () => {
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTObjHandler(setAmount),
+      updateAmount: makeUndoableFTHandler(setAmount),
     },
   });
 

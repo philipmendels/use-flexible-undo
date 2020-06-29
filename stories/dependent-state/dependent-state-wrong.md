@@ -14,7 +14,7 @@ const subHandler = () => amount && setCount(prev => prev - amount);
 const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
   add: combineHandlers(addHandler, subHandler),
   subtract: combineHandlers(subHandler, addHandler),
-  updateAmount: makeUndoableFTObjHandler(setAmount),
+  updateAmount: makeUndoableFTHandler(setAmount),
 });
 ```
 
@@ -25,7 +25,7 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   combineHandlers,
 } from 'use-flexible-undo';
 import { rootClass, uiContainerClass } from '../styles';
@@ -62,7 +62,7 @@ export const DependentStateWrong: FC = () => {
   const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
     add: combineHandlers(addHandler, subHandler),
     subtract: combineHandlers(subHandler, addHandler),
-    updateAmount: makeUndoableFTObjHandler(setAmount),
+    updateAmount: makeUndoableFTHandler(setAmount),
   });
 
   return (

@@ -11,7 +11,7 @@ import {
   makeUndoableStateDepHandler,
   merge,
   invertHandlers,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
 } from 'use-flexible-undo';
 import { ActionList } from '../components/action-list';
 import { uiContainerClass, rootClass } from '../styles';
@@ -43,7 +43,7 @@ const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
+  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
 export const MakeUndoablesFromDispatchExample2: FC = () => {

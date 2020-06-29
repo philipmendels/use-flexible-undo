@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   combineHandlers,
   UpdaterMaker,
 } from '../../.';
@@ -50,7 +50,7 @@ export const DependentStateRight2Example: FC = () => {
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
-      updateAmount: makeUndoableFTObjHandler(amount =>
+      updateAmount: makeUndoableFTHandler(amount =>
         setState(merge({ amount }))
       ),
     },

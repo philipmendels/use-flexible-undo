@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import {
   PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
   combineHandlers,
 } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -38,7 +38,7 @@ export const DependentStateWrong: FC = () => {
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
-      updateAmount: makeUndoableFTObjHandler(setAmount),
+      updateAmount: makeUndoableFTHandler(setAmount),
     },
   });
 

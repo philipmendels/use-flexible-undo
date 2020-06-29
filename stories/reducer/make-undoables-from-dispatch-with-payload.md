@@ -11,7 +11,7 @@ import {
   makeUndoableStateDepHandler,
   merge,
   invertHandlers,
-  makeUndoableFTObjHandler,
+  makeUndoableFTHandler,
 } from 'use-flexible-undo';
 import { NumberInput } from '../components/number-input';
 import { ActionList } from '../components/action-list';
@@ -48,7 +48,7 @@ const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTObjHandler(amount => merge({ amount })),
+  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
 export const MakeUndoablesFromDispatchWithPayloadExample: FC = () => {
