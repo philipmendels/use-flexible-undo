@@ -21,7 +21,7 @@ import { FromToPayloadExample } from './from-to-payload';
 import FromToPayloadIntro from './from-to-payload-intro.md';
 import FromToPayloadReadme from './from-to-payload.md';
 
-import { MakeUndoableFTObjHandlerExample } from './make-undoable-from-to-handler';
+import { MakeUndoableFTHandlerExample } from './make-undoable-from-to-handler';
 import MakeUndoableFromToHandlerIntro from './make-undoable-from-to-handler-intro.md';
 import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md';
 
@@ -80,7 +80,7 @@ storiesOf('useFlexibleUndo/basics', module)
   })
   .add(
     'makeUndoableFTHandler & wrapFTHandler',
-    () => <MakeUndoableFTObjHandlerExample />,
+    () => <MakeUndoableFTHandlerExample />,
     {
       readme: {
         content: MakeUndoableFromToHandlerIntro,

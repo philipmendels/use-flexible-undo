@@ -1,3 +1,3 @@
 ### makeUndoableFTHandler & wrapFTHandler - Example
 
-In this example the utility **makeUndoableFTHandler** is used to create the do/redo and undo handlers for the undoable "updateCount" function
+This example is equivalent to the previous example, except that we we use the utility **makeUndoableFTHandler** to convert "setCount" to the do/redo and undo handlers for "updateCount". We then use **wrapFTHandler** to convert "updateCount" to the more specialized functions add, subtract, multiply and divide.

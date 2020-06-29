@@ -20,7 +20,7 @@ interface PBT {
 }
 
 export const FromToPayloadExample: React.FC = () => {
-  const [count, setCount] = useState(1);
+  const [count, setCount] = useState(0);
 
   const {
     undoables,
@@ -54,10 +54,10 @@ export const FromToPayloadExample: React.FC = () => {
       <div className={topUIStyle}>
         <div className={countStyle}>count = {count}</div>
         <div className={actionsStyle}>
-          <button onClick={() => add(2)}>add 2</button>
-          <button onClick={() => subtract(1)}>subtract 1</button>
-          <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
-          <button onClick={() => divide(Math.PI)}>di&pi;de</button>
+          <button onClick={() => add(Math.PI)}>add PI</button>
+          <button onClick={() => subtract(Math.PI)}>subtract PI</button>
+          <button onClick={() => multiply(Math.PI)}>multiPI</button>
+          <button onClick={() => divide(Math.PI)}>diPIde</button>
         </div>
         <BranchNav
           history={history}

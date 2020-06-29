@@ -2,20 +2,23 @@
 
 The utility **makeUndoableFTHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument. It returns an object with do/redo and undo handlers that take an object with the current "from" state and the new "to" state as payload.
 
+The utility **wrapFTHandler** takes as first argument a function that expects an payload an object with "from" and "to" state, and as second argument the current state. It returns a function that takes a curried function for updating the state based on the payload and the previous state.
+
+And again for TypeScript users: Note that we do not need to type anything anymore. The payload type for add, subtract, multiply and divide is inferred from "updateCount" which in turn infers it from "setCount" which in turn infers it from the initial state passed to useState. You can however still type the hook with a record of payload by type (see previous example) if you want, for some extra guidance and safety.
+
 ```typescript
 import React, { useState } from 'react';
-import { useFlexibleUndo, makeUndoableFTHandler, wrapFTHandler } from '../../.';
 import {
-  rootStyle,
-  topUIStyle,
-  countStyle,
-  actionsStyle,
-} from '../../stories/styles';
-import { ActionList } from '../../stories/components/action-list';
+  useFlexibleUndo,
+  makeUndoableFTHandler,
+  wrapFTHandler,
+} from 'use-flexible-undo';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
-export const MakeUndoableFTObjHandlerExample: React.FC = () => {
-  const [count, setCount] = useState(1);
+export const MakeUndoableFTHandlerExample: React.FC = () => {
+  const [count, setCount] = useState(0);
 
   const {
     undoables,
@@ -44,10 +47,10 @@ export const MakeUndoableFTObjHandlerExample: React.FC = () => {
       <div className={topUIStyle}>
         <div className={countStyle}>count = {count}</div>
         <div className={actionsStyle}>
-          <button onClick={() => add(2)}>add 2</button>
-          <button onClick={() => subtract(1)}>subtract 1</button>
-          <button onClick={() => multiply(Math.PI)}>multi&pi;</button>
-          <button onClick={() => divide(Math.PI)}>di&pi;de</button>
+          <button onClick={() => add(Math.PI)}>add PI</button>
+          <button onClick={() => subtract(Math.PI)}>subtract PI</button>
+          <button onClick={() => multiply(Math.PI)}>multiPI</button>
+          <button onClick={() => divide(Math.PI)}>diPIde</button>
         </div>
         <BranchNav
           history={history}
