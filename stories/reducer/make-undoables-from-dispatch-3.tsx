@@ -3,12 +3,11 @@ import {
   useFlexibleUndo,
   makeUndoableReducer,
   makeUndoableFTHandler,
-  PayloadFromTo,
-  Updater,
   invertHandlers,
-  makeUndoableHandler,
   useUndoableReducer,
+  makeUndoablePartialStateUpdater,
 } from '../../.';
+import { merge } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -18,33 +17,21 @@ interface State {
   count: number;
 }
 
-interface PayloadByType_Reducer {
+interface PBT_Reducer {
   add: number;
   subtract: number;
 }
 
-type Nullber = number | null;
-
-interface PayloadByType extends PayloadByType_Reducer {
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
-const makeCountHandler = (
-  updater: Updater<number>
-): Updater<State> => state => ({
-  ...state,
-  count: updater(state.count),
-});
-
-const undoableAddHandler = makeUndoableHandler(makeCountHandler)(
+const undoableAddHandler = makeUndoablePartialStateUpdater(
+  (amount: number) => () => amount,
+  (state: State) => state.count,
+  count => merge({ count })
+)(
   amount => prev => prev + amount,
   amount => prev => prev - amount
 );
 
-const { reducer, actionCreators } = makeUndoableReducer<
-  State,
-  PayloadByType_Reducer
->({
+const { reducer, actionCreators } = makeUndoableReducer<State, PBT_Reducer>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
 });
@@ -55,7 +42,7 @@ export const MakeUndoablesFromDispatchExample3: FC = () => {
     { count: 0 },
     actionCreators
   );
-  const [amount, setAmount] = useState<Nullber>(1);
+  const [amount, setAmount] = useState<number | null>(1);
 
   const {
     undoables,
@@ -64,7 +51,7 @@ export const MakeUndoablesFromDispatchExample3: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
       ...handlers,
       updateAmount: makeUndoableFTHandler(setAmount),

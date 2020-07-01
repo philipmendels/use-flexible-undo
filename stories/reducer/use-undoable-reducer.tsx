@@ -5,10 +5,8 @@ import {
   PayloadFromTo,
   useUndoableReducer,
   makeUndoableFTHandler,
-  UpdaterMaker,
-  Updater,
-  makeUndoableStateDepHandler,
   invertHandlers,
+  makeUndoablePartialStateUpdater,
 } from '../../.';
 import { merge } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
@@ -29,12 +27,11 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const makeCountHandler = (um: UpdaterMaker<number>) => (): Updater<
-  State
-> => prev =>
-  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
-
-const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+const undoableAddHandler = makeUndoablePartialStateUpdater(
+  () => state => state.amount || 0,
+  (state: State) => state.count,
+  count => merge({ count })
+)(
   amount => prev => prev + amount,
   amount => prev => prev - amount
 );
@@ -62,7 +59,7 @@ export const UseUndoableReducer: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers,
   });
 

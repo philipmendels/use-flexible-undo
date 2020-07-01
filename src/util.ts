@@ -52,15 +52,64 @@ export const makeUndoableFTHandler = <S, R>(stateSetter: (s: S) => R) =>
     ({ from }) => stateSetter(from)
   );
 
-export const makeUndoableStateDepHandler = <S1, S2, P, R>(
-  stateUpdaterMaker: (um: UpdaterMaker<S1, S2>) => (payload: P) => R
+// export const makeUndoablePartialStateFTHandler = <S, S1, R>(
+//   stateSetter: (stateUpdater: Updater<S>) => R,
+//   setter: (newState: S1) => (state: S) => S
+// ) =>
+//   combineHandlers<PayloadFromTo<S1>, R>(
+//     ({ to }) => stateSetter(setter(to)),
+//     ({ from }) => stateSetter(setter(from))
+//   );
+
+// export const makeUndoablePartialStateFTUpdater = <S, S1>(
+//   setter: (newState: S1) => (state: S) => S
+// ) =>
+//   combineHandlers<PayloadFromTo<S1>, Updater<S>>(
+//     ({ to }) => setter(to),
+//     ({ from }) => setter(from)
+//   );
+
+export const makeUndoablePartialStateHandler = <S, R, S1, S2, P>(
+  stateSetter: (stateUpdater: Updater<S>) => R,
+  s1Selector: (payload: P) => (state: S) => S1,
+  s2Selector: (state: S) => S2,
+  setter: (newState: S2) => (state: S) => S
 ) => (
   updaterForDrdoMaker: UpdaterMaker<S1, S2>,
   updaterForUndoMaker: UpdaterMaker<S1, S2>
 ) =>
   combineHandlers<P, R>(
-    stateUpdaterMaker(updaterForDrdoMaker),
-    stateUpdaterMaker(updaterForUndoMaker)
+    payload =>
+      stateSetter(prev =>
+        setter(
+          updaterForDrdoMaker(s1Selector(payload)(prev))(s2Selector(prev))
+        )(prev)
+      ),
+    payload =>
+      stateSetter(prev =>
+        setter(
+          updaterForUndoMaker(s1Selector(payload)(prev))(s2Selector(prev))
+        )(prev)
+      )
+  );
+
+export const makeUndoablePartialStateUpdater = <S, S1, S2, P>(
+  s1Selector: (payload: P) => (state: S) => S1,
+  s2Selector: (state: S) => S2,
+  setter: (newState: S2) => (state: S) => S
+) => (
+  updaterForDrdoMaker: UpdaterMaker<S1, S2>,
+  updaterForUndoMaker: UpdaterMaker<S1, S2>
+) =>
+  combineHandlers<P, Updater<S>>(
+    payload => prev =>
+      setter(updaterForDrdoMaker(s1Selector(payload)(prev))(s2Selector(prev)))(
+        prev
+      ),
+    payload => prev =>
+      setter(updaterForUndoMaker(s1Selector(payload)(prev))(s2Selector(prev)))(
+        prev
+      )
   );
 
 export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(
@@ -98,7 +147,7 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
 export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   dispatch: UDispatch<PBT>,
   actionCreators: UndoableUActionCreatorsByType<PBT>
-): UndoableHandlersByType<PBT> =>
+) =>
   mapObject(actionCreators)<UndoableHandlersByType<PBT>>(([type, creator]) => [
     type,
     {

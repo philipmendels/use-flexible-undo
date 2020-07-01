@@ -1,17 +1,15 @@
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTHandler,
-  UpdaterMaker,
-  makeUndoableStateDepHandler,
   invertHandlers,
+  makeUndoablePartialStateHandler,
 } from '../../.';
+import { merge } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { merge } from '../examples-util';
 
 type Nullber = number | null;
 
@@ -20,31 +18,19 @@ interface State {
   amount: Nullber;
 }
 
-interface PayloadByType {
-  add: boolean;
-  subtract: boolean;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
 export const DependentStateRight4Example: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
   });
 
-  const makeCountHandler = (um: UpdaterMaker<number>) => (
-    shouldDouble: boolean
-  ) =>
-    setState(prev =>
-      prev.amount
-        ? {
-            ...prev,
-            count: um(shouldDouble ? prev.amount * 2 : prev.amount)(prev.count),
-          }
-        : prev
-    );
-
-  const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+  const undoableAddHandler = makeUndoablePartialStateHandler(
+    setState,
+    (shouldDouble: boolean) => ({ amount }) =>
+      amount ? (shouldDouble ? amount * 2 : amount) : 0,
+    state => state.count,
+    count => merge({ count })
+  )(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
@@ -56,11 +42,11 @@ export const DependentStateRight4Example: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTHandler(amount =>
+      updateAmount: makeUndoableFTHandler((amount: Nullber) =>
         setState(merge({ amount }))
       ),
     },

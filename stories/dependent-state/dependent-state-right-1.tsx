@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTHandler,
   makeUndoableHandler,
@@ -11,17 +10,9 @@ import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-type Nullber = number | null;
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
 export const DependentStateRight1Example: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
+  const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
@@ -35,7 +26,7 @@ export const DependentStateRight1Example: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

@@ -1,31 +1,25 @@
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTHandler,
-  combineHandlers,
+  UndoableHandler,
+  invertHandlers,
 } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-type Nullber = number | null;
-
-interface PayloadByType {
-  add: void;
-  subtract: void;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
 export const DependentStateWrong: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
+  const [amount, setAmount] = useState<number | null>(1);
 
   //Do NOT do this! Move 'amount' to the action payload or combine it
   //with the 'count' state so that you can get it from the prev state.
-  const addHandler = () => amount && setCount(prev => prev + amount);
-  const subHandler = () => amount && setCount(prev => prev - amount);
+  const undoableAddHandler: UndoableHandler<void> = {
+    drdo: () => amount && setCount(prev => prev + amount),
+    undo: () => amount && setCount(prev => prev - amount),
+  };
 
   const {
     undoables,
@@ -34,10 +28,10 @@ export const DependentStateWrong: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useFlexibleUndo({
     handlers: {
-      add: combineHandlers(addHandler, subHandler),
-      subtract: combineHandlers(subHandler, addHandler),
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
       updateAmount: makeUndoableFTHandler(setAmount),
     },
   });

@@ -3,9 +3,9 @@ import {
   useFlexibleUndo,
   PayloadFromTo,
   UReducer,
-  UpdaterMaker,
-  Updater,
+  makeUndoablePartialStateUpdater,
 } from '../../.';
+import { merge } from '../examples-util';
 import { ActionList } from '../components/action-list';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -24,19 +24,26 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const makeCountUpdater = (um: UpdaterMaker<number>): Updater<State> => prev =>
-  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
-
-const addUpdater = makeCountUpdater(amount => prev => prev + amount);
-const subUpdater = makeCountUpdater(amount => prev => prev - amount);
+const undoableAddHandler = makeUndoablePartialStateUpdater(
+  (_payload: void) => state => state.amount || 0,
+  (state: State) => state.count,
+  count => merge({ count })
+)(
+  amount => prev => prev + amount,
+  amount => prev => prev - amount
+);
 
 const reducer: UReducer<State, PayloadByType> = (prevState, action) => {
   const isUndo = action.meta?.isUndo;
   switch (action.type) {
     case 'add':
-      return isUndo ? subUpdater(prevState) : addUpdater(prevState);
+      return isUndo
+        ? undoableAddHandler.undo()(prevState)
+        : undoableAddHandler.drdo()(prevState);
     case 'subtract':
-      return isUndo ? addUpdater(prevState) : subUpdater(prevState);
+      return isUndo
+        ? undoableAddHandler.drdo()(prevState)
+        : undoableAddHandler.undo()(prevState);
     case 'updateAmount':
       const { from, to } = action.payload;
       return { ...prevState, amount: isUndo ? from : to };
