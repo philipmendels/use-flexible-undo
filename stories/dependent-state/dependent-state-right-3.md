@@ -1,56 +1,22 @@
 ```typescript
-type Nullber = number | null;
-
-interface State {
-  count: number;
-  amount: Nullber;
-}
-
-const makeCountHandler = (um: UpdaterMaker<number>) => () =>
-  setState(prev =>
-    prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
-  );
-
-const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
-
-const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTHandler(amount => setState(merge({ amount }))),
-});
-```
-
-Full code:
-
-```typescript
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
-  makeUndoableFTHandler,
-  UpdaterMaker,
-  makeUndoableStateDepHandler,
   invertHandlers,
-  merge,
-} from 'use-flexible-undo';
-import { rootClass, uiContainerClass } from '../styles';
+  makeUndoableFTHandler,
+  makeUndoablePartialStateHandler,
+} from '../../.';
+import { merge } from '../examples-util';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
 
 type Nullber = number | null;
 
 interface State {
   count: number;
   amount: Nullber;
-}
-
-interface PayloadByType {
-  add: undefined;
-  subtract: undefined;
-  updateAmount: PayloadFromTo<Nullber>;
 }
 
 export const DependentStateRight3Example: FC = () => {
@@ -59,62 +25,71 @@ export const DependentStateRight3Example: FC = () => {
     amount: 1,
   });
 
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
-
-  const makeCountHandler = (um: UpdaterMaker<number>) => () =>
-    setState(prev =>
-      prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev
-    );
-
-  const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+  const undoableAddHandler = makeUndoablePartialStateHandler(
+    setState,
+    (_: void) => state => state.amount || 0,
+    state => state.count,
+    count => merge({ count })
+  )(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTHandler(amount => setState(merge({ amount }))),
+  const {
+    undoables,
+    undo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTHandler((amount: Nullber) =>
+        setState(merge({ amount }))
+      ),
+    },
   });
 
+  const { add, subtract, updateAmount } = undoables;
+
   return (
-    <div className={rootClass}>
-      <div>count = {count}</div>
-      <div className={uiContainerClass}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => add()}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => subtract()}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount =&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => add()}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => subtract()}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

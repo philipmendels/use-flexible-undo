@@ -8,15 +8,14 @@ import {
   PayloadFromTo,
   useUndoableReducer,
   makeUndoableFTHandler,
-  UpdaterMaker,
-  Updater,
-  makeUndoableStateDepHandler,
   invertHandlers,
-  merge,
-} from 'use-flexible-undo';
-import { ActionList } from '../components/action-list';
-import { uiContainerClass, rootClass } from '../styles';
+  makeUndoablePartialStateUpdater,
+} from '../../.';
+import { merge } from '../examples-util';
+import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
+import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
 type Nullber = number | null;
 
@@ -31,12 +30,11 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const makeCountHandler = (um: UpdaterMaker<number>) => (): Updater<
-  State
-> => prev =>
-  prev.amount ? { ...prev, count: um(prev.amount)(prev.count) } : prev;
-
-const undoableAddHandler = makeUndoableStateDepHandler(makeCountHandler)(
+const undoableAddHandler = makeUndoablePartialStateUpdater(
+  () => state => state.amount || 0,
+  (state: State) => state.count,
+  count => merge({ count })
+)(
   amount => prev => prev + amount,
   amount => prev => prev - amount
 );
@@ -48,10 +46,7 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
 });
 
 export const UseUndoableReducer: FC = () => {
-  const {
-    state: { count, amount },
-    boundActionCreators,
-  } = useUndoableReducer(
+  const [{ count, amount }, handlers] = useUndoableReducer(
     reducer,
     {
       count: 0,
@@ -61,49 +56,54 @@ export const UseUndoableReducer: FC = () => {
   );
 
   const {
-    makeUndoables,
-    canUndo,
+    undoables,
     undo,
-    canRedo,
     redo,
-    stack,
+    history,
     timeTravel,
-  } = useFlexibleUndo();
+    switchToBranch,
+  } = useFlexibleUndo({
+    handlers,
+  });
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>(
-    boundActionCreators
-  );
+  const { add, subtract, updateAmount } = undoables;
 
   return (
-    <div className={rootClass}>
-      <div>count = {count}</div>
-      <div className={uiContainerClass}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => add()}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => subtract()}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount =&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => add()}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => subtract()}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };

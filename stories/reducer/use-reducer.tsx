@@ -25,7 +25,7 @@ interface PayloadByType {
 }
 
 const undoableAddHandler = makeUndoablePartialStateUpdater(
-  (_payload: void) => state => state.amount || 0,
+  (_: void) => state => state.amount || 0,
   (state: State) => state.count,
   count => merge({ count })
 )(

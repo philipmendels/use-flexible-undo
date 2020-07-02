@@ -1,101 +1,80 @@
 Passing a state dependency as (part of) the action payload is one way of keeping your redo/undo handlers pure. See the next example for an alternative.
 
 ```typescript
-type Nullber = number | null;
-
-const [count, setCount] = useState(0);
-const [amount, setAmount] = useState<Nullber>(1);
-
-const undoableAddHandler = makeUndoableHandler(setCount)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
-
-const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTHandler(setAmount),
-});
-```
-
-Full code:
-
-```typescript
 import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useFlexibleUndo,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
-} from 'use-flexible-undo';
-import { rootClass, uiContainerClass } from '../styles';
+} from '../../.';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
-
-type Nullber = number | null;
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-  updateAmount: PayloadFromTo<Nullber>;
-}
+import { BranchNav } from '../components/branch-nav';
 
 export const DependentStateRight1Example: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
-
-  const {
-    makeUndoables,
-    canUndo,
-    undo,
-    canRedo,
-    redo,
-    stack,
-    timeTravel,
-  } = useFlexibleUndo();
+  const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
 
-  const { add, subtract, updateAmount } = makeUndoables<PayloadByType>({
-    add: undoableAddHandler,
-    subtract: invertHandlers(undoableAddHandler),
-    updateAmount: makeUndoableFTHandler(setAmount),
+  const {
+    undoables,
+    undo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTHandler(setAmount),
+    },
   });
 
+  const { add, subtract, updateAmount } = undoables;
+
   return (
-    <div className={rootClass}>
-      <div>count = {count}</div>
-      <div className={uiContainerClass}>
-        <label>
-          amount:&nbsp;
-          <NumberInput
-            value={amount}
-            onChange={value =>
-              updateAmount({
-                from: amount,
-                to: value,
-              })
-            }
-          />
-        </label>
-        <button disabled={!amount} onClick={() => amount && add(amount)}>
-          add
-        </button>
-        <button disabled={!amount} onClick={() => amount && subtract(amount)}>
-          subtract
-        </button>
-        <button disabled={!canUndo} onClick={() => undo()}>
-          undo
-        </button>
-        <button disabled={!canRedo} onClick={() => redo()}>
-          redo
-        </button>
+    <div className={rootStyle}>
+      <div className={topUIStyle}>
+        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
+        <div className={actionsStyle}>
+          <label>
+            amount =&nbsp;
+            <NumberInput
+              value={amount}
+              onChange={value =>
+                updateAmount({
+                  from: amount,
+                  to: value,
+                })
+              }
+            />
+          </label>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
+            add
+          </button>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+            subtract
+          </button>
+        </div>
+        <BranchNav
+          history={history}
+          switchToBranch={switchToBranch}
+          undo={undo}
+          redo={redo}
+        />
       </div>
-      <ActionList stack={stack} timeTravel={timeTravel} />
+      <ActionList
+        history={history}
+        timeTravel={timeTravel}
+        switchToBranch={switchToBranch}
+      />
     </div>
   );
 };
