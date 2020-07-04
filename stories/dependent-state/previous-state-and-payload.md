@@ -1,20 +1,39 @@
+### Previous state and payload - Readme & Code
+
+```typescript
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableFTHandler,
-  makeUndoableHandler,
   invertHandlers,
-} from '../../.';
+  makeUndoablePartialStateHandler,
+} from 'use-flexible-undo';
+import { merge } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-export const DependentStateRight1Example: FC = () => {
-  const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<number | null>(1);
+type Nullber = number | null;
 
-  const undoableAddHandler = makeUndoableHandler(setCount)(
+interface State {
+  count: number;
+  amount: Nullber;
+}
+
+export const PreviousStateAndPayloadExample: FC = () => {
+  const [{ count, amount }, setState] = useState<State>({
+    count: 0,
+    amount: 1,
+  });
+
+  const undoableAddHandler = makeUndoablePartialStateHandler(
+    setState,
+    (shouldDouble: boolean) => ({ amount }) =>
+      amount ? (shouldDouble ? amount * 2 : amount) : 0,
+    state => state.count,
+    count => merge({ count })
+  )(
     amount => prev => prev + amount,
     amount => prev => prev - amount
   );
@@ -30,7 +49,9 @@ export const DependentStateRight1Example: FC = () => {
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTHandler(setAmount),
+      updateAmount: makeUndoableFTHandler((amount: Nullber) =>
+        setState(merge({ amount }))
+      ),
     },
   });
 
@@ -53,10 +74,13 @@ export const DependentStateRight1Example: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => amount && add(amount)}>
+          <button disabled={!amount} onClick={() => add(false)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+          <button disabled={!amount} onClick={() => add(true)}>
+            add x 2
+          </button>
+          <button disabled={!amount} onClick={() => subtract(false)}>
             subtract
           </button>
         </div>
@@ -75,3 +99,4 @@ export const DependentStateRight1Example: FC = () => {
     </div>
   );
 };
+```

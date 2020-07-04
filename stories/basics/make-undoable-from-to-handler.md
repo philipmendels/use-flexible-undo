@@ -2,7 +2,7 @@
 
 The utility **makeUndoableFTHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument. It returns an object with do/redo and undo handlers that take an object with the current "from" state and the new "to" state as payload.
 
-The utility **wrapFTHandler** takes as first argument a function that expects an payload an object with "from" and "to" state, and as second argument the current state. It returns a function that takes a curried function for updating the state based on the payload and the previous state.
+The utility **wrapFTHandler** takes as first argument a function that expects as payload an object with "from" and "to" state, and as second argument the current state. It returns a function that takes a curried function for updating the state based on the payload and the previous state.
 
 And again for TypeScript users: Note that we do not need to type anything anymore. The payload type for add, subtract, multiply and divide is inferred from "updateCount" which in turn infers it from "setCount" which in turn infers it from the initial state passed to useState. You can however still type the hook with a record of payload by type (see previous example) if you want, for some extra guidance and safety.
 

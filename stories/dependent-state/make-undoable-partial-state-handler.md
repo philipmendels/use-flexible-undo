@@ -1,10 +1,13 @@
+### makeUndoablePartialStateHandler - Readme & Code
+
+```typescript
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
-  makeUndoableFTHandler,
-  makeUndoableHandler,
   invertHandlers,
-} from '../../.';
+  makeUndoableFTHandler,
+  makeUndoablePartialStateHandler,
+} from 'use-flexible-undo';
 import { merge } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -18,17 +21,20 @@ interface State {
   amount: Nullber;
 }
 
-export const DependentStateRight2Example: FC = () => {
+export const MakeUndoablePartialStateHandlerExample: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
   });
 
-  const undoableAddHandler = makeUndoableHandler(setState)<void>(
-    () => prev =>
-      prev.amount ? { ...prev, count: prev.count + prev.amount } : prev,
-    () => prev =>
-      prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
+  const undoableAddHandler = makeUndoablePartialStateHandler(
+    setState,
+    (_: void) => state => state.amount || 0,
+    state => state.count,
+    count => merge({ count })
+  )(
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
   );
 
   const {
@@ -89,3 +95,4 @@ export const DependentStateRight2Example: FC = () => {
     </div>
   );
 };
+```

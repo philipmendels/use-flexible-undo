@@ -1,6 +1,8 @@
-This example is broken on purpose to illustrate that you should not make your redo/undo handlers depend on external state. The problem is that the handlers may run before the external state is updated if you click undo or redo in fast succession or if you use time travel. To see the problem:
+### Don't do this - Example
 
-- Click 'add' one ore more times
+This example is broken on purpose to illustrate that you should not directly refer to state dependencies from within your do/redo & undo handlers. The problem is that if the handlers are called multiple times within a single React update, then they will not use the updated state but the stale version of it. This happens during time travel, but not when rapidly clicking undo/redo because each click results in an separate update. To see the problem:
+
+- Click 'add' one or more times
 - Change the amount
-- Again click 'add' one ore more times
+- Again click 'add' one or more times
 - Time-travel to the bottom of the stack and back to the top one or more times to see the 'count' state getting out-of-sync

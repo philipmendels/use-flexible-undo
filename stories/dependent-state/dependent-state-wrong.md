@@ -1,19 +1,21 @@
-You **_should not_** make your redo/undo handlers depend on external state. Refactor your actions so that you can get dependent state from the action payload or refactor your state so that you can get it from the previous state. You can see how in the next two examples.
+### Don't do this - Readme & Code
+
+You **_should not_** directly refer to state dependencies from within your do/redo and undo handlers. If you have a direct dependency on state you can fix it by refactoring your actions so that you can get the dependency from the action payload or by refactoring your state so that you can get it from the previous state.
 
 ```typescript
-timport React, { FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableFTHandler,
   UndoableHandler,
   invertHandlers,
-} from '../../.';
+} from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-export const DependentStateWrong: FC = () => {
+export const WrongHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 

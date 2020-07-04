@@ -1,10 +1,9 @@
-```typescript
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableFTHandler,
+  makeUndoableHandler,
   invertHandlers,
-  makeUndoablePartialStateHandler,
 } from '../../.';
 import { merge } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -19,21 +18,17 @@ interface State {
   amount: Nullber;
 }
 
-export const DependentStateRight4Example: FC = () => {
+export const DependencyInPreviousStateExample: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
   });
 
-  const undoableAddHandler = makeUndoablePartialStateHandler(
-    setState,
-    (shouldDouble: boolean) => ({ amount }) =>
-      amount ? (shouldDouble ? amount * 2 : amount) : 0,
-    state => state.count,
-    count => merge({ count })
-  )(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+  const undoableAddHandler = makeUndoableHandler(setState)<void>(
+    () => prev =>
+      prev.amount ? { ...prev, count: prev.count + prev.amount } : prev,
+    () => prev =>
+      prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
   );
 
   const {
@@ -72,13 +67,10 @@ export const DependentStateRight4Example: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add(false)}>
+          <button disabled={!amount} onClick={() => add()}>
             add
           </button>
-          <button disabled={!amount} onClick={() => add(true)}>
-            add x 2
-          </button>
-          <button disabled={!amount} onClick={() => subtract(false)}>
+          <button disabled={!amount} onClick={() => subtract()}>
             subtract
           </button>
         </div>
@@ -97,4 +89,3 @@ export const DependentStateRight4Example: FC = () => {
     </div>
   );
 };
-```

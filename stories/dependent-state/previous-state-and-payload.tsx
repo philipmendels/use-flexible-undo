@@ -1,8 +1,8 @@
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
-  invertHandlers,
   makeUndoableFTHandler,
+  invertHandlers,
   makeUndoablePartialStateHandler,
 } from '../../.';
 import { merge } from '../examples-util';
@@ -18,7 +18,7 @@ interface State {
   amount: Nullber;
 }
 
-export const DependentStateRight3Example: FC = () => {
+export const PreviousStateAndPayloadExample: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
@@ -26,7 +26,8 @@ export const DependentStateRight3Example: FC = () => {
 
   const undoableAddHandler = makeUndoablePartialStateHandler(
     setState,
-    (_: void) => state => state.amount || 0,
+    (shouldDouble: boolean) => ({ amount }) =>
+      amount ? (shouldDouble ? amount * 2 : amount) : 0,
     state => state.count,
     count => merge({ count })
   )(
@@ -70,10 +71,13 @@ export const DependentStateRight3Example: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add()}>
+          <button disabled={!amount} onClick={() => add(false)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => subtract()}>
+          <button disabled={!amount} onClick={() => add(true)}>
+            add x 2
+          </button>
+          <button disabled={!amount} onClick={() => subtract(false)}>
             subtract
           </button>
         </div>

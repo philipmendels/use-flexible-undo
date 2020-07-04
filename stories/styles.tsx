@@ -32,7 +32,7 @@ export const topUIStyle = css`
     font-family: monospace;
   }
   input[type='number'] {
-    width: 62px;
+    width: 84px;
     border: 1px solid gray;
     font-size: 18px;
     font-family: monospace;
@@ -49,7 +49,7 @@ export const topUIStyle = css`
       border-color: #ddd;
       cursor: inherit;
     }
-    min-width: 80px;
+    min-width: 95px;
   }
 `;
 

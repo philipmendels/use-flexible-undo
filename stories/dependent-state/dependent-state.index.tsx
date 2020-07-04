@@ -1,48 +1,64 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 
-import { DependentStateWrong } from './dependent-state-wrong';
+import { WrongHandlerExample } from './dependent-state-wrong';
 import DependentStateWrongIntro from './dependent-state-wrong-intro.md';
 import DependentStateWrongReadme from './dependent-state-wrong.md';
-import { DependentStateRight1Example } from './dependent-state-right-1';
-import DependentStateRight1Intro from './dependent-state-right-1-intro.md';
-import DependentStateRight1Readme from './dependent-state-right-1.md';
-import { DependentStateRight2Example } from './dependent-state-right-2';
-import DependentStateRight2Intro from './dependent-state-right-2-intro.md';
-import DependentStateRight2Readme from './dependent-state-right-2.md';
-import { DependentStateRight3Example } from './dependent-state-right-3';
-import DependentStateRight3Readme from './dependent-state-right-3.md';
-import { DependentStateRight4Example } from './dependent-state-right-4';
-import DependentStateRight4Readme from './dependent-state-right-4.md';
+
+import { DependencyInPayloadExample } from './dependency-in-payload';
+import DependencyInPayloadIntro from './dependency-in-payload-intro.md';
+import DependencyInPayloadReadme from './dependency-in-payload.md';
+
+import { DependencyInPreviousStateExample } from './dependency-in-previous-state';
+import DependencyInPreviousStateIntro from './dependency-in-previous-state-intro.md';
+import DependencyInPreviousStateReadme from './dependency-in-previous-state.md';
+
+import { MakeUndoablePartialStateHandlerExample } from './make-undoable-partial-state-handler';
+import MakeUndoablePartialStateHandlerIntro from './make-undoable-partial-state-handler-intro.md';
+import MakeUndoablePartialStateHandlerReadme from './make-undoable-partial-state-handler.md';
+
+import { PreviousStateAndPayloadExample } from './previous-state-and-payload';
+import PreviousStateAndPayloadIntro from './previous-state-and-payload-intro.md';
+import PreviousStateAndPayloadReadme from './previous-state-and-payload.md';
 
 storiesOf('useFlexibleUndo/dependent state', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
-  .add('dependent state: WRONG', () => <DependentStateWrong />, {
+  .add(`don't do this`, () => <WrongHandlerExample />, {
     readme: {
       content: DependentStateWrongIntro,
       sidebar: DependentStateWrongReadme,
     },
   })
-  .add('dependent state: RIGHT 1', () => <DependentStateRight1Example />, {
+  .add('dependency in payload', () => <DependencyInPayloadExample />, {
     readme: {
-      content: DependentStateRight1Intro,
-      sidebar: DependentStateRight1Readme,
+      content: DependencyInPayloadIntro,
+      sidebar: DependencyInPayloadReadme,
     },
   })
-  .add('dependent state: RIGHT 2', () => <DependentStateRight2Example />, {
+  .add(
+    'dependency in previous state',
+    () => <DependencyInPreviousStateExample />,
+    {
+      readme: {
+        content: DependencyInPreviousStateIntro,
+        sidebar: DependencyInPreviousStateReadme,
+      },
+    }
+  )
+  .add(
+    'makeUndoablePartialStateHandler',
+    () => <MakeUndoablePartialStateHandlerExample />,
+    {
+      readme: {
+        content: MakeUndoablePartialStateHandlerIntro,
+        sidebar: MakeUndoablePartialStateHandlerReadme,
+      },
+    }
+  )
+  .add('previous state and payload', () => <PreviousStateAndPayloadExample />, {
     readme: {
-      content: DependentStateRight2Intro,
-      sidebar: DependentStateRight2Readme,
-    },
-  })
-  .add('dependent state: RIGHT 3', () => <DependentStateRight3Example />, {
-    readme: {
-      sidebar: DependentStateRight3Readme,
-    },
-  })
-  .add('dependent state: RIGHT 4', () => <DependentStateRight4Example />, {
-    readme: {
-      sidebar: DependentStateRight4Readme,
+      content: PreviousStateAndPayloadIntro,
+      sidebar: PreviousStateAndPayloadReadme,
     },
   });

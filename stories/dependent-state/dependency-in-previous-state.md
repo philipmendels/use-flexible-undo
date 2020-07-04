@@ -1,11 +1,15 @@
+### Dependency in previous state - Readme & Code
+
+As an alternative to passing a state dependency as (part of) the action payload, you can store all dependent state together and get the dependencies from the previous state in your do/redo & undo handlers. In this and the following examples we use useState to define our combined state. In the next chapter we take a look at useReducer.
+
 ```typescript
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
-  invertHandlers,
   makeUndoableFTHandler,
-  makeUndoablePartialStateHandler,
-} from '../../.';
+  makeUndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
 import { merge } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -19,20 +23,17 @@ interface State {
   amount: Nullber;
 }
 
-export const DependentStateRight3Example: FC = () => {
+export const DependencyInPreviousStateExample: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
   });
 
-  const undoableAddHandler = makeUndoablePartialStateHandler(
-    setState,
-    (_: void) => state => state.amount || 0,
-    state => state.count,
-    count => merge({ count })
-  )(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+  const undoableAddHandler = makeUndoableHandler(setState)<void>(
+    () => prev =>
+      prev.amount ? { ...prev, count: prev.count + prev.amount } : prev,
+    () => prev =>
+      prev.amount ? { ...prev, count: prev.count - prev.amount } : prev
   );
 
   const {

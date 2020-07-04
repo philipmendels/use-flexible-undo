@@ -10,7 +10,7 @@ import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-export const DependentStateWrong: FC = () => {
+export const WrongHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
