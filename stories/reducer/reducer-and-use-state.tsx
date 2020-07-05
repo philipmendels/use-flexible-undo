@@ -5,9 +5,9 @@ import {
   makeUndoableFTHandler,
   invertHandlers,
   useUndoableReducer,
-  makeUndoablePartialStateUpdater,
+  makeUndoableUpdater,
 } from '../../.';
-import { merge } from '../examples-util';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -22,21 +22,17 @@ interface PBT_Reducer {
   subtract: number;
 }
 
-const undoableAddHandler = makeUndoablePartialStateUpdater(
-  (amount: number) => () => amount,
+const undoableAddHandler = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
+)((amount: number) => () => amount)(addUpdater, subtractUpdater);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PBT_Reducer>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
 });
 
-export const MakeUndoablesFromDispatchExample3: FC = () => {
+export const ReducerAndUseStateExample: FC = () => {
   const [{ count }, handlers] = useUndoableReducer(
     reducer,
     { count: 0 },

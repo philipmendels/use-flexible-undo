@@ -1,17 +1,14 @@
-Full code:
-
-```typescript
-import React, { FC, useReducer } from 'react';
+import React, { FC } from 'react';
 import {
   useFlexibleUndo,
   makeUndoableReducer,
   PayloadFromTo,
   invertHandlers,
   makeUndoableFTHandler,
-  bindUndoableActionCreators,
-  makeUndoablePartialStateUpdater,
+  useUndoableReducer,
+  makeUndoableUpdater,
 } from '../../.';
-import { merge } from '../examples-util';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -25,19 +22,17 @@ interface State {
 }
 
 interface PayloadByType {
-  add: void;
-  subtract: void;
+  add: boolean;
+  subtract: boolean;
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoablePartialStateUpdater(
-  () => state => state.amount || 0,
+const undoableAddHandler = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
+)((shouldDouble: boolean) => ({ amount }) =>
+  amount ? (shouldDouble ? amount * 2 : amount) : 0
+)(addUpdater, subtractUpdater);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: undoableAddHandler,
@@ -45,13 +40,15 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
-export const MakeUndoablesFromDispatchExample2: FC = () => {
-  const [{ count, amount }, dispatch] = useReducer(reducer, {
-    count: 0,
-    amount: 1,
-  });
-
-  const handlers = bindUndoableActionCreators(dispatch, actionCreators);
+export const ReducerWithPreviousStateAndPayloadExample: FC = () => {
+  const [{ count, amount }, handlers] = useUndoableReducer(
+    reducer,
+    {
+      count: 0,
+      amount: 1,
+    },
+    actionCreators
+  );
 
   const {
     undoables,
@@ -83,10 +80,13 @@ export const MakeUndoablesFromDispatchExample2: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add()}>
+          <button disabled={!amount} onClick={() => add(false)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => subtract()}>
+          <button disabled={!amount} onClick={() => add(true)}>
+            add x 2
+          </button>
+          <button disabled={!amount} onClick={() => subtract(false)}>
             subtract
           </button>
         </div>
@@ -105,4 +105,3 @@ export const MakeUndoablesFromDispatchExample2: FC = () => {
     </div>
   );
 };
-```

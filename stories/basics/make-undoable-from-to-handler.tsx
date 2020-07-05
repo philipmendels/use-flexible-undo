@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { useFlexibleUndo, makeUndoableFTHandler, wrapFTHandler } from '../../.';
+import {
+  addUpdater,
+  subtractUpdater,
+  multiplyUpdater,
+  divideUpdater,
+} from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -24,10 +30,10 @@ export const MakeUndoableFTHandlerExample: React.FC = () => {
 
   const countHandler = wrapFTHandler(updateCount, count);
 
-  const add = countHandler(amount => prev => prev + amount);
-  const subtract = countHandler(amount => prev => prev - amount);
-  const multiply = countHandler(amount => prev => prev * amount);
-  const divide = countHandler(amount => prev => prev / amount);
+  const add = countHandler(addUpdater);
+  const subtract = countHandler(subtractUpdater);
+  const multiply = countHandler(multiplyUpdater);
+  const divide = countHandler(divideUpdater);
 
   return (
     <div className={rootStyle}>

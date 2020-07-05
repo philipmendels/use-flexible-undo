@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo, makeUndoableHandler, invertHandlers } from '../../.';
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -8,8 +9,8 @@ export const MakeUndoableHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+    addUpdater,
+    subtractUpdater
   );
 
   const {

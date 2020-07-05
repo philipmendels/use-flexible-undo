@@ -5,6 +5,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
 } from '../../.';
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -15,8 +16,8 @@ export const DependencyInPayloadExample: FC = () => {
   const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+    addUpdater,
+    subtractUpdater
   );
 
   const {

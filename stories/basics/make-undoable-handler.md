@@ -2,6 +2,8 @@
 
 The utility **makeUndoableHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument and returns a function that takes two (do/redo and undo) curried functions for updating the state based on the payload and the previous state. The final return value is an object with do/redo and undo handlers.
 
+Note that the curried updater functions ("addUpdater" and "substractUpdater") are extracted and imported from a util file. We will do this in all the following examples. Look at the previous example to see how they are written inline.
+
 The utility **invertHandlers** takes an object with 'drdo' and 'undo' as keys and the handlers as values, and returns and object in wich the values are switched.
 
 ```typescript
@@ -11,6 +13,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
 } from 'use-flexible-undo';
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -19,8 +22,8 @@ export const MakeUndoableHandlerExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+    addUpdater,
+    subtractUpdater
   );
 
   const {

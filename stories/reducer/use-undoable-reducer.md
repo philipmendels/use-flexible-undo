@@ -1,4 +1,4 @@
-Full code:
+### useUndoableReducer - Readme & Code
 
 ```typescript
 import React, { FC } from 'react';
@@ -9,9 +9,9 @@ import {
   useUndoableReducer,
   makeUndoableFTHandler,
   invertHandlers,
-  makeUndoablePartialStateUpdater,
-} from '../../.';
-import { merge } from '../examples-util';
+  makeUndoableUpdater,
+} from 'use-flexible-undo';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -30,14 +30,10 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoablePartialStateUpdater(
-  () => state => state.amount || 0,
+const undoableAddHandler = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
+)(() => state => state.amount || 0)(addUpdater, subtractUpdater);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: undoableAddHandler,
@@ -45,7 +41,7 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
-export const UseUndoableReducer: FC = () => {
+export const UseUndoableReducerExample: FC = () => {
   const [{ count, amount }, handlers] = useUndoableReducer(
     reducer,
     {

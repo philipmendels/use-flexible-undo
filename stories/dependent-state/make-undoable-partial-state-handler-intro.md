@@ -1,1 +1,0 @@
-### makeUndoablePartialStateHandler - example

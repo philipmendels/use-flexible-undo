@@ -1,4 +1,6 @@
-### makeUndoablePartialStateHandler - Readme & Code
+### makeUndoableSetter - Readme & Code
+
+The utility function **makeUndoableSetter** takes
 
 ```typescript
 import React, { FC, useState } from 'react';
@@ -6,9 +8,9 @@ import {
   useFlexibleUndo,
   invertHandlers,
   makeUndoableFTHandler,
-  makeUndoablePartialStateHandler,
+  makeUndoableSetter,
 } from 'use-flexible-undo';
-import { merge } from '../examples-util';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -21,21 +23,16 @@ interface State {
   amount: Nullber;
 }
 
-export const MakeUndoablePartialStateHandlerExample: FC = () => {
+export const MakeUndoableSetterExample: FC = () => {
   const [{ count, amount }, setState] = useState<State>({
     count: 0,
     amount: 1,
   });
 
-  const undoableAddHandler = makeUndoablePartialStateHandler(
-    setState,
-    (_: void) => state => state.amount || 0,
+  const undoableAddHandler = makeUndoableSetter(setState)(
     state => state.count,
     count => merge({ count })
-  )(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
-  );
+  )((_: void) => state => state.amount || 0)(addUpdater, subtractUpdater);
 
   const {
     undoables,

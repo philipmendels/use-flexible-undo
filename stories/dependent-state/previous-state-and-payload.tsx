@@ -3,9 +3,9 @@ import {
   useFlexibleUndo,
   makeUndoableFTHandler,
   invertHandlers,
-  makeUndoablePartialStateHandler,
+  makeUndoableSetter,
 } from '../../.';
-import { merge } from '../examples-util';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -24,16 +24,12 @@ export const PreviousStateAndPayloadExample: FC = () => {
     amount: 1,
   });
 
-  const undoableAddHandler = makeUndoablePartialStateHandler(
-    setState,
-    (shouldDouble: boolean) => ({ amount }) =>
-      amount ? (shouldDouble ? amount * 2 : amount) : 0,
+  const undoableAddHandler = makeUndoableSetter(setState)(
     state => state.count,
     count => merge({ count })
-  )(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
-  );
+  )((shouldDouble: boolean) => ({ amount }) =>
+    amount ? (shouldDouble ? amount * 2 : amount) : 0
+  )(addUpdater, subtractUpdater);
 
   const {
     undoables,

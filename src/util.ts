@@ -52,64 +52,38 @@ export const makeUndoableFTHandler = <S, R>(stateSetter: (s: S) => R) =>
     ({ from }) => stateSetter(from)
   );
 
-// export const makeUndoablePartialStateFTHandler = <S, S1, R>(
-//   stateSetter: (stateUpdater: Updater<S>) => R,
-//   setter: (newState: S1) => (state: S) => S
-// ) =>
-//   combineHandlers<PayloadFromTo<S1>, R>(
-//     ({ to }) => stateSetter(setter(to)),
-//     ({ from }) => stateSetter(setter(from))
-//   );
-
-// export const makeUndoablePartialStateFTUpdater = <S, S1>(
-//   setter: (newState: S1) => (state: S) => S
-// ) =>
-//   combineHandlers<PayloadFromTo<S1>, Updater<S>>(
-//     ({ to }) => setter(to),
-//     ({ from }) => setter(from)
-//   );
-
-export const makeUndoablePartialStateHandler = <S, R, S1, S2, P>(
-  stateSetter: (stateUpdater: Updater<S>) => R,
-  s1Selector: (payload: P) => (state: S) => S1,
-  s2Selector: (state: S) => S2,
-  setter: (newState: S2) => (state: S) => S
-) => (
-  updaterForDrdoMaker: UpdaterMaker<S1, S2>,
-  updaterForUndoMaker: UpdaterMaker<S1, S2>
+export const makeUndoableSetter = <S, R>(
+  stateSetter: (stateUpdater: Updater<S>) => R
+) => <S_PART>(
+  getter: (state: S) => S_PART,
+  setter: (newState: S_PART) => (state: S) => S
+) => <P, INPUT>(selector: (payload: P) => (state: S) => INPUT) => (
+  updaterForDrdoMaker: UpdaterMaker<INPUT, S_PART>,
+  updaterForUndoMaker: UpdaterMaker<INPUT, S_PART>
 ) =>
   combineHandlers<P, R>(
     payload =>
       stateSetter(prev =>
-        setter(
-          updaterForDrdoMaker(s1Selector(payload)(prev))(s2Selector(prev))
-        )(prev)
+        setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(prev)
       ),
     payload =>
       stateSetter(prev =>
-        setter(
-          updaterForUndoMaker(s1Selector(payload)(prev))(s2Selector(prev))
-        )(prev)
+        setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(prev)
       )
   );
 
-export const makeUndoablePartialStateUpdater = <S, S1, S2, P>(
-  s1Selector: (payload: P) => (state: S) => S1,
-  s2Selector: (state: S) => S2,
-  setter: (newState: S2) => (state: S) => S
-) => (
-  updaterForDrdoMaker: UpdaterMaker<S1, S2>,
-  updaterForUndoMaker: UpdaterMaker<S1, S2>
+export const makeUndoableUpdater = <S, S_PART>(
+  getter: (state: S) => S_PART,
+  setter: (newState: S_PART) => (state: S) => S
+) => <P, INPUT>(selector: (payload: P) => (state: S) => INPUT) => (
+  updaterForDrdoMaker: UpdaterMaker<INPUT, S_PART>,
+  updaterForUndoMaker: UpdaterMaker<INPUT, S_PART>
 ) =>
   combineHandlers<P, Updater<S>>(
     payload => prev =>
-      setter(updaterForDrdoMaker(s1Selector(payload)(prev))(s2Selector(prev)))(
-        prev
-      ),
+      setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(prev),
     payload => prev =>
-      setter(updaterForUndoMaker(s1Selector(payload)(prev))(s2Selector(prev)))(
-        prev
-      )
+      setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(prev)
   );
 
 export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(

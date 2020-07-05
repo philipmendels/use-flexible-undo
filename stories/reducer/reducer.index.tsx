@@ -1,56 +1,68 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 
-import { UsingReducer } from './use-reducer';
-import UsingReducerIntro from './use-reducer-intro.md';
-import UsingReducerReadme from './use-reducer.md';
-import { MakeUndoablesFromDispatchExample2 } from './make-undoables-from-dispatch-2';
-import MakeUndoablesFromDispatch2Readme from './make-undoables-from-dispatch-2.md';
-import { MakeUndoablesFromDispatchWithPayloadExample } from './make-undoables-from-dispatch-with-payload';
-import MakeUndoablesFromDispatchWithPayloadReadme from './make-undoables-from-dispatch-with-payload.md';
-import { MakeUndoablesFromDispatchExample3 } from './make-undoables-from-dispatch-3';
-import MakeUndoablesFromDispatch3Readme from './make-undoables-from-dispatch-3.md';
-import { UseUndoableReducer } from './use-undoable-reducer';
+import { ReducerAndMakeUndoableUpdaterExample } from './use-reducer';
+import ReducerAndMakeUndoableUpdaterIntro from './use-reducer-intro.md';
+import ReducerAndMakeUndoableUpdaterReadme from './use-reducer.md';
+
+import { BindUndoableActionCreatorsExample } from './bind-undoable-action-creators';
+import BindUndoableActionCreatorsIntro from './bind-undoable-action-creators-intro.md';
+import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md';
+
+import { UseUndoableReducerExample } from './use-undoable-reducer';
+import UseUndoableReducerIntro from './use-undoable-reducer-intro.md';
 import UseUndoableReducerReadme from './use-undoable-reducer.md';
+
+import { ReducerWithPreviousStateAndPayloadExample } from './reducer-with-previous-state-and-payload';
+import ReducerWithPreviousStateAndPayloadIntro from './reducer-with-previous-state-and-payload-intro.md';
+import ReducerWithPreviousStateAndPayloadReadme from './reducer-with-previous-state-and-payload.md';
+
+import { ReducerAndUseStateExample } from './reducer-and-use-state';
+import ReducerAndUseStateIntro from './reducer-and-use-state-intro.md';
+import ReducerAndUseStateReadme from './reducer-and-use-state.md';
 
 storiesOf('useFlexibleUndo/reducer', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
-  .add('useReducer and manual dispatch', () => <UsingReducer />, {
-    readme: {
-      content: UsingReducerIntro,
-      sidebar: UsingReducerReadme,
-    },
-  })
   .add(
-    'makeUndoableReducer & bindUndoableActionCreators',
-    () => <MakeUndoablesFromDispatchExample2 />,
+    'reducer & makeUndoableUpdater',
+    () => <ReducerAndMakeUndoableUpdaterExample />,
     {
       readme: {
-        sidebar: MakeUndoablesFromDispatch2Readme,
+        content: ReducerAndMakeUndoableUpdaterIntro,
+        sidebar: ReducerAndMakeUndoableUpdaterReadme,
       },
     }
   )
-  .add('useUndoableReducer', () => <UseUndoableReducer />, {
+  .add(
+    'makeUndoableReducer & bindUndoableActionCreators',
+    () => <BindUndoableActionCreatorsExample />,
+    {
+      readme: {
+        content: BindUndoableActionCreatorsIntro,
+        sidebar: BindUndoableActionCreatorsReadme,
+      },
+    }
+  )
+  .add('useUndoableReducer', () => <UseUndoableReducerExample />, {
     readme: {
+      content: UseUndoableReducerIntro,
       sidebar: UseUndoableReducerReadme,
     },
   })
   .add(
-    'additional payload',
-    () => <MakeUndoablesFromDispatchWithPayloadExample />,
+    'useUndoableReducer with previous state and payload',
+    () => <ReducerWithPreviousStateAndPayloadExample />,
     {
       readme: {
-        sidebar: MakeUndoablesFromDispatchWithPayloadReadme,
+        content: ReducerWithPreviousStateAndPayloadIntro,
+        sidebar: ReducerWithPreviousStateAndPayloadReadme,
       },
     }
   )
-  .add(
-    'using both a reducer and useState',
-    () => <MakeUndoablesFromDispatchExample3 />,
-    {
-      readme: {
-        sidebar: MakeUndoablesFromDispatch3Readme,
-      },
-    }
-  );
+  .add('useUndoableReducer and useState', () => <ReducerAndUseStateExample />, {
+    readme: {
+      content: ReducerAndUseStateIntro,
+      sidebar: ReducerAndUseStateReadme,
+    },
+  });

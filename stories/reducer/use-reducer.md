@@ -1,3 +1,5 @@
+### Reducer & makeUndoableUpdater - Readme & Code
+
 You can separate your redo/undo handlers from your state update logic by using a reducer. However, as you can see, this involves writing a fair amount of boiler plate code. Check the next example for a utility that makes life easier.
 
 Full code:
@@ -8,9 +10,9 @@ import {
   useFlexibleUndo,
   PayloadFromTo,
   UReducer,
-  makeUndoablePartialStateUpdater,
-} from '../../.';
-import { merge } from '../examples-util';
+  makeUndoableUpdater,
+} from 'use-flexible-undo';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { ActionList } from '../components/action-list';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -29,14 +31,10 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoablePartialStateUpdater(
-  (_: void) => state => state.amount || 0,
+const undoableAddHandler = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
+)((_: void) => state => state.amount || 0)(addUpdater, subtractUpdater);
 
 const reducer: UReducer<State, PayloadByType> = (prevState, action) => {
   const isUndo = action.meta?.isUndo;
@@ -57,7 +55,7 @@ const reducer: UReducer<State, PayloadByType> = (prevState, action) => {
   }
 };
 
-export const UsingReducer: FC = () => {
+export const ReducerAndMakeUndoableUpdaterExample: FC = () => {
   const [{ count, amount }, dispatch] = useReducer(reducer, {
     count: 0,
     amount: 1,

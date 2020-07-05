@@ -1,3 +1,6 @@
+### useUndoableReducer with previous state and payload - Readme & Code
+
+```typescript
 import React, { FC } from 'react';
 import {
   useFlexibleUndo,
@@ -6,9 +9,9 @@ import {
   invertHandlers,
   makeUndoableFTHandler,
   useUndoableReducer,
-  makeUndoablePartialStateUpdater,
+  makeUndoableUpdater,
 } from '../../.';
-import { merge } from '../examples-util';
+import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -27,15 +30,12 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoablePartialStateUpdater(
-  (shouldDouble: boolean) => ({ amount }) =>
-    amount ? (shouldDouble ? amount * 2 : amount) : 0,
+const undoableAddHandler = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
+)((shouldDouble: boolean) => ({ amount }) =>
+  amount ? (shouldDouble ? amount * 2 : amount) : 0
+)(addUpdater, subtractUpdater);
 
 const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   add: undoableAddHandler,
@@ -43,7 +43,7 @@ const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
-export const MakeUndoablesFromDispatchWithPayloadExample: FC = () => {
+export const ReducerWithPreviousStateAndPayloadExample: FC = () => {
   const [{ count, amount }, handlers] = useUndoableReducer(
     reducer,
     {
@@ -108,3 +108,4 @@ export const MakeUndoablesFromDispatchWithPayloadExample: FC = () => {
     </div>
   );
 };
+```
