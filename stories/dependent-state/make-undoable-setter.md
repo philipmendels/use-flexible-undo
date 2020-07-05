@@ -1,6 +1,18 @@
 ### makeUndoableSetter - Readme & Code
 
-The utility function **makeUndoableSetter** takes
+The curried utility function **makeUndoableSetter** takes:
+
+- a function for setting combined state A (e.g. the setter returned from React.useState)  
+  ->
+- a function for selecting slice B from A.
+- a function for updating slice B in A.  
+  ->
+- a function for deriving a state change value C based on the action payload and/or the previous state A  
+  ->
+- a curried updater function C -> B -> B for the do/redo handler
+- a curried updater function C -> B -> B for the undo handler
+
+This may not be a one-size-fits-all solution. Feel free to write your solution, for example using lenses and other functional utilities.
 
 ```typescript
 import React, { FC, useState } from 'react';
