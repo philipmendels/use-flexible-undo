@@ -12,7 +12,7 @@ The curried utility function **makeUndoableSetter** takes:
 - a curried updater function C -> B -> B for the do/redo handler
 - a curried updater function C -> B -> B for the undo handler
 
-This may not be a one-size-fits-all solution. Feel free to write your solution, for example using lenses and other functional utilities.
+This may not be a one-size-fits-all solution. Feel free to write your own solution, for example using lenses and other functional utilities.
 
 ```typescript
 import React, { FC, useState } from 'react';

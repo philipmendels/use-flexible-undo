@@ -1,5 +1,7 @@
 ### useUndoableReducer - Readme & Code
 
+memoizes
+
 ```typescript
 import React, { FC } from 'react';
 import {
