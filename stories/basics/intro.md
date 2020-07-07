@@ -4,6 +4,8 @@ The **useFlexibleUndo** hook takes a **handlers** object with pairs of do/redo (
 
 If you use TypeScript then you can type **useFlexibleUndo** with a record of payload by action type ("PBT"). Alternatively you could type the payloads within the handlers and let PBT be inferred.
 
+Finally note that we could have just created one undoable function "add", and wrap that in a "subtract" function which negates its argument ( subtract = amount => add(-amount) ). That's fine, but has the possible downside that you cannot differentiate between the actions in the undo history. In the next example you can see what this history looks like.
+
 ```typescript
 import React, { FC, useState } from 'react';
 import { useFlexibleUndo } from 'use-flexible-undo';

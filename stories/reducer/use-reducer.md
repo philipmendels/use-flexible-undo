@@ -1,8 +1,10 @@
 ### Reducer & makeUndoableUpdater - Readme & Code
 
-You can extract your state update logic from your components by using a reducer. If you use a reducer / Redux, you may want to consider using one of the many undo libraries that integrate with that instead of using a state management independent solution like we have here. Nevertheless, let's explore how we can integrate this library with a reducer. In this example you can see that manually writing out a reducer and dispatch calls in full involves writing a lot of repetitive code. In the next examples we look at some utilities for removing the repetition.
+You can extract your state update logic from your components by using a reducer. If you use a reducer / Redux, you may want to consider using one of the many undo libraries that integrate with that instead of using a state management independent solution like we have here. Nevertheless, let's explore how we can integrate this library with a reducer.
 
 The utility **makeUndoableUpdater** is similar to **makeUndoableSetter** which was explained in the previous chapter. The difference is that it does not take the initial state setter function, and consequently it does not set the state, but returns do/redo & undo state updater functions that you can use in a reducer. Again this may not be a one-size-fits-all solution. Feel free to write your own solution, for example using lenses and other functional utilities.
+
+In this example you can see that manually writing a reducer and calling dispatch from the handlers involves writing a lot of repetitive code. We could optimize the code a bit by leaving out the "subtract" case from the reducer, and simply using the inverse of the "add" handler for the "subtract" handler (e.g. using the **invertHandlers** util). But this would only bring us so far. In the next examples we look at some utilities for removing more repetitive code.
 
 ```typescript
 import React, { FC, useReducer } from 'react';
