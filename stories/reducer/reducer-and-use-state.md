@@ -1,5 +1,7 @@
 ### useUndoableReducer and useState - Readme & Code
 
+Just as you can use the results of separate calls to useState inside you do/redo & undo handlers, you can also combine separate calls to useState and useReducer (in this example wrapped by useUndoableReducer). It may not necessarily be a good idea, but you can.
+
 ```typescript
 import React, { FC, useState } from 'react';
 import {

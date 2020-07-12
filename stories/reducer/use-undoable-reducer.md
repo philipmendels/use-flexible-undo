@@ -1,6 +1,6 @@
 ### useUndoableReducer - Readme & Code
 
-memoizes
+The hook **useUndoableReducer** is a basic wrapper for useReducer and bindUndoableActionCreators. It takes a reducer, the initial state and an object with do/redo + undo action creators by action type. It returns (in a tuple) the current state and an object with do/redo + undo handlers by action type. This handlers object is memoized inside the hook, and can be passed to **useFlexibleUndo**.
 
 ```typescript
 import React, { FC } from 'react';

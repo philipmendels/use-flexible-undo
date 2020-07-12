@@ -1,5 +1,7 @@
 ### useUndoableReducer with previous state and payload - Readme & Code
 
+You are free to obtain your state dependencies from the previous state, or from the action payload, or from a combination of the two. In this somewhat contrived :) example "shouldDouble" is not part of state (there is a dedicated button for "add x 2"), hence we simply pass a static boolean value as the action payload.
+
 ```typescript
 import React, { FC } from 'react';
 import {
@@ -10,7 +12,7 @@ import {
   makeUndoableFTHandler,
   useUndoableReducer,
   makeUndoableUpdater,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
