@@ -10,6 +10,10 @@ export type HandlersByType<PBT extends PayloadByType> = {
 
 export type StateUpdater<P, S> = (payload: P) => (state: S) => S;
 
+export type StateUpdatersByType<S, PBT extends PayloadByType> = {
+  [K in keyof PBT]: StateUpdater<PBT[K], S>;
+};
+
 export type Undoable<T> = {
   drdo: T;
   undo: T;
@@ -46,6 +50,18 @@ export type BaseAction<T = string, P = any> = P extends void | undefined
       payload: P;
     };
 
+export type BaseActionUnion<PBT extends PayloadByType> = {
+  [T in keyof PBT]: BaseAction<T, PBT[T]>;
+}[keyof PBT];
+
+export type ActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
+  payload: PBT[T]
+) => BaseAction<T, PBT[T]>;
+
+export type ActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in keyof PBT]: ActionCreator<PBT, T>;
+};
+
 export type Action<T = string, P = any> = BaseAction<T, P> & {
   created: Date;
   id: string;
@@ -69,6 +85,10 @@ export type UActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
   payload: PBT[T]
 ) => UAction<T, PBT[T]>;
 
+export type UActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in keyof PBT]: UActionCreator<PBT, T>;
+};
+
 export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
   [T in keyof PBT]: Undoable<UActionCreator<PBT, T>>;
 };
@@ -78,7 +98,15 @@ export type UReducer<S, PBT extends PayloadByType> = (
   action: UActionUnion<PBT>
 ) => S;
 
+export type Reducer<S, PBT extends PayloadByType> = (
+  state: S,
+  action: BaseActionUnion<PBT>
+) => S;
+
 export type UDispatch<PBT extends PayloadByType> = Dispatch<UActionUnion<PBT>>;
+export type DispatchPBT<PBT extends PayloadByType> = Dispatch<
+  BaseActionUnion<PBT>
+>;
 
 export type ValueOf<T> = T[keyof T];
 
@@ -145,3 +173,7 @@ export type BranchSwitchModus =
   | 'LAST_COMMON_ACTION'
   | 'HEAD_OF_BRANCH'
   | 'LAST_KNOWN_POSITION_ON_BRANCH';
+
+export type UndoMap<PBT extends PayloadByType> = {
+  [K in keyof PBT]: (payload: PBT[K]) => BaseActionUnion<PBT>;
+};

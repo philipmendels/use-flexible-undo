@@ -10,6 +10,11 @@ import {
   UndoableHandlersByType,
   UpdaterMaker,
   UndoableStateUpdatersByType,
+  StateUpdatersByType,
+  ActionCreatorsByType,
+  UndoMap,
+  DispatchPBT,
+  Reducer,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
 import { SetStateAction } from 'react';
@@ -26,6 +31,15 @@ export const invertHandlers = <P, R>({
   drdo,
   undo,
 }: Undoable<PayloadHandler<P, R>>) => combineHandlers(undo, drdo);
+
+export const invertFTPayload = <P>({ from, to }: PayloadFromTo<P>) => ({
+  from: to,
+  to: from,
+});
+
+export const invertFTHandler = <P, R>(
+  handler: PayloadHandler<PayloadFromTo<P>, R>
+) => (payload: PayloadFromTo<P>) => handler(invertFTPayload(payload));
 
 export const makeHandler = <S, R>(
   stateSetter: (stateUpdater: Updater<S>) => R
@@ -71,6 +85,14 @@ export const makeUndoableSetter = <S, R>(
         setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(prev)
       )
   );
+
+export const makeUpdater = <S, S_PART>(
+  getter: (state: S) => S_PART,
+  setter: (newState: S_PART) => (state: S) => S
+) => <P, INPUT>(selector: (payload: P) => (state: S) => INPUT) => (
+  updaterMaker: UpdaterMaker<INPUT, S_PART>
+): PayloadHandler<P, Updater<S>> => payload => prev =>
+  setter(updaterMaker(selector(payload)(prev))(getter(prev)))(prev);
 
 export const makeUndoableUpdater = <S, S_PART>(
   getter: (state: S) => S_PART,
@@ -118,6 +140,18 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
   ),
 });
 
+export const makeReducer = <S, PBT extends PayloadByType>(
+  stateUpdaters: StateUpdatersByType<S, PBT>
+) => ({
+  reducer: ((state, { payload, type }) => {
+    const updater = stateUpdaters[type];
+    return updater ? updater(payload)(state) : state;
+  }) as Reducer<S, PBT>,
+  actionCreators: mapObject(stateUpdaters)<ActionCreatorsByType<PBT>>(
+    ([type, _]) => [type, makeActionCreator(type)]
+  ),
+});
+
 export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   dispatch: UDispatch<PBT>,
   actionCreators: UndoableUActionCreatorsByType<PBT>
@@ -127,5 +161,18 @@ export const bindUndoableActionCreators = <PBT extends PayloadByType>(
     {
       drdo: payload => dispatch(creator.drdo(payload)),
       undo: payload => dispatch(creator.undo(payload)),
+    },
+  ]);
+
+export const bindActionCreatorsAndUndoMap = <PBT extends PayloadByType>(
+  dispatch: DispatchPBT<PBT>,
+  actionCreators: ActionCreatorsByType<PBT>,
+  undoMap: UndoMap<PBT>
+) =>
+  mapObject(actionCreators)<UndoableHandlersByType<PBT>>(([type, creator]) => [
+    type,
+    {
+      drdo: payload => dispatch(creator(payload)),
+      undo: payload => dispatch(undoMap[type](payload)),
     },
   ]);

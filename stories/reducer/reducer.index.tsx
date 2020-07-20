@@ -21,6 +21,9 @@ import { ReducerAndUseStateExample } from './reducer-and-use-state';
 import ReducerAndUseStateIntro from './reducer-and-use-state-intro.md';
 import ReducerAndUseStateReadme from './reducer-and-use-state.md';
 
+import { UseReducerWithUndoMapExample } from './use-reducer-with-undo-map';
+import { BindActionCreatorsAndUndoMapExample } from './bind-action-creators-and-undo-map';
+
 storiesOf('useFlexibleUndo/reducer', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
@@ -65,4 +68,20 @@ storiesOf('useFlexibleUndo/reducer', module)
       content: ReducerAndUseStateIntro,
       sidebar: ReducerAndUseStateReadme,
     },
-  });
+  })
+  .add('useReducerWithUndoMap', () => <UseReducerWithUndoMapExample />, {
+    readme: {
+      // content: ReducerAndUseStateIntro,
+      // sidebar: ReducerAndUseStateReadme,
+    },
+  })
+  .add(
+    'bindActionCreatorsAndUndoMap',
+    () => <BindActionCreatorsAndUndoMapExample />,
+    {
+      readme: {
+        // content: ReducerAndUseStateIntro,
+        // sidebar: ReducerAndUseStateReadme,
+      },
+    }
+  );
