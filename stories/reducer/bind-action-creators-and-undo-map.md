@@ -1,12 +1,13 @@
-import React, { FC } from 'react';
+```typescript
+import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
   PayloadFromTo,
   makeUpdater,
   makeReducer,
   invertFTHandler,
-  useReducerWithUndoMap,
-} from '../../.';
+  bindActionCreatorsAndUndoMap,
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -37,20 +38,17 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   updateAmount: ({ to }) => merge({ amount: to }),
 });
 
-export const UseReducerWithUndoMapExample: FC = () => {
-  const [{ count, amount }, handlers] = useReducerWithUndoMap(
-    reducer,
-    {
-      count: 0,
-      amount: 1,
-    },
-    actionCreators,
-    {
-      add: actionCreators.subtract,
-      subtract: actionCreators.add,
-      updateAmount: invertFTHandler(actionCreators.updateAmount),
-    }
-  );
+export const BindActionCreatorsAndUndoMapExample: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
+    count: 0,
+    amount: 1,
+  });
+
+  const handlers = bindActionCreatorsAndUndoMap(dispatch, actionCreators, {
+    add: actionCreators.subtract,
+    subtract: actionCreators.add,
+    updateAmount: invertFTHandler(actionCreators.updateAmount),
+  });
 
   const {
     undoables,
@@ -104,3 +102,4 @@ export const UseReducerWithUndoMapExample: FC = () => {
     </div>
   );
 };
+```

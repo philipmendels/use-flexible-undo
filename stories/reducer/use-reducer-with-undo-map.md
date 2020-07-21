@@ -1,3 +1,4 @@
+```typescript
 import React, { FC } from 'react';
 import {
   useFlexibleUndo,
@@ -6,7 +7,7 @@ import {
   makeReducer,
   invertFTHandler,
   useReducerWithUndoMap,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -104,3 +105,4 @@ export const UseReducerWithUndoMapExample: FC = () => {
     </div>
   );
 };
+```

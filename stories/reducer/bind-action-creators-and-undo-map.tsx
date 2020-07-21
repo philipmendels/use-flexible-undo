@@ -5,13 +5,13 @@ import {
   makeUpdater,
   makeReducer,
   invertFTHandler,
+  bindActionCreatorsAndUndoMap,
 } from '../../.';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { bindActionCreatorsAndUndoMap } from '../../src';
 
 type Nullber = number | null;
 
