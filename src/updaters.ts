@@ -206,7 +206,9 @@ export const redoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => ({
 const getNewIndexForRedo = <PBT extends PayloadByType>(history: History<PBT>) =>
   getCurrentIndex(history) + 1;
 
-const getActionForRedo = <PBT extends PayloadByType>(history: History<PBT>) => {
+export const getActionForRedo = <PBT extends PayloadByType>(
+  history: History<PBT>
+) => {
   const stack = getCurrentBranch(history).stack;
   return stack[getNewIndexForRedo(history)];
 };

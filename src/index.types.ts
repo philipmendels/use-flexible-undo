@@ -74,6 +74,7 @@ export type ActionUnion<PBT extends PayloadByType> = {
 export type UAction<T, P> = BaseAction<T, P> & {
   meta?: {
     isUndo?: boolean;
+    clearFutureOnDo?: boolean;
   };
 };
 
@@ -177,3 +178,11 @@ export type BranchSwitchModus =
 export type UndoMap<PBT extends PayloadByType> = {
   [K in keyof PBT]: (payload: PBT[K]) => BaseActionUnion<PBT>;
 };
+
+export interface UseUnducerProps<S, PBT extends PayloadByType> {
+  options?: UFUOptions;
+  initialHistory?: History<PBT>;
+  reducer: UReducer<S, PBT>;
+  initialState: S;
+  actionCreators: UndoableUActionCreatorsByType<PBT>;
+}
