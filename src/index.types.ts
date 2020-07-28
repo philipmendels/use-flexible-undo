@@ -1,17 +1,17 @@
-import { Dispatch } from 'react';
+import { Dispatch, Reducer } from 'react';
 
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
 export type PayloadHandler<P, R = void> = (payload: P) => R;
 
-export type HandlersByType<PBT extends PayloadByType> = {
-  [K in keyof PBT]: PayloadHandler<PBT[K]>;
+export type HandlersByType<A extends BaseAction> = {
+  [T in A['type']]: PayloadHandler<IsA<T, A>['payload']>;
 };
 
 export type StateUpdater<P, S> = (payload: P) => (state: S) => S;
 
-export type StateUpdatersByType<S, PBT extends PayloadByType> = {
-  [K in keyof PBT]: StateUpdater<PBT[K], S>;
+export type StateUpdatersByType<S, A extends BaseAction> = {
+  [T in A['type']]: StateUpdater<IsA<T, A>['payload'], S>;
 };
 
 export type Undoable<T> = {
@@ -21,14 +21,14 @@ export type Undoable<T> = {
 
 export type UndoableHandler<P, R = void> = Undoable<PayloadHandler<P, R>>;
 
-export type UndoableHandlersByType<PBT extends PayloadByType> = {
-  [K in keyof PBT]: UndoableHandler<PBT[K]>;
+export type UndoableHandlersByType<A extends BaseAction> = {
+  [T in A['type']]: UndoableHandler<IsA<T, A>['payload']>;
 };
 
 export type UndoableStateUpdater<P, S> = Undoable<StateUpdater<P, S>>;
 
-export type UndoableStateUpdatersByType<S, PBT extends PayloadByType> = {
-  [K in keyof PBT]: UndoableStateUpdater<PBT[K], S>;
+export type UndoableStateUpdatersByType<S, A extends UAction> = {
+  [T in A['type']]: UndoableStateUpdater<IsA<T, A>['payload'], S>;
 };
 
 // Not a generic solution, just ok for this project
@@ -54,12 +54,22 @@ export type BaseActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: BaseAction<T, PBT[T]>;
 }[keyof PBT];
 
-export type ActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
-  payload: PBT[T]
-) => BaseAction<T, PBT[T]>;
+export type ActionCreator<P, T> = (payload: P) => BaseAction<T, P>;
 
-export type ActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: ActionCreator<PBT, T>;
+type IsA<T, A> = A extends Record<'type', T> ? A : never;
+
+export type ActionCreatorsByType<A extends BaseAction> = {
+  [T in A['type']]: ActionCreator<IsA<T, A>['payload'], T>;
+};
+
+export type UActionCreator<P, T> = (payload: P) => UAction<T, P>;
+
+export type UActionCreatorsByType<A extends UAction> = {
+  [T in A['type']]: UActionCreator<IsA<T, A>['payload'], T>;
+};
+
+export type UndoableUActionCreatorsByType<A extends UAction> = {
+  [T in A['type']]: Undoable<UActionCreator<IsA<T, A>['payload'], T>>;
 };
 
 export type Action<T = string, P = any> = BaseAction<T, P> & {
@@ -71,38 +81,47 @@ export type ActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: Action<T, PBT[T]>;
 }[keyof PBT];
 
-export type UAction<T, P> = BaseAction<T, P> & {
-  meta?: {
-    isUndo?: boolean;
-    clearFutureOnDo?: boolean;
-  };
+// export type UAction<T = string, P = any> = BaseAction<T, P> & {
+//   meta?: {
+//     isUndo?: boolean;
+//   };
+// };
+
+export type UAction<T = string, P = any> = P extends void | undefined
+  ? {
+      type: T;
+      payload?: P;
+      meta?: {
+        isUndo?: boolean;
+      };
+    }
+  : {
+      type: T;
+      payload: P;
+      meta?: {
+        isUndo?: boolean;
+      };
+    };
+
+export type UFUA<A> = {
+  action: A;
+  created: Date;
+  id: string;
 };
 
 export type UActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: UAction<T, PBT[T]>;
 }[keyof PBT];
 
-export type UActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
-  payload: PBT[T]
-) => UAction<T, PBT[T]>;
-
-export type UActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: UActionCreator<PBT, T>;
-};
-
-export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: Undoable<UActionCreator<PBT, T>>;
-};
-
 export type UReducer<S, PBT extends PayloadByType> = (
   state: S,
   action: UActionUnion<PBT>
 ) => S;
 
-export type Reducer<S, PBT extends PayloadByType> = (
-  state: S,
-  action: BaseActionUnion<PBT>
-) => S;
+// export type Reducer<S, PBT extends PayloadByType> = (
+//   state: S,
+//   action: BaseActionUnion<PBT>
+// ) => S;
 
 export type UDispatch<PBT extends PayloadByType> = Dispatch<UActionUnion<PBT>>;
 export type DispatchPBT<PBT extends PayloadByType> = Dispatch<
@@ -126,10 +145,10 @@ export interface UFUOptions {
   clearFutureOnDo?: boolean;
 }
 
-export interface UFUProps<PBT extends PayloadByType> {
-  handlers: UndoableHandlersByType<PBT>;
+export interface UFUProps<A extends BaseAction> {
+  handlers: UndoableHandlersByType<A>;
   options?: UFUOptions;
-  initialHistory?: History<PBT>;
+  initialHistory?: History<A>;
 }
 
 export interface PositionOnBranch {
@@ -142,7 +161,7 @@ export interface ParentConnection {
   position: PositionOnBranch;
 }
 
-export interface Branch<PBT extends PayloadByType> {
+export interface Branch<A> {
   id: string;
   number: number;
   parent?: {
@@ -155,16 +174,16 @@ export interface Branch<PBT extends PayloadByType> {
   };
   lastPosition?: PositionOnBranch;
   created: Date;
-  stack: ActionUnion<PBT>[];
+  stack: UFUA<A>[];
 }
 
-export interface BranchConnection<PBT extends PayloadByType> {
+export interface BranchConnection<A> {
   position: PositionOnBranch;
-  branches: Branch<PBT>[];
+  branches: Branch<A>[];
 }
 
-export interface History<PBT extends PayloadByType> {
-  branches: Record<string, Branch<PBT>>;
+export interface History<A> {
+  branches: Record<string, Branch<A>>;
   currentBranchId: string;
   currentPosition: PositionOnBranch;
 }
@@ -175,14 +194,18 @@ export type BranchSwitchModus =
   | 'HEAD_OF_BRANCH'
   | 'LAST_KNOWN_POSITION_ON_BRANCH';
 
-export type UndoMap<PBT extends PayloadByType> = {
-  [K in keyof PBT]: (payload: PBT[K]) => BaseActionUnion<PBT>;
+export type UndoMap<A extends BaseAction> = {
+  [T in A['type']]: A extends Record<'type', T> ? A : never;
 };
 
-export interface UseUnducerProps<S, PBT extends PayloadByType> {
+export type PBT2<A extends UAction<string, any>> = {
+  [T in A['type']]: (A extends Record<'type', T> ? A : never)['payload'];
+};
+
+export interface UseUnducerProps<S, A extends UAction<string, any>> {
   options?: UFUOptions;
-  initialHistory?: History<PBT>;
-  reducer: UReducer<S, PBT>;
+  initialHistory?: History<A>;
+  reducer: Reducer<S, A>;
   initialState: S;
-  actionCreators: UndoableUActionCreatorsByType<PBT>;
+  actionCreators: UndoableUActionCreatorsByType<A>;
 }

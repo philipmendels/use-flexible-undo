@@ -1,22 +1,15 @@
-import {
-  Entry,
-  BaseAction,
-  Updater,
-  PayloadByType,
-  UActionUnion,
-  DeepPartial,
-} from './index.types';
+import { Entry, Updater, DeepPartial, UAction } from './index.types';
 import { mergeDeepLeft } from 'ramda';
 
-export const makeActionCreator = <PBT extends PayloadByType>(
-  type: keyof PBT,
+export const makeActionCreator = <A extends UAction>(
+  type: A['type'],
   isUndo?: boolean
-) => <P extends PBT[keyof PBT]>(payload: P) =>
-  (({
+) => (payload: A['payload']) =>
+  ({
     type,
     payload,
     ...(isUndo ? { meta: { isUndo } } : {}),
-  } as BaseAction) as UActionUnion<PBT>);
+  } as UAction<A['type'], A['payload']>);
 
 export const merge = <S, P extends Partial<S>>(
   partial: P

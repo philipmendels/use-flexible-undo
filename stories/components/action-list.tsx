@@ -2,13 +2,6 @@ import React, { useState, ReactElement, ReactNode } from 'react';
 import styled from '@emotion/styled';
 import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
 import '@reach/menu-button/styles.css';
-import {
-  PayloadByType,
-  ActionUnion,
-  History,
-  BranchConnection,
-  BranchSwitchModus,
-} from '../../.';
 import { GitBranchIcon, DotIcon } from '@primer/octicons-react';
 import {
   getCurrentBranch,
@@ -16,24 +9,31 @@ import {
   getSideBranches,
 } from '../../src/updaters';
 import { formatTime, useInterval } from './util';
+import {
+  UFUA,
+  BaseAction,
+  BranchSwitchModus,
+  BranchConnection,
+  History,
+} from '../../src';
 
-type ConvertFn<PBT extends PayloadByType> = (
-  action: ActionUnion<PBT>
+type ConvertFn<A extends BaseAction<string, any>> = (
+  action: UFUA<A>
 ) => ReactNode;
 
-interface ActionListProps<PBT extends PayloadByType> {
-  history: History<PBT>;
+interface ActionListProps<A extends BaseAction<string, any>> {
+  history: History<A>;
   timeTravel: (index: number, branchId?: string) => void;
   switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
-  describeAction?: ConvertFn<PBT>;
+  describeAction?: ConvertFn<A>;
 }
 
-export const ActionList = <PBT extends PayloadByType>({
+export const ActionList = <A extends BaseAction<string, any>>({
   history,
   timeTravel,
   switchToBranch,
   describeAction,
-}: ActionListProps<PBT>): ReactElement | null => {
+}: ActionListProps<A>): ReactElement | null => {
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 5000);
 
@@ -95,17 +95,17 @@ const Indicator = styled.div`
   transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 `;
 
-interface StackItemProps<PBT extends PayloadByType> {
-  action: ActionUnion<PBT>;
+interface StackItemProps<A extends BaseAction<string, any>> {
+  action: UFUA<A>;
   now: Date;
-  connections: BranchConnection<PBT>[];
+  connections: BranchConnection<A>[];
   switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
   timeTravel: () => void;
   isCurrent: boolean;
-  describeAction?: ConvertFn<PBT>;
+  describeAction?: ConvertFn<A>;
 }
 
-const StackItem = <PBT extends PayloadByType>({
+const StackItem = <A extends BaseAction<string, any>>({
   action,
   isCurrent,
   now,
@@ -113,8 +113,8 @@ const StackItem = <PBT extends PayloadByType>({
   connections,
   timeTravel,
   switchToBranch,
-}: StackItemProps<PBT>): ReactElement | null => {
-  const { created, type, payload } = action;
+}: StackItemProps<A>): ReactElement | null => {
+  const { created } = action;
   return (
     <StackItemRoot>
       <div
@@ -164,7 +164,7 @@ const StackItem = <PBT extends PayloadByType>({
         <div className="description" style={{ flex: 1, whiteSpace: 'nowrap' }}>
           {describeAction
             ? describeAction(action)
-            : JSON.stringify({ type, payload })}
+            : JSON.stringify(action.action)}
         </div>
       </StackItemContent>
     </StackItemRoot>

@@ -61,7 +61,7 @@ export const DependencyInPreviousStateExample: FC = () => {
               value={amount}
               onChange={value =>
                 updateAmount({
-                  from: amount,
+                  from: 'amount',
                   to: value,
                 })
               }

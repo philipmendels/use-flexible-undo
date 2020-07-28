@@ -5,7 +5,7 @@ import {
   invertHandlers,
   makeUndoableFTHandler,
   makeUndoableUpdater,
-} from '../../.';
+} from '../../src';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';

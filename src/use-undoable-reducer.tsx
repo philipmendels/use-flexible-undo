@@ -1,17 +1,16 @@
-import { useReducer, useMemo } from 'react';
+import { useReducer, useMemo, Reducer } from 'react';
 import {
-  UReducer,
-  PayloadByType,
   UndoableUActionCreatorsByType,
   UndoableHandlersByType,
+  UAction,
 } from './index.types';
 import { bindUndoableActionCreators } from './util';
 
-export const useUndoableReducer = <S, PBT extends PayloadByType>(
-  reducer: UReducer<S, PBT>,
+export const useUndoableReducer = <S, A extends UAction>(
+  reducer: Reducer<S, A>,
   initialState: S,
-  actionCreators: UndoableUActionCreatorsByType<PBT>
-): [S, UndoableHandlersByType<PBT>] => {
+  actionCreators: UndoableUActionCreatorsByType<A>
+): [S, UndoableHandlersByType<A>] => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const handlers = useMemo(
     () => bindUndoableActionCreators(dispatch, actionCreators),

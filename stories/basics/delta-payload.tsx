@@ -3,12 +3,13 @@ import { useFlexibleUndo } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
+import { BaseActionUnion } from '../../src';
 
 // action Payload By action Type
-interface PBT {
+type PBT = BaseActionUnion<{
   add: number;
   subtract: number;
-}
+}>;
 
 export const DeltaPayloadExample: FC = () => {
   const [count, setCount] = useState(0);

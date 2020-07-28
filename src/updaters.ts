@@ -2,27 +2,24 @@ import { mapFilterObj } from './util-internal';
 import { mergeDeepC, mergeDeep } from './util-internal';
 import {
   History,
-  PayloadByType,
-  ActionUnion,
   Branch,
-  Action,
-  UndoableHandlersByType,
   BranchConnection,
   PositionOnBranch,
+  BaseAction,
+  UFUA,
+  UndoableHandlersByType,
 } from './index.types';
 import { v4 } from 'uuid';
 
 const START = 'start';
 
 export const createInitialHistory = <
-  PBT extends PayloadByType
->(): History<PBT> => {
-  const initialAction = ({
-    id: v4(),
-    created: new Date(),
+  A extends BaseAction<string, any>
+>(): History<A> => {
+  const initialAction = createAction({
     type: START,
     payload: undefined,
-  } as Action) as ActionUnion<PBT>;
+  }) as UFUA<A>;
   const initialBranchId = v4();
   return {
     currentPosition: {
@@ -41,18 +38,17 @@ export const createInitialHistory = <
   };
 };
 
-export const getCurrentBranch = <PBT extends PayloadByType>(
-  prev: History<PBT>
-) => prev.branches[prev.currentBranchId];
+export const getCurrentBranch = <A extends BaseAction>(prev: History<A>) =>
+  prev.branches[prev.currentBranchId];
 
-export const getCurrentIndex = <PBT extends PayloadByType>(
-  prev: History<PBT>
+export const getCurrentIndex = <A extends BaseAction<string, any>>(
+  prev: History<A>
 ) => prev.currentPosition.globalIndex;
 
-export const addAction = <PBT extends PayloadByType>(
-  action: ActionUnion<PBT>,
+export const addAction = <A extends BaseAction<string, any>>(
+  action: UFUA<A>,
   clearFutureOnDo: boolean
-) => (prev: History<PBT>) => {
+) => (prev: History<A>) => {
   if (isAtHead(prev)) {
     return addActionToCurrentBranch(action)(prev);
   } else {
@@ -64,9 +60,9 @@ export const addAction = <PBT extends PayloadByType>(
   }
 };
 
-export const addActionToCurrentBranch = <PBT extends PayloadByType>(
-  action: ActionUnion<PBT>
-) => (prev: History<PBT>) => {
+export const addActionToCurrentBranch = <A extends BaseAction<string, any>>(
+  action: UFUA<A>
+) => (prev: History<A>) => {
   const currentIndex = getCurrentIndex(prev);
   const currentBranch = getCurrentBranch(prev);
   return mergeDeep(
@@ -85,7 +81,7 @@ export const addActionToCurrentBranch = <PBT extends PayloadByType>(
   );
 };
 
-const clearFuture = <PBT extends PayloadByType>(prev: History<PBT>) => {
+const clearFuture = <A extends BaseAction<string, any>>(prev: History<A>) => {
   const currentIndex = getCurrentIndex(prev);
   const currentBranch = getCurrentBranch(prev);
   // TODO: delete orphan branches
@@ -105,7 +101,7 @@ export const getReparentedBranches = (
   newBranchId: string,
   branchId: string,
   index: number
-) => <PBT extends PayloadByType>(prev: History<PBT>) =>
+) => <A extends BaseAction<string, any>>(prev: History<A>) =>
   mapFilterObj(
     b =>
       b.parent?.branchId === branchId && b.parent.position.globalIndex <= index,
@@ -117,9 +113,9 @@ export const getReparentedBranches = (
     prev.branches
   );
 
-export const addActionToNewBranch = <PBT extends PayloadByType>(
-  action: ActionUnion<PBT>
-) => (prev: History<PBT>) => {
+export const addActionToNewBranch = <A extends BaseAction<string, any>>(
+  action: UFUA<A>
+) => (prev: History<A>) => {
   const currentIndex = getCurrentIndex(prev);
   const currentBranch = getCurrentBranch(prev);
   const currentStack = currentBranch.stack;
@@ -130,7 +126,7 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
     currentBranch.id,
     currentIndex
   )(prev);
-  const newBranch: Branch<PBT> = {
+  const newBranch: Branch<A> = {
     created: new Date(),
     id: newBranchId,
     number: Math.max(...Object.values(prev.branches).map(b => b.number)) + 1,
@@ -164,14 +160,18 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
   );
 };
 
-export const getNewPosition = (newIndex: number) => <PBT extends PayloadByType>(
-  stack: ActionUnion<PBT>[]
+export const getNewPosition = (newIndex: number) => <
+  A extends BaseAction<string, any>
+>(
+  stack: UFUA<A>[]
 ): PositionOnBranch => ({
   actionId: stack[newIndex].id,
   globalIndex: newIndex,
 });
 
-export const undoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => {
+export const undoUpdater = <A extends BaseAction<string, any>>(
+  prev: History<A>
+) => {
   const newIndex = getCurrentIndex(prev) - 1;
   const stack = getCurrentBranch(prev).stack;
   return {
@@ -180,22 +180,24 @@ export const undoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => {
   };
 };
 
-export const getSideEffectForUndo = <PBT extends PayloadByType>(
-  handlers: UndoableHandlersByType<PBT>
-) => (history: History<PBT>) => {
+export const getSideEffectForUndo = <A extends BaseAction>(
+  handlers: UndoableHandlersByType<A>
+) => (history: History<A>) => {
   const stack = getCurrentBranch(history).stack;
   const action = stack[getCurrentIndex(history)];
-  return getSideEffectForUndoAction(handlers)(action);
+  return getSideEffectForUndoAction(handlers)(action.action);
 };
 
-export const getSideEffectForUndoAction = <PBT extends PayloadByType>(
-  handlers: UndoableHandlersByType<PBT>
-) => (action: ActionUnion<PBT>) => {
+export const getSideEffectForUndoAction = <A extends BaseAction>(
+  handlers: UndoableHandlersByType<A>
+) => (action: A) => {
   const { type, payload } = action;
-  return () => handlers[type].undo(payload);
+  return () => handlers[type as A['type']].undo(payload);
 };
 
-export const redoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => ({
+export const redoUpdater = <A extends BaseAction<string, any>>(
+  prev: History<A>
+) => ({
   ...prev,
   currentPosition: {
     actionId: getActionForRedo(prev).id,
@@ -203,35 +205,36 @@ export const redoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => ({
   },
 });
 
-const getNewIndexForRedo = <PBT extends PayloadByType>(history: History<PBT>) =>
-  getCurrentIndex(history) + 1;
+const getNewIndexForRedo = <A extends BaseAction<string, any>>(
+  history: History<A>
+) => getCurrentIndex(history) + 1;
 
-export const getActionForRedo = <PBT extends PayloadByType>(
-  history: History<PBT>
+export const getActionForRedo = <A extends BaseAction<string, any>>(
+  history: History<A>
 ) => {
   const stack = getCurrentBranch(history).stack;
   return stack[getNewIndexForRedo(history)];
 };
 
-export const getSideEffectForRedo = <PBT extends PayloadByType>(
-  handlers: UndoableHandlersByType<PBT>
-) => (history: History<PBT>) => {
+export const getSideEffectForRedo = <A extends BaseAction<string, any>>(
+  handlers: UndoableHandlersByType<A>
+) => (history: History<A>) => {
   const action = getActionForRedo(history);
-  return getSideEffectForRedoAction(handlers)(action);
+  return getSideEffectForRedoAction(handlers)(action.action);
 };
 
-export const getSideEffectForRedoAction = <PBT extends PayloadByType>(
-  handlers: UndoableHandlersByType<PBT>
-) => (action: ActionUnion<PBT>) => {
+export const getSideEffectForRedoAction = <A extends BaseAction<string, any>>(
+  handlers: UndoableHandlersByType<A>
+) => (action: A) => {
   const { type, payload } = action;
-  return () => handlers[type].drdo(payload);
+  return () => handlers[type as A['type']].drdo(payload);
 };
 
-export const getPathFromCommonAncestor = <PBT extends PayloadByType>(
-  history: History<PBT>,
+export const getPathFromCommonAncestor = <A extends BaseAction<string, any>>(
+  history: History<A>,
   branchId: string,
-  path: Branch<PBT>[] = []
-): Branch<PBT>[] => {
+  path: Branch<A>[] = []
+): Branch<A>[] => {
   const branch = history.branches[branchId];
   if (branch.parent) {
     const newPath = [branch, ...path];
@@ -249,8 +252,10 @@ export const getPathFromCommonAncestor = <PBT extends PayloadByType>(
   throw new Error('you cannot travel to the branch that you are on');
 };
 
-export const updatePath = (path: string[]) => <PBT extends PayloadByType>(
-  prevHistory: History<PBT>
+export const updatePath = (path: string[]) => <
+  A extends BaseAction<string, any>
+>(
+  prevHistory: History<A>
 ) =>
   path.reduce((newHist, pathBranchId) => {
     const branch = newHist.branches[newHist.currentBranchId];
@@ -293,40 +298,39 @@ export const updatePath = (path: string[]) => <PBT extends PayloadByType>(
     );
   }, prevHistory);
 
-export const createAction = <PBT extends PayloadByType>(
-  type: keyof PBT,
-  payload: PBT[keyof PBT]
-) =>
-  (({
-    type,
-    payload,
-    created: new Date(),
-    id: v4(),
-  } as Action) as ActionUnion<PBT>);
+export const createAction = <A extends BaseAction<string, any>>(
+  action: A
+): UFUA<A> => ({
+  action,
+  created: new Date(),
+  id: v4(),
+});
 
-export const isUndoPossible = <PBT extends PayloadByType>(
-  history: History<PBT>
+export const isUndoPossible = <A extends BaseAction<string, any>>(
+  history: History<A>
 ) => getCurrentIndex(history) > 0;
 
-export const isRedoPossible = <PBT extends PayloadByType>(
-  history: History<PBT>
+export const isRedoPossible = <A extends BaseAction<string, any>>(
+  history: History<A>
 ) => {
   const index = getCurrentIndex(history);
   const stack = getCurrentBranch(history).stack;
   return index < stack.length - 1;
 };
 
-export const isAtHead = <PBT extends PayloadByType>(history: History<PBT>) => {
+export const isAtHead = <A extends BaseAction<string, any>>(
+  history: History<A>
+) => {
   const index = getCurrentIndex(history);
   const stack = getCurrentBranch(history).stack;
   return index === stack.length - 1;
 };
 
 export const getSideBranches = (branchId: string, flatten: boolean) => <
-  PBT extends PayloadByType
+  A extends BaseAction<string, any>
 >(
-  history: History<PBT>
-): BranchConnection<PBT>[] =>
+  history: History<A>
+): BranchConnection<A>[] =>
   Object.values(history.branches)
     .filter(b => b.parent?.branchId === branchId)
     .map(b => {
@@ -339,8 +343,8 @@ export const getSideBranches = (branchId: string, flatten: boolean) => <
       };
     });
 
-export const getBranchSwitchProps = <PBT extends PayloadByType>(
-  history: History<PBT>,
+export const getBranchSwitchProps = <A extends BaseAction<string, any>>(
+  history: History<A>,
   branchId: string
 ) => {
   const path = getPathFromCommonAncestor(history, branchId);

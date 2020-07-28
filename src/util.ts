@@ -3,21 +3,17 @@ import {
   Updater,
   PayloadHandler,
   Undoable,
-  PayloadByType,
-  UReducer,
   UndoableUActionCreatorsByType,
-  UDispatch,
   UndoableHandlersByType,
   UpdaterMaker,
   UndoableStateUpdatersByType,
   StateUpdatersByType,
   ActionCreatorsByType,
-  UndoMap,
-  DispatchPBT,
-  Reducer,
+  BaseAction,
+  UAction,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
-import { SetStateAction } from 'react';
+import { SetStateAction, Reducer, Dispatch } from 'react';
 
 export const combineHandlers = <P, R>(
   drdo: PayloadHandler<P, R>,
@@ -118,18 +114,18 @@ export const wrapFTHandler = <S, R>(
 ) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler({ from: state, to: updater(payload)(state) });
 
-export const makeUndoableReducer = <S, PBT extends PayloadByType>(
-  stateUpdaters: UndoableStateUpdatersByType<S, PBT>
+export const makeUndoableReducer = <S, A extends UAction>(
+  stateUpdaters: UndoableStateUpdatersByType<S, A>
 ) => ({
   reducer: ((state, { payload, type, meta }) => {
-    const updater = stateUpdaters[type];
+    const updater = stateUpdaters[type as A['type']];
     return updater
       ? meta && meta.isUndo
         ? updater.undo(payload)(state)
         : updater.drdo(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
-  }) as UReducer<S, PBT>,
-  actionCreators: mapObject(stateUpdaters)<UndoableUActionCreatorsByType<PBT>>(
+  }) as Reducer<S, A>,
+  actionCreators: mapObject(stateUpdaters)<UndoableUActionCreatorsByType<A>>(
     ([type, _]) => [
       type,
       {
@@ -140,39 +136,39 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
   ),
 });
 
-export const makeReducer = <S, PBT extends PayloadByType>(
-  stateUpdaters: StateUpdatersByType<S, PBT>
+export const makeReducer = <S, A extends BaseAction>(
+  stateUpdaters: StateUpdatersByType<S, A>
 ) => ({
   reducer: ((state, { payload, type }) => {
-    const updater = stateUpdaters[type];
+    const updater = stateUpdaters[type as A['type']];
     return updater ? updater(payload)(state) : state;
-  }) as Reducer<S, PBT>,
-  actionCreators: mapObject(stateUpdaters)<ActionCreatorsByType<PBT>>(
+  }) as Reducer<S, A>,
+  actionCreators: mapObject(stateUpdaters)<ActionCreatorsByType<A>>(
     ([type, _]) => [type, makeActionCreator(type)]
   ),
 });
 
-export const bindUndoableActionCreators = <PBT extends PayloadByType>(
-  dispatch: UDispatch<PBT>,
-  actionCreators: UndoableUActionCreatorsByType<PBT>
+export const bindUndoableActionCreators = <A extends UAction>(
+  dispatch: Dispatch<A>,
+  actionCreators: UndoableUActionCreatorsByType<A>
 ) =>
-  mapObject(actionCreators)<UndoableHandlersByType<PBT>>(([type, creator]) => [
+  mapObject(actionCreators)<UndoableHandlersByType<A>>(([type, creator]) => [
     type,
     {
-      drdo: payload => dispatch(creator.drdo(payload)),
-      undo: payload => dispatch(creator.undo(payload)),
+      drdo: payload => dispatch((creator.drdo(payload) as any) as A),
+      undo: payload => dispatch((creator.undo(payload) as any) as A),
     },
   ]);
 
-export const bindActionCreatorsAndUndoMap = <PBT extends PayloadByType>(
-  dispatch: DispatchPBT<PBT>,
-  actionCreators: ActionCreatorsByType<PBT>,
-  undoMap: UndoMap<PBT>
+export const bindActionCreatorsAndUndoMap = <A extends BaseAction>(
+  dispatch: Dispatch<A>,
+  actionCreators: ActionCreatorsByType<A>,
+  undoMap: ActionCreatorsByType<A>
 ) =>
-  mapObject(actionCreators)<UndoableHandlersByType<PBT>>(([type, creator]) => [
+  mapObject(actionCreators)<UndoableHandlersByType<A>>(([type, creator]) => [
     type,
     {
-      drdo: payload => dispatch(creator(payload)),
-      undo: payload => dispatch(undoMap[type](payload)),
+      drdo: payload => dispatch((creator(payload) as any) as A),
+      undo: payload => dispatch((undoMap[type](payload) as any) as A),
     },
   ]);

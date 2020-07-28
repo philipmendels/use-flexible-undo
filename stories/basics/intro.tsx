@@ -1,12 +1,12 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../../.';
+import { useFlexibleUndo, BaseActionUnion } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 
 // action Payload By action Type
-interface PBT {
+type PBT = BaseActionUnion<{
   add: number;
   subtract: number;
-}
+}>;
 
 export const IntroExample: FC = () => {
   const [count, setCount] = useState(0);

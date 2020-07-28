@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo, PayloadFromTo } from '../../.';
+import { useFlexibleUndo, PayloadFromTo, BaseActionUnion } from '../../.';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
 
 // action Payload By action Type
-interface PBT {
+type PBT = BaseActionUnion<{
   // an object with 'from' and 'to' fields of type number:
   updateCount: PayloadFromTo<number>;
-}
+}>;
 
 export const FromToPayloadExample: React.FC = () => {
   const [count, setCount] = useState(0);

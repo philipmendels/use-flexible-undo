@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 
 import {
-  PayloadByType,
   UFUProps,
   HandlersByType,
   History,
   Updater,
   BranchSwitchModus,
+  BaseAction,
 } from './index.types';
 import { mapObject } from './util-internal';
 import {
@@ -29,11 +29,11 @@ import {
 } from './updaters';
 import { defaultOptions } from './constants';
 
-export const useFlexibleUndo = <PBT extends PayloadByType>({
+export const useFlexibleUndo = <A extends BaseAction>({
   handlers,
   options,
   initialHistory = createInitialHistory(),
-}: UFUProps<PBT>) => {
+}: UFUProps<A>) => {
   const [history, setHistory] = useState(initialHistory);
 
   const { clearFutureOnDo } = {
@@ -43,10 +43,10 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
 
   const undoables = useMemo(
     () =>
-      mapObject(handlers)<HandlersByType<PBT>>(([type, handler]) => [
+      mapObject(handlers)<HandlersByType<A>>(([type, handler]) => [
         type,
         payload => {
-          const action = createAction(type, payload);
+          const action = createAction({ type, payload } as A);
           handler.drdo(payload);
           setHistory(addAction(action, clearFutureOnDo));
         },
@@ -67,9 +67,9 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
 
   const handleUndoRedo = useCallback(
     (
-      isPossible: (history: History<PBT>) => boolean,
-      getSideEffect: (history: History<PBT>) => () => void,
-      updater: Updater<History<PBT>>
+      isPossible: (history: History<A>) => boolean,
+      getSideEffect: (history: History<A>) => () => void,
+      updater: Updater<History<A>>
     ) => {
       let isSideEffectQueued = false;
       setHistory(prev => {
@@ -114,7 +114,7 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
                 .reverse();
               actions.forEach(action => {
                 queuedSideEffectsRef.current.push(
-                  getSideEffectForUndoAction(handlers)(action)
+                  getSideEffectForUndoAction(handlers)(action.action)
                 );
               });
             } else if (newIndex > currentIndex) {
@@ -124,7 +124,7 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
               );
               actions.forEach(action => {
                 queuedSideEffectsRef.current.push(
-                  getSideEffectForRedoAction(handlers)(action)
+                  getSideEffectForRedoAction(handlers)(action.action)
                 );
               });
             }

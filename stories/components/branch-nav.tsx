@@ -10,27 +10,27 @@ import {
 import '@reach/listbox/styles.css';
 import { TriangleDownIcon } from '@primer/octicons-react';
 
-import { PayloadByType, BranchSwitchModus, History } from '../../.';
 import { getLastItem, formatTime, useInterval } from './util';
 import {
   getCurrentBranch,
   isUndoPossible,
   isRedoPossible,
 } from '../../src/updaters';
+import { BaseAction, BranchSwitchModus, History } from '../../src';
 
-interface BranchNavProps<PBT extends PayloadByType> {
-  history: History<PBT>;
+interface BranchNavProps<A extends BaseAction<string, any>> {
+  history: History<A>;
   switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;
   undo: () => void;
   redo: () => void;
 }
 
-export const BranchNav = <PBT extends PayloadByType>({
+export const BranchNav = <A extends BaseAction<string, any>>({
   history,
   switchToBranch,
   undo,
   redo,
-}: BranchNavProps<PBT>): ReactElement | null => {
+}: BranchNavProps<A>): ReactElement | null => {
   const [now, setNow] = useState(new Date());
   useInterval(() => setNow(new Date()), 5000);
   const branchList = Object.values(history.branches).sort(

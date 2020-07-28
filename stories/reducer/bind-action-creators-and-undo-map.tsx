@@ -6,6 +6,7 @@ import {
   makeReducer,
   invertFTHandler,
   bindActionCreatorsAndUndoMap,
+  BaseActionUnion,
 } from '../../.';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -20,11 +21,11 @@ interface State {
   amount: Nullber;
 }
 
-interface PayloadByType {
+type PayloadByType = BaseActionUnion<{
   add: void;
   subtract: void;
   updateAmount: PayloadFromTo<Nullber>;
-}
+}>;
 
 const countUpdater = makeUpdater(
   (state: State) => state.count,
