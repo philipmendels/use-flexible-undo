@@ -15,6 +15,7 @@ import {
   UndoMap,
   DispatchPBT,
   Reducer,
+  HandlersByType,
 } from './index.types';
 import { mapObject, makeActionCreator } from './util-internal';
 import { SetStateAction } from 'react';
@@ -151,6 +152,15 @@ export const makeReducer = <S, PBT extends PayloadByType>(
     ([type, _]) => [type, makeActionCreator(type)]
   ),
 });
+
+export const bindActionCreators = <PBT extends PayloadByType>(
+  dispatch: DispatchPBT<PBT>,
+  actionCreators: ActionCreatorsByType<PBT>
+) =>
+  mapObject(actionCreators)<HandlersByType<PBT>>(([type, creator]) => [
+    type,
+    payload => dispatch(creator(payload)),
+  ]);
 
 export const bindUndoableActionCreators = <PBT extends PayloadByType>(
   dispatch: UDispatch<PBT>,

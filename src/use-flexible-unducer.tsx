@@ -8,7 +8,6 @@ import {
   UseUnducerProps,
   UReducer,
   UActionUnion,
-  UDispatch,
 } from './index.types';
 import { mapObject } from './util-internal';
 import {
@@ -27,8 +26,9 @@ import {
   getActionForRedo,
 } from './updaters';
 import { defaultOptions } from './constants';
+import { makeReducer, bindActionCreators } from './util';
 
-interface PayloadByType2 {
+type PBT_Unducer<PBT extends PayloadByType> = {
   undo: void;
   redo: void;
   timeTravelCurrentBranch: number;
@@ -36,22 +36,22 @@ interface PayloadByType2 {
     branchId: string;
     travelTo?: BranchSwitchModus;
   };
-}
+  undoable: {
+    action: UActionUnion<PBT>;
+    clearFutureOnDo?: boolean;
+  };
+};
 
-interface State<S, PBT> {
+interface UnducerState<S, PBT> {
   history: History<PBT>;
   state: S;
 }
 
-// type PBT2<A extends Action> = {
-//   [T in A['type']]: (A extends Record<'type', T> ? A : never)['payload'];
-// };
-
 const timeTravelCurrentBranch = <S, PBT extends PayloadByType>(
-  prevState: State<S, PBT>,
+  prevState: UnducerState<S, PBT>,
   newIndex: number,
   reducer: UReducer<S, PBT>
-): State<S, PBT> => {
+): UnducerState<S, PBT> => {
   const prev = prevState.history;
   const currentIndex = getCurrentIndex(prev);
   const currentStack = getCurrentBranch(prev).stack;
@@ -73,7 +73,7 @@ const timeTravelCurrentBranch = <S, PBT extends PayloadByType>(
             meta: {
               isUndo: true,
             },
-          } as any),
+          } as UActionUnion<PBT>),
         prevState.state
       );
     } else if (newIndex > currentIndex) {
@@ -83,7 +83,7 @@ const timeTravelCurrentBranch = <S, PBT extends PayloadByType>(
           reducer(acc, {
             type: action.type,
             payload: action.payload,
-          } as any),
+          } as UActionUnion<PBT>),
         prevState.state
       );
     }
@@ -97,14 +97,23 @@ const timeTravelCurrentBranch = <S, PBT extends PayloadByType>(
   }
 };
 
-const makeReducer = <S, PBT extends PayloadByType>(
-  reducer: UReducer<S, PBT>
-) => (
-  prevState: State<S, PBT>,
-  action: UActionUnion<PayloadByType2>
-): State<S, PBT> => {
-  switch (action.type) {
-    case 'undo':
+const makeUnducer = <S, PBT extends PayloadByType>(reducer: UReducer<S, PBT>) =>
+  makeReducer<UnducerState<S, PBT>, PBT_Unducer<PBT>>({
+    undoable: payload => prevState => {
+      const actionOriginal = payload.action;
+      const historyItem = createAction(
+        actionOriginal.type,
+        actionOriginal.payload
+      );
+      return {
+        history: addAction(
+          historyItem,
+          payload.clearFutureOnDo || false
+        )(prevState.history),
+        state: reducer(prevState.state, historyItem),
+      };
+    },
+    undo: () => prevState => {
       const stack = getCurrentBranch(prevState.history).stack;
       const actionU = stack[getCurrentIndex(prevState.history)];
       return {
@@ -115,24 +124,26 @@ const makeReducer = <S, PBT extends PayloadByType>(
           meta: {
             isUndo: true,
           },
-        } as any),
+        } as UActionUnion<PBT>),
       };
-    case 'redo':
+    },
+    redo: () => prevState => {
       const actionR = getActionForRedo(prevState.history);
       return {
         history: redoUpdater(prevState.history),
         state: reducer(prevState.state, {
           type: actionR.type,
           payload: actionR.payload,
-        } as any),
+        } as UActionUnion<PBT>),
       };
-    case 'timeTravelCurrentBranch':
-      return timeTravelCurrentBranch(prevState, action.payload, reducer);
-    case 'switchToBranch':
-      const travelTo = action.payload.travelTo || 'LAST_COMMON_ACTION_IF_PAST';
-      const branchId = action.payload.branchId;
+    },
+    timeTravelCurrentBranch: payload => prevState =>
+      timeTravelCurrentBranch(prevState, payload, reducer),
+    switchToBranch: payload => prevState => {
+      const travelTo = payload.travelTo || 'LAST_COMMON_ACTION_IF_PAST';
+      const branchId = payload.branchId;
       const history = prevState.history;
-      let newState: State<S, PBT> = prevState;
+      let newState: UnducerState<S, PBT> = prevState;
       if (branchId === history.currentBranchId) {
         throw new Error('You cannot switch to the current branch.');
       } else {
@@ -167,19 +178,8 @@ const makeReducer = <S, PBT extends PayloadByType>(
         }
         return newState;
       }
-
-    default:
-      const a = action as UActionUnion<PBT>;
-      const action2 = createAction(a.type, a.payload);
-      return {
-        history: addAction(
-          action2,
-          a.meta?.clearFutureOnDo || false
-        )(prevState.history),
-        state: reducer(prevState.state, a),
-      };
-  }
-};
+    },
+  });
 
 export const useFlexibleUnducer = <S, PBT extends PayloadByType>({
   initialHistory = createInitialHistory(),
@@ -193,28 +193,38 @@ export const useFlexibleUnducer = <S, PBT extends PayloadByType>({
     ...options,
   };
 
-  const red = useMemo(() => makeReducer(reducer), [reducer]);
-  const [state, dispatch] = useReducer(red, {
+  const {
+    reducer: unducer,
+    actionCreators: unducerActionCreators,
+  } = useMemo(() => makeUnducer(reducer), [reducer]);
+
+  const [state, dispatch] = useReducer(unducer, {
     state: initialState,
     history: initialHistory,
   });
+
+  const {
+    undoable,
+    redo,
+    switchToBranch: switchToBranchDispatch,
+    undo,
+    timeTravelCurrentBranch: timeTravel,
+  } = useMemo(() => bindActionCreators(dispatch, unducerActionCreators), [
+    unducerActionCreators,
+  ]);
 
   const undoables = useMemo(
     () =>
       mapObject(actionCreators)<HandlersByType<PBT>>(([type, creator]) => [
         type,
         payload => {
-          const a = creator.drdo(payload);
-          (dispatch as UDispatch<PBT>)({
-            ...a,
-            meta: {
-              ...a.meta,
-              clearFutureOnDo,
-            },
+          undoable({
+            action: creator.drdo(payload),
+            clearFutureOnDo,
           });
         },
       ]),
-    [actionCreators, clearFutureOnDo]
+    [actionCreators, clearFutureOnDo, undoable]
   );
   const history = state.history;
 
@@ -222,20 +232,10 @@ export const useFlexibleUnducer = <S, PBT extends PayloadByType>({
 
   const canRedo = useMemo(() => isRedoPossible(history), [history]);
 
-  const undo = useCallback(() => dispatch({ type: 'undo' }), []);
-
-  const redo = useCallback(() => dispatch({ type: 'redo' }), []);
-
-  const timeTravel = useCallback(
-    (index: number) =>
-      dispatch({ type: 'timeTravelCurrentBranch', payload: index }),
-    []
-  );
-
   const switchToBranch = useCallback(
     (branchId: string, travelTo?: BranchSwitchModus) =>
-      dispatch({ type: 'switchToBranch', payload: { branchId, travelTo } }),
-    []
+      switchToBranchDispatch({ branchId, travelTo }),
+    [switchToBranchDispatch]
   );
 
   // const timeTravel = useCallback(

@@ -71,12 +71,21 @@ export type ActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: Action<T, PBT[T]>;
 }[keyof PBT];
 
-export type UAction<T, P> = BaseAction<T, P> & {
-  meta?: {
-    isUndo?: boolean;
-    clearFutureOnDo?: boolean;
-  };
-};
+export type UAction<T = string, P = any> = P extends void | undefined
+  ? {
+      type: T;
+      payload?: P;
+      meta?: {
+        isUndo?: boolean;
+      };
+    }
+  : {
+      type: T;
+      payload: P;
+      meta?: {
+        isUndo?: boolean;
+      };
+    };
 
 export type UActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: UAction<T, PBT[T]>;
