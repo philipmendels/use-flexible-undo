@@ -5,6 +5,7 @@ import { DescribeActionsMap } from './describe-actions-map';
 import { HistoryChangeExample } from './history-change';
 import { MemoizationExample } from './memoization';
 import { UnducerExample } from './unducer';
+import UnducerReadme from './unducer.md';
 
 storiesOf('useFlexibleUndo/other', module)
   //@ts-ignore
@@ -36,6 +37,6 @@ storiesOf('useFlexibleUndo/other', module)
   .add('unducer', () => <UnducerExample />, {
     readme: {
       // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      sidebar: UnducerReadme,
     },
   });
