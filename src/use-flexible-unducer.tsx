@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   PayloadByType,
@@ -26,19 +26,20 @@ import {
   getActionForRedo,
 } from './updaters';
 import { defaultOptions } from './constants';
-import { makeReducer, bindActionCreators } from './util';
+import { makeReducer } from './util';
+import { useBoundReducer } from './use-bound-reducer';
 
 type PBT_Unducer<PBT extends PayloadByType> = {
+  doUndoable: {
+    action: UActionUnion<PBT>;
+    clearFutureOnDo?: boolean;
+  };
   undo: void;
   redo: void;
   timeTravelCurrentBranch: number;
   switchToBranch: {
     branchId: string;
     travelTo?: BranchSwitchModus;
-  };
-  undoable: {
-    action: UActionUnion<PBT>;
-    clearFutureOnDo?: boolean;
   };
 };
 
@@ -99,7 +100,7 @@ const timeTravelCurrentBranch = <S, PBT extends PayloadByType>(
 
 const makeUnducer = <S, PBT extends PayloadByType>(reducer: UReducer<S, PBT>) =>
   makeReducer<UnducerState<S, PBT>, PBT_Unducer<PBT>>({
-    undoable: payload => prevState => {
+    doUndoable: payload => prevState => {
       const actionOriginal = payload.action;
       const historyItem = createAction(
         actionOriginal.type,
@@ -139,6 +140,7 @@ const makeUnducer = <S, PBT extends PayloadByType>(reducer: UReducer<S, PBT>) =>
     },
     timeTravelCurrentBranch: payload => prevState =>
       timeTravelCurrentBranch(prevState, payload, reducer),
+
     switchToBranch: payload => prevState => {
       const travelTo = payload.travelTo || 'LAST_COMMON_ACTION_IF_PAST';
       const branchId = payload.branchId;
@@ -198,44 +200,48 @@ export const useFlexibleUnducer = <S, PBT extends PayloadByType>({
     actionCreators: unducerActionCreators,
   } = useMemo(() => makeUnducer(reducer), [reducer]);
 
-  const [state, dispatch] = useReducer(unducer, {
-    state: initialState,
-    history: initialHistory,
-  });
-
-  const {
-    undoable,
-    redo,
-    switchToBranch: switchToBranchDispatch,
-    undo,
-    timeTravelCurrentBranch: timeTravel,
-  } = useMemo(() => bindActionCreators(dispatch, unducerActionCreators), [
-    unducerActionCreators,
-  ]);
+  const [
+    { state, history },
+    {
+      doUndoable,
+      redo: boundRedo,
+      undo: boundUndo,
+      switchToBranch: boundSwitchToBranchDispatch,
+      timeTravelCurrentBranch: timeTravel,
+    },
+  ] = useBoundReducer(
+    unducer,
+    {
+      state: initialState,
+      history: initialHistory,
+    },
+    unducerActionCreators
+  );
 
   const undoables = useMemo(
     () =>
       mapObject(actionCreators)<HandlersByType<PBT>>(([type, creator]) => [
         type,
         payload => {
-          undoable({
+          doUndoable({
             action: creator.drdo(payload),
             clearFutureOnDo,
           });
         },
       ]),
-    [actionCreators, clearFutureOnDo, undoable]
+    [actionCreators, clearFutureOnDo, doUndoable]
   );
-  const history = state.history;
 
   const canUndo = useMemo(() => isUndoPossible(history), [history]);
-
   const canRedo = useMemo(() => isRedoPossible(history), [history]);
+
+  const undo = useCallback(() => boundUndo(), [boundUndo]);
+  const redo = useCallback(() => boundRedo(), [boundRedo]);
 
   const switchToBranch = useCallback(
     (branchId: string, travelTo?: BranchSwitchModus) =>
-      switchToBranchDispatch({ branchId, travelTo }),
-    [switchToBranchDispatch]
+      boundSwitchToBranchDispatch({ branchId, travelTo }),
+    [boundSwitchToBranchDispatch]
   );
 
   // const timeTravel = useCallback(
@@ -282,7 +288,7 @@ export const useFlexibleUnducer = <S, PBT extends PayloadByType>({
     canRedo,
     undo,
     redo,
-    state: state.state,
+    state,
     history,
     timeTravel,
     switchToBranch,
