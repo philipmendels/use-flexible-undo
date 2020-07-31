@@ -24,6 +24,7 @@ import {
   getNewPosition,
   getBranchSwitchProps,
   getActionForRedo,
+  getTTActions,
 } from './updaters';
 import { defaultOptions } from './constants';
 import { makeReducer } from './util';
@@ -60,47 +61,29 @@ const timeTravelCurrentBranch = <S, PBT extends PayloadByType>(
   newIndex: number,
   reducer: UReducer<S, PBT>
 ): UnducerState<S, PBT> => {
-  const prev = prevState.history;
-  const currentIndex = getCurrentIndex(prev);
-  const currentStack = getCurrentBranch(prev).stack;
-  if (newIndex === currentIndex) {
+  const { state, history } = prevState;
+  const { direction, actions } = getTTActions(newIndex)(history);
+  if (direction === 'none') {
     return prevState;
-  } else if (newIndex > currentStack.length - 1 || newIndex < -1) {
-    throw new Error(`Invalid index ${newIndex}`);
   } else {
-    let newState = prevState.state;
-    if (newIndex < currentIndex) {
-      const actions = currentStack
-        .slice(newIndex + 1, currentIndex + 1)
-        .reverse();
-      newState = actions.reduce(
-        (acc, action) =>
-          reducer(acc, {
-            type: action.type,
-            payload: action.payload,
-            meta: {
-              isUndo: true,
-            },
-          } as UActionUnion<PBT>),
-        prevState.state
-      );
-    } else if (newIndex > currentIndex) {
-      const actions = currentStack.slice(currentIndex + 1, newIndex + 1);
-      newState = actions.reduce(
-        (acc, action) =>
-          reducer(acc, {
-            type: action.type,
-            payload: action.payload,
-          } as UActionUnion<PBT>),
-        prevState.state
-      );
-    }
     return {
       history: {
-        ...prev,
-        currentPosition: getNewPosition(newIndex)(currentStack),
+        ...history,
+        currentPosition: getNewPosition(newIndex)(
+          getCurrentBranch(history).stack
+        ),
       },
-      state: newState,
+      state: actions.reduce(
+        (acc, { type, payload }) =>
+          reducer(acc, {
+            type,
+            payload,
+            meta: {
+              isUndo: direction === 'undo',
+            },
+          } as UActionUnion<PBT>),
+        state
+      ),
     };
   }
 };

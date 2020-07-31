@@ -11,7 +11,6 @@ import {
 import { mapObject } from './util-internal';
 import {
   getCurrentBranch,
-  getCurrentIndex,
   updatePath,
   createInitialHistory,
   createAction,
@@ -26,6 +25,7 @@ import {
   getSideEffectForRedoAction,
   getNewPosition,
   getBranchSwitchProps,
+  getTTActions,
 } from './updaters';
 import { defaultOptions } from './constants';
 
@@ -99,29 +99,19 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
     (newIndex: number) => {
       let areSideEffectsQueued = false;
       setHistory(prev => {
-        const currentIndex = getCurrentIndex(prev);
-        const currentStack = getCurrentBranch(prev).stack;
-        if (newIndex === currentIndex) {
+        const { direction, actions } = getTTActions(newIndex)(prev);
+        if (direction === 'none') {
           return prev;
-        } else if (newIndex > currentStack.length - 1 || newIndex < -1) {
-          throw new Error(`Invalid index ${newIndex}`);
         } else {
           if (!areSideEffectsQueued) {
             areSideEffectsQueued = true;
-            if (newIndex < currentIndex) {
-              const actions = currentStack
-                .slice(newIndex + 1, currentIndex + 1)
-                .reverse();
+            if (direction === 'undo') {
               actions.forEach(action => {
                 queuedSideEffectsRef.current.push(
                   getSideEffectForUndoAction(handlers)(action)
                 );
               });
-            } else if (newIndex > currentIndex) {
-              const actions = currentStack.slice(
-                currentIndex + 1,
-                newIndex + 1
-              );
+            } else {
               actions.forEach(action => {
                 queuedSideEffectsRef.current.push(
                   getSideEffectForRedoAction(handlers)(action)
@@ -131,7 +121,9 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
           }
           return {
             ...prev,
-            currentPosition: getNewPosition(newIndex)(currentStack),
+            currentPosition: getNewPosition(newIndex)(
+              getCurrentBranch(prev).stack
+            ),
           };
         }
       });
@@ -140,7 +132,7 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
   );
 
   const timeTravel = useCallback(
-    (indexOnBranch: number, branchId = history.currentBranchId) => {
+    (indexOnBranch: number, branchId: string = history.currentBranchId) => {
       if (branchId === history.currentBranchId) {
         timeTravelCurrentBranch(indexOnBranch);
       } else {
@@ -160,7 +152,7 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
   );
 
   const timeTravelById = useCallback(
-    (actionId: string, branchId = history.currentBranchId) => {
+    (actionId: string, branchId: string = history.currentBranchId) => {
       const index = history.branches[branchId].stack.findIndex(
         action => action.id === actionId
       );

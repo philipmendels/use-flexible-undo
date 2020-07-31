@@ -350,3 +350,25 @@ export const getBranchSwitchProps = <PBT extends PayloadByType>(
     caIndex: path[0].parent!.position.globalIndex,
   };
 };
+
+export const getTTActions = (newIndex: number) => <PBT extends PayloadByType>(
+  prev: History<PBT>
+): { direction: 'none' | 'undo' | 'redo'; actions: ActionUnion<PBT>[] } => {
+  const currentIndex = getCurrentIndex(prev);
+  const currentStack = getCurrentBranch(prev).stack;
+  if (newIndex === currentIndex) {
+    return { direction: 'none', actions: [] };
+  } else if (newIndex > currentStack.length - 1 || newIndex < -1) {
+    throw new Error(`Invalid index ${newIndex}`);
+  } else if (newIndex < currentIndex) {
+    return {
+      direction: 'undo',
+      actions: currentStack.slice(newIndex + 1, currentIndex + 1).reverse(),
+    };
+  } else {
+    return {
+      direction: 'redo',
+      actions: currentStack.slice(currentIndex + 1, newIndex + 1),
+    };
+  }
+};
