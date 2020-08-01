@@ -1,7 +1,7 @@
 import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
-  makeUndoableReducer,
+  makeUnducer,
   PayloadFromTo,
   invertHandlers,
   makeUndoableFTHandler,
@@ -32,7 +32,7 @@ const undoableAddHandler = makeUndoableUpdater(
   count => merge({ count })
 )(() => state => state.amount || 0)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
+const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),

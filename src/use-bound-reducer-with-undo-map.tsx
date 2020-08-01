@@ -8,7 +8,7 @@ import {
 } from './index.types';
 import { bindActionCreatorsAndUndoMap } from './util';
 
-export const useReducerWithUndoMap = <S, PBT extends PayloadByType>(
+export const useBoundReducerWithUndoMap = <S, PBT extends PayloadByType>(
   reducer: Reducer<S, PBT>,
   initialState: S,
   actionCreators: ActionCreatorsByType<PBT>,

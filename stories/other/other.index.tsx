@@ -4,8 +4,10 @@ import { DescribeActionsSwitch } from './describe-actions-switch';
 import { DescribeActionsMap } from './describe-actions-map';
 import { HistoryChangeExample } from './history-change';
 import { MemoizationExample } from './memoization';
-import { UnducerExample } from './unducer';
-import UnducerReadme from './unducer.md';
+import { UseUndoableUnducerExample } from './use-undoable-unducer';
+import UseUndoableUnducerReadme from './use-undoable-unducer.md';
+import { UseUndoableReducerExample } from './use-undoable-reducer';
+import UseUndoableReducerReadme from './use-undoable-reducer.md';
 
 storiesOf('useFlexibleUndo/other', module)
   //@ts-ignore
@@ -22,7 +24,7 @@ storiesOf('useFlexibleUndo/other', module)
       // sidebar: UsingReducerReadme,
     },
   })
-  .add('histrory-change', () => <HistoryChangeExample />, {
+  .add('history-change', () => <HistoryChangeExample />, {
     readme: {
       // content: UsingReducerIntro,
       // sidebar: UsingReducerReadme,
@@ -34,9 +36,15 @@ storiesOf('useFlexibleUndo/other', module)
       // sidebar: UsingReducerReadme,
     },
   })
-  .add('unducer', () => <UnducerExample />, {
+  .add('useUndoableUnducer', () => <UseUndoableUnducerExample />, {
     readme: {
       // content: UsingReducerIntro,
-      sidebar: UnducerReadme,
+      sidebar: UseUndoableUnducerReadme,
+    },
+  })
+  .add('useUndoableReducer', () => <UseUndoableReducerExample />, {
+    readme: {
+      // content: UsingReducerIntro,
+      sidebar: UseUndoableReducerReadme,
     },
   });

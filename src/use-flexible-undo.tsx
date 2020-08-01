@@ -13,10 +13,10 @@ import {
   getCurrentBranch,
   updatePath,
   createInitialHistory,
-  createAction,
+  createHistoryItem,
   isUndoPossible,
   isRedoPossible,
-  addAction,
+  addHistoryItem,
   undoUpdater,
   redoUpdater,
   getSideEffectForRedo,
@@ -46,9 +46,9 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
       mapObject(handlers)<HandlersByType<PBT>>(([type, handler]) => [
         type,
         payload => {
-          const action = createAction(type, payload);
+          const action = createHistoryItem(type, payload);
           handler.drdo(payload);
-          setHistory(addAction(action, clearFutureOnDo));
+          setHistory(addHistoryItem(action, clearFutureOnDo));
         },
       ]),
     [clearFutureOnDo, handlers]

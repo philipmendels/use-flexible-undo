@@ -1,58 +1,65 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import {
-  useFlexibleUndo,
-  makeUnducer,
-  makeUndoableFTHandler,
-  invertHandlers,
-  useBoundUnducer,
-  makeUndoableUpdater,
+  PayloadFromTo,
+  makeUpdater,
+  makeReducer,
+  invertFTHandler,
+  useUndoableReducer,
 } from '../../.';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
-import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
+import { BranchNav } from '../components/branch-nav';
+
+type Nullber = number | null;
 
 interface State {
   count: number;
+  amount: Nullber;
 }
 
-interface PBT_Reducer {
-  add: number;
-  subtract: number;
+interface PayloadByType {
+  add: void;
+  subtract: void;
+  updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoableUpdater(
+const countUpdater = makeUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)((amount: number) => () => amount)(addUpdater, subtractUpdater);
+)(() => state => state.amount || 0);
 
-const { reducer, actionCreators } = makeUnducer<State, PBT_Reducer>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
+const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
+  add: countUpdater(addUpdater),
+  subtract: countUpdater(subtractUpdater),
+  updateAmount: ({ to }) => merge({ amount: to }),
 });
 
-export const ReducerAndUseStateExample: FC = () => {
-  const [{ count }, handlers] = useBoundUnducer(
-    reducer,
-    { count: 0 },
-    actionCreators
-  );
-  const [amount, setAmount] = useState<number | null>(1);
-
+export const UseUndoableReducerExample: FC = () => {
   const {
+    state,
+    history,
     undoables,
     undo,
     redo,
-    history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
-    handlers: {
-      ...handlers,
-      updateAmount: makeUndoableFTHandler(setAmount),
+  } = useUndoableReducer({
+    reducer,
+    initialState: {
+      count: 0,
+      amount: 1,
+    },
+    actionCreators,
+    undoMap: {
+      add: actionCreators.subtract,
+      subtract: actionCreators.add,
+      updateAmount: invertFTHandler(actionCreators.updateAmount),
     },
   });
+
+  const { count, amount } = state;
 
   const { add, subtract, updateAmount } = undoables;
 
@@ -73,10 +80,10 @@ export const ReducerAndUseStateExample: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => amount && add(amount)}>
+          <button disabled={!amount} onClick={() => add()}>
             add
           </button>
-          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+          <button disabled={!amount} onClick={() => subtract()}>
             subtract
           </button>
         </div>

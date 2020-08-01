@@ -41,7 +41,7 @@ storiesOf('useFlexibleUndo/reducer', module)
     }
   )
   .add(
-    'makeUndoableReducer & bindUndoableActionCreators',
+    'makeUnducer & bindUndoableActionCreators',
     () => <BindUndoableActionCreatorsExample />,
     {
       readme: {
@@ -50,14 +50,14 @@ storiesOf('useFlexibleUndo/reducer', module)
       },
     }
   )
-  .add('useUndoableReducer', () => <UseUndoableReducerExample />, {
+  .add('useBoundUnducer', () => <UseUndoableReducerExample />, {
     readme: {
       content: UseUndoableReducerIntro,
       sidebar: UseUndoableReducerReadme,
     },
   })
   .add(
-    'useUndoableReducer with previous state and payload',
+    'useBoundUnducer with previous state and payload',
     () => <ReducerWithPreviousStateAndPayloadExample />,
     {
       readme: {
@@ -66,7 +66,7 @@ storiesOf('useFlexibleUndo/reducer', module)
       },
     }
   )
-  .add('useUndoableReducer and useState', () => <ReducerAndUseStateExample />, {
+  .add('useBoundUnducer and useState', () => <ReducerAndUseStateExample />, {
     readme: {
       content: ReducerAndUseStateIntro,
       sidebar: ReducerAndUseStateReadme,
@@ -82,7 +82,7 @@ storiesOf('useFlexibleUndo/reducer', module)
       },
     }
   )
-  .add('useReducerWithUndoMap', () => <UseReducerWithUndoMapExample />, {
+  .add('useBoundReducerWithUndoMap', () => <UseReducerWithUndoMapExample />, {
     readme: {
       // content: ReducerAndUseStateIntro,
       sidebar: UseReducerWithUndoMapReadme,

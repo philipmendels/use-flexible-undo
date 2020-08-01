@@ -4,7 +4,7 @@ import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button';
 import '@reach/menu-button/styles.css';
 import {
   PayloadByType,
-  ActionUnion,
+  HistoryItemUnion,
   History,
   BranchConnection,
   BranchSwitchModus,
@@ -18,7 +18,7 @@ import {
 import { formatTime, useInterval } from './util';
 
 type ConvertFn<PBT extends PayloadByType> = (
-  action: ActionUnion<PBT>
+  action: HistoryItemUnion<PBT>
 ) => ReactNode;
 
 interface ActionListProps<PBT extends PayloadByType> {
@@ -96,7 +96,7 @@ const Indicator = styled.div`
 `;
 
 interface StackItemProps<PBT extends PayloadByType> {
-  action: ActionUnion<PBT>;
+  action: HistoryItemUnion<PBT>;
   now: Date;
   connections: BranchConnection<PBT>[];
   switchToBranch: (branchId: string, travelTo?: BranchSwitchModus) => void;

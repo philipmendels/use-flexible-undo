@@ -6,7 +6,7 @@ import {
   makeUpdater,
   makeReducer,
   invertFTHandler,
-  useReducerWithUndoMap,
+  useBoundReducerWithUndoMap,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -39,7 +39,7 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
 });
 
 export const UseReducerWithUndoMapExample: FC = () => {
-  const [{ count, amount }, handlers] = useReducerWithUndoMap(
+  const [{ count, amount }, handlers] = useBoundReducerWithUndoMap(
     reducer,
     {
       count: 0,

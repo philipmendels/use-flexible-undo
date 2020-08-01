@@ -3,9 +3,9 @@ import { mergeDeepC, mergeDeep } from './util-internal';
 import {
   History,
   PayloadByType,
-  ActionUnion,
+  HistoryItemUnion,
   Branch,
-  Action,
+  HistoryItem,
   UndoableHandlersByType,
   BranchConnection,
   PositionOnBranch,
@@ -22,7 +22,7 @@ export const createInitialHistory = <
     created: new Date(),
     type: START,
     payload: undefined,
-  } as Action) as ActionUnion<PBT>;
+  } as HistoryItem) as HistoryItemUnion<PBT>;
   const initialBranchId = v4();
   return {
     currentPosition: {
@@ -49,8 +49,8 @@ export const getCurrentIndex = <PBT extends PayloadByType>(
   prev: History<PBT>
 ) => prev.currentPosition.globalIndex;
 
-export const addAction = <PBT extends PayloadByType>(
-  action: ActionUnion<PBT>,
+export const addHistoryItem = <PBT extends PayloadByType>(
+  action: HistoryItemUnion<PBT>,
   clearFutureOnDo: boolean
 ) => (prev: History<PBT>) => {
   if (isAtHead(prev)) {
@@ -65,7 +65,7 @@ export const addAction = <PBT extends PayloadByType>(
 };
 
 export const addActionToCurrentBranch = <PBT extends PayloadByType>(
-  action: ActionUnion<PBT>
+  action: HistoryItemUnion<PBT>
 ) => (prev: History<PBT>) => {
   const currentIndex = getCurrentIndex(prev);
   const currentBranch = getCurrentBranch(prev);
@@ -118,7 +118,7 @@ export const getReparentedBranches = (
   );
 
 export const addActionToNewBranch = <PBT extends PayloadByType>(
-  action: ActionUnion<PBT>
+  action: HistoryItemUnion<PBT>
 ) => (prev: History<PBT>) => {
   const currentIndex = getCurrentIndex(prev);
   const currentBranch = getCurrentBranch(prev);
@@ -165,7 +165,7 @@ export const addActionToNewBranch = <PBT extends PayloadByType>(
 };
 
 export const getNewPosition = (newIndex: number) => <PBT extends PayloadByType>(
-  stack: ActionUnion<PBT>[]
+  stack: HistoryItemUnion<PBT>[]
 ): PositionOnBranch => ({
   actionId: stack[newIndex].id,
   globalIndex: newIndex,
@@ -190,7 +190,7 @@ export const getSideEffectForUndo = <PBT extends PayloadByType>(
 
 export const getSideEffectForUndoAction = <PBT extends PayloadByType>(
   handlers: UndoableHandlersByType<PBT>
-) => (action: ActionUnion<PBT>) => {
+) => (action: HistoryItemUnion<PBT>) => {
   const { type, payload } = action;
   return () => handlers[type].undo(payload);
 };
@@ -222,7 +222,7 @@ export const getSideEffectForRedo = <PBT extends PayloadByType>(
 
 export const getSideEffectForRedoAction = <PBT extends PayloadByType>(
   handlers: UndoableHandlersByType<PBT>
-) => (action: ActionUnion<PBT>) => {
+) => (action: HistoryItemUnion<PBT>) => {
   const { type, payload } = action;
   return () => handlers[type].drdo(payload);
 };
@@ -293,7 +293,7 @@ export const updatePath = (path: string[]) => <PBT extends PayloadByType>(
     );
   }, prevHistory);
 
-export const createAction = <PBT extends PayloadByType>(
+export const createHistoryItem = <PBT extends PayloadByType>(
   type: keyof PBT,
   payload: PBT[keyof PBT]
 ) =>
@@ -302,7 +302,7 @@ export const createAction = <PBT extends PayloadByType>(
     payload,
     created: new Date(),
     id: v4(),
-  } as Action) as ActionUnion<PBT>);
+  } as HistoryItem) as HistoryItemUnion<PBT>);
 
 export const isUndoPossible = <PBT extends PayloadByType>(
   history: History<PBT>
@@ -353,7 +353,10 @@ export const getBranchSwitchProps = <PBT extends PayloadByType>(
 
 export const getTTActions = (newIndex: number) => <PBT extends PayloadByType>(
   prev: History<PBT>
-): { direction: 'none' | 'undo' | 'redo'; actions: ActionUnion<PBT>[] } => {
+): {
+  direction: 'none' | 'undo' | 'redo';
+  actions: HistoryItemUnion<PBT>[];
+} => {
   const currentIndex = getCurrentIndex(prev);
   const currentStack = getCurrentBranch(prev).stack;
   if (newIndex === currentIndex) {

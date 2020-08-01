@@ -1,14 +1,14 @@
-### useUndoableReducer - Readme & Code
+### useBoundUnducer - Readme & Code
 
-The hook **useUndoableReducer** is a basic wrapper for useReducer and bindUndoableActionCreators. It takes a reducer, the initial state and an object with do/redo + undo action creators by action type. It returns (in a tuple) the current state and an object with do/redo + undo handlers by action type. This handlers object is memoized inside the hook, and can be passed to **useFlexibleUndo**.
+The hook **useBoundUnducer** is a basic wrapper for useReducer and bindUndoableActionCreators. It takes a reducer, the initial state and an object with do/redo + undo action creators by action type. It returns (in a tuple) the current state and an object with do/redo + undo handlers by action type. This handlers object is memoized inside the hook, and can be passed to **useFlexibleUndo**.
 
 ```typescript
 import React, { FC } from 'react';
 import {
   useFlexibleUndo,
-  makeUndoableReducer,
+  makeUnducer,
   PayloadFromTo,
-  useUndoableReducer,
+  useBoundUnducer,
   makeUndoableFTHandler,
   invertHandlers,
   makeUndoableUpdater,
@@ -37,14 +37,14 @@ const undoableAddHandler = makeUndoableUpdater(
   count => merge({ count })
 )(() => state => state.amount || 0)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
+const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
 export const UseUndoableReducerExample: FC = () => {
-  const [{ count, amount }, handlers] = useUndoableReducer(
+  const [{ count, amount }, handlers] = useBoundUnducer(
     reducer,
     {
       count: 0,

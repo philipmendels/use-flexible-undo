@@ -4,7 +4,7 @@ import {
   PayloadHandler,
   Undoable,
   PayloadByType,
-  UReducer,
+  Unducer,
   UndoableUActionCreatorsByType,
   UDispatch,
   UndoableHandlersByType,
@@ -17,7 +17,11 @@ import {
   Reducer,
   HandlersByType,
 } from './index.types';
-import { mapObject, makeActionCreator } from './util-internal';
+import {
+  mapObject,
+  makeUActionCreator,
+  makeActionCreator,
+} from './util-internal';
 import { SetStateAction } from 'react';
 
 export const combineHandlers = <P, R>(
@@ -119,7 +123,7 @@ export const wrapFTHandler = <S, R>(
 ) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
   handler({ from: state, to: updater(payload)(state) });
 
-export const makeUndoableReducer = <S, PBT extends PayloadByType>(
+export const makeUnducer = <S, PBT extends PayloadByType>(
   stateUpdaters: UndoableStateUpdatersByType<S, PBT>
 ) => ({
   reducer: ((state, { payload, type, meta }) => {
@@ -129,13 +133,13 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
         ? updater.undo(payload)(state)
         : updater.drdo(payload)(state)
       : state; // TODO: when no handler found return state or throw error?
-  }) as UReducer<S, PBT>,
+  }) as Unducer<S, PBT>,
   actionCreators: mapObject(stateUpdaters)<UndoableUActionCreatorsByType<PBT>>(
     ([type, _]) => [
       type,
       {
-        drdo: makeActionCreator(type),
-        undo: makeActionCreator(type, true),
+        drdo: makeUActionCreator(type),
+        undo: makeUActionCreator(type, true),
       },
     ]
   ),

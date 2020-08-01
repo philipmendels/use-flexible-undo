@@ -1,10 +1,10 @@
-import { History, ActionUnion } from '../src';
+import { History, HistoryItemUnion } from '../src';
 import { getPathFromCommonAncestor, updatePath } from '../src/updaters';
 
 interface PBT {
   act: string;
 }
-const createStack = (id: string): ActionUnion<PBT>[] =>
+const createStack = (id: string): HistoryItemUnion<PBT>[] =>
   new Array(4).fill(0).map((_, idx) => ({
     created: new Date(),
     id: id + idx,

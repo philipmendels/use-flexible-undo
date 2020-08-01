@@ -1,15 +1,15 @@
-### useUndoableReducer and useState - Readme & Code
+### useBoundUnducer and useState - Readme & Code
 
-Just as you can use the results of separate calls to useState inside you do/redo & undo handlers, you can also combine separate calls to useState and useReducer (in this example wrapped by useUndoableReducer). It may not necessarily be a good idea, but you can.
+Just as you can use the results of separate calls to useState inside you do/redo & undo handlers, you can also combine separate calls to useState and useReducer (in this example wrapped by useBoundUnducer). It may not necessarily be a good idea, but you can.
 
 ```typescript
 import React, { FC, useState } from 'react';
 import {
   useFlexibleUndo,
-  makeUndoableReducer,
+  makeUnducer,
   makeUndoableFTHandler,
   invertHandlers,
-  useUndoableReducer,
+  useBoundUnducer,
   makeUndoableUpdater,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
@@ -32,13 +32,13 @@ const undoableAddHandler = makeUndoableUpdater(
   count => merge({ count })
 )((amount: number) => () => amount)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUndoableReducer<State, PBT_Reducer>({
+const { reducer, actionCreators } = makeUnducer<State, PBT_Reducer>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
 });
 
 export const ReducerAndUseStateExample: FC = () => {
-  const [{ count }, handlers] = useUndoableReducer(
+  const [{ count }, handlers] = useBoundUnducer(
     reducer,
     { count: 0 },
     actionCreators

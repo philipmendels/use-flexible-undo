@@ -1,15 +1,15 @@
+```typescript
 import React, { FC } from 'react';
 import {
-  makeUndoableReducer,
   PayloadFromTo,
-  invertHandlers,
-  makeUndoableFTHandler,
-  makeUndoableUpdater,
+  makeUpdater,
+  makeReducer,
+  invertFTHandler,
+  useUndoableReducer,
 } from '../../.';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
-import { useFlexibleUnducer } from '../../src/use-flexible-unducer';
 import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
 
@@ -26,18 +26,18 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoableUpdater(
+const countUpdater = makeUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(() => state => state.amount || 0)(addUpdater, subtractUpdater);
+)(() => state => state.amount || 0);
 
-const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
+const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
+  add: countUpdater(addUpdater),
+  subtract: countUpdater(subtractUpdater),
+  updateAmount: ({ to }) => merge({ amount: to }),
 });
 
-export const UnducerExample: FC = () => {
+export const UseUndoableReducerExample: FC = () => {
   const {
     state,
     history,
@@ -46,13 +46,18 @@ export const UnducerExample: FC = () => {
     redo,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUnducer({
+  } = useUndoableReducer({
     reducer,
     initialState: {
       count: 0,
       amount: 1,
     },
     actionCreators,
+    undoMap: {
+      add: actionCreators.subtract,
+      subtract: actionCreators.add,
+      updateAmount: invertFTHandler(actionCreators.updateAmount),
+    },
   });
 
   const { count, amount } = state;
@@ -98,3 +103,4 @@ export const UnducerExample: FC = () => {
     </div>
   );
 };
+```

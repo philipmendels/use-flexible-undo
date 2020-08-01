@@ -40,52 +40,54 @@ export type DeepPartial<T> = {
     : T[K];
 };
 
-export type BaseAction<T = string, P = any> = P extends void | undefined
+type Meta<M> = M extends void | undefined
+  ? {
+      meta?: M;
+    }
+  : {
+      meta: M;
+    };
+
+export type Action<T = string, P = any, M = undefined> = P extends
+  | void
+  | undefined
   ? {
       type: T;
       payload?: P;
-    }
+    } & Meta<M>
   : {
       type: T;
       payload: P;
-    };
-
-export type BaseActionUnion<PBT extends PayloadByType> = {
-  [T in keyof PBT]: BaseAction<T, PBT[T]>;
-}[keyof PBT];
-
-export type ActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
-  payload: PBT[T]
-) => BaseAction<T, PBT[T]>;
-
-export type ActionCreatorsByType<PBT extends PayloadByType> = {
-  [T in keyof PBT]: ActionCreator<PBT, T>;
-};
-
-export type Action<T = string, P = any> = BaseAction<T, P> & {
-  created: Date;
-  id: string;
-};
+    } & Meta<M>;
 
 export type ActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: Action<T, PBT[T]>;
 }[keyof PBT];
 
-export type UAction<T = string, P = any> = P extends void | undefined
-  ? {
-      type: T;
-      payload?: P;
-      meta?: {
-        isUndo?: boolean;
-      };
-    }
-  : {
-      type: T;
-      payload: P;
-      meta?: {
-        isUndo?: boolean;
-      };
-    };
+export type ActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
+  payload: PBT[T]
+) => Action<T, PBT[T]>;
+
+export type ActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in keyof PBT]: ActionCreator<PBT, T>;
+};
+
+export type HistoryItem<T = string, P = any> = Action<T, P> & {
+  created: Date;
+  id: string;
+};
+
+export type HistoryItemUnion<PBT extends PayloadByType> = {
+  [T in keyof PBT]: HistoryItem<T, PBT[T]>;
+}[keyof PBT];
+
+export type UAction<T = string, P = any> = Action<
+  T,
+  P,
+  {
+    isUndo?: boolean;
+  }
+>;
 
 export type UActionUnion<PBT extends PayloadByType> = {
   [T in keyof PBT]: UAction<T, PBT[T]>;
@@ -103,20 +105,18 @@ export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
   [T in keyof PBT]: Undoable<UActionCreator<PBT, T>>;
 };
 
-export type UReducer<S, PBT extends PayloadByType> = (
+export type Unducer<S, PBT extends PayloadByType> = (
   state: S,
   action: UActionUnion<PBT>
 ) => S;
 
 export type Reducer<S, PBT extends PayloadByType> = (
   state: S,
-  action: BaseActionUnion<PBT>
+  action: ActionUnion<PBT>
 ) => S;
 
 export type UDispatch<PBT extends PayloadByType> = Dispatch<UActionUnion<PBT>>;
-export type DispatchPBT<PBT extends PayloadByType> = Dispatch<
-  BaseActionUnion<PBT>
->;
+export type DispatchPBT<PBT extends PayloadByType> = Dispatch<ActionUnion<PBT>>;
 
 export type ValueOf<T> = T[keyof T];
 
@@ -135,10 +135,13 @@ export interface UFUOptions {
   clearFutureOnDo?: boolean;
 }
 
-export interface UFUProps<PBT extends PayloadByType> {
-  handlers: UndoableHandlersByType<PBT>;
+interface UFUCommonProps<PBT extends PayloadByType> {
   options?: UFUOptions;
   initialHistory?: History<PBT>;
+}
+export interface UFUProps<PBT extends PayloadByType>
+  extends UFUCommonProps<PBT> {
+  handlers: UndoableHandlersByType<PBT>;
 }
 
 export interface PositionOnBranch {
@@ -164,7 +167,7 @@ export interface Branch<PBT extends PayloadByType> {
   };
   lastPosition?: PositionOnBranch;
   created: Date;
-  stack: ActionUnion<PBT>[];
+  stack: HistoryItemUnion<PBT>[];
 }
 
 export interface BranchConnection<PBT extends PayloadByType> {
@@ -185,13 +188,61 @@ export type BranchSwitchModus =
   | 'LAST_KNOWN_POSITION_ON_BRANCH';
 
 export type UndoMap<PBT extends PayloadByType> = {
-  [K in keyof PBT]: (payload: PBT[K]) => BaseActionUnion<PBT>;
+  [K in keyof PBT]: (payload: PBT[K]) => ActionUnion<PBT>;
 };
 
-export interface UseUnducerProps<S, PBT extends PayloadByType> {
-  options?: UFUOptions;
-  initialHistory?: History<PBT>;
-  reducer: UReducer<S, PBT>;
+interface ReducerCommonProps<S, PBT extends PayloadByType>
+  extends UFUCommonProps<PBT> {
   initialState: S;
+}
+
+export interface UseUndoableUnducerProps<S, PBT extends PayloadByType>
+  extends ReducerCommonProps<S, PBT> {
+  reducer: Unducer<S, PBT>;
   actionCreators: UndoableUActionCreatorsByType<PBT>;
+}
+
+export interface UseUndoableReducerProps<S, PBT extends PayloadByType>
+  extends ReducerCommonProps<S, PBT> {
+  reducer: Reducer<S, PBT>;
+  actionCreators: ActionCreatorsByType<PBT>;
+  undoMap: UndoMap<PBT>;
+}
+
+export interface UndoableState<S, PBT> {
+  history: History<PBT>;
+  state: S;
+}
+
+interface PBT_UndoableReducer_Common {
+  undo: void;
+  redo: void;
+  timeTravel: {
+    indexOnBranch: number;
+    branchId?: string;
+  };
+  timeTravelById: {
+    actionId: string;
+    branchId?: string;
+  };
+  switchToBranch: {
+    branchId: string;
+    travelTo?: BranchSwitchModus;
+  };
+}
+
+export interface PBT_UndoableReducer<PBT extends PayloadByType>
+  extends PBT_UndoableReducer_Common {
+  doUndoable: {
+    action: ActionUnion<PBT>;
+    clearFutureOnDo?: boolean;
+  };
+}
+
+export interface PBT_UndoableUnducer<PBT extends PayloadByType>
+  extends PBT_UndoableReducer_Common {
+  doUndoable: {
+    action: UActionUnion<PBT>;
+    clearFutureOnDo?: boolean;
+  };
 }

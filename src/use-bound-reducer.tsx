@@ -1,14 +1,14 @@
 import { useReducer, useMemo } from 'react';
 import {
-  UReducer,
   PayloadByType,
   ActionCreatorsByType,
   HandlersByType,
+  Reducer,
 } from './index.types';
 import { bindActionCreators } from './util';
 
 export const useBoundReducer = <S, PBT extends PayloadByType>(
-  reducer: UReducer<S, PBT>,
+  reducer: Reducer<S, PBT>,
   initialState: S,
   actionCreators: ActionCreatorsByType<PBT>
 ): [S, HandlersByType<PBT>] => {

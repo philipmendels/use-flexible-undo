@@ -1,16 +1,16 @@
-````typescript
+```typescript
 import React, { FC } from 'react';
 import {
-  makeUndoableReducer,
+  makeUnducer,
   PayloadFromTo,
   invertHandlers,
   makeUndoableFTHandler,
   makeUndoableUpdater,
-} from '../../.';
+  useUndoableUnducer,
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
-import { useFlexibleUnducer } from '../../src/use-flexible-unducer';
 import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
 
@@ -32,13 +32,13 @@ const undoableAddHandler = makeUndoableUpdater(
   count => merge({ count })
 )(() => state => state.amount || 0)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
+const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
-export const UnducerExample: FC = () => {
+export const UseUndoableUnducerExample: FC = () => {
   const {
     state,
     history,
@@ -47,7 +47,7 @@ export const UnducerExample: FC = () => {
     redo,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUnducer({
+  } = useUndoableUnducer({
     reducer,
     initialState: {
       count: 0,
@@ -99,4 +99,4 @@ export const UnducerExample: FC = () => {
     </div>
   );
 };
-````
+```

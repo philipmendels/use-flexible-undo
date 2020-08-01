@@ -1,4 +1,4 @@
-### useUndoableReducer with previous state and payload - Readme & Code
+### useBoundUnducer with previous state and payload - Readme & Code
 
 You are free to obtain your state dependencies from the previous state, or from the action payload, or from a combination of the two. In this somewhat contrived :) example "shouldDouble" is not part of state (there is a dedicated button for "add x 2"), hence we simply pass a static boolean value as the action payload.
 
@@ -6,11 +6,11 @@ You are free to obtain your state dependencies from the previous state, or from 
 import React, { FC } from 'react';
 import {
   useFlexibleUndo,
-  makeUndoableReducer,
+  makeUnducer,
   PayloadFromTo,
   invertHandlers,
   makeUndoableFTHandler,
-  useUndoableReducer,
+  useBoundUnducer,
   makeUndoableUpdater,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
@@ -39,14 +39,14 @@ const undoableAddHandler = makeUndoableUpdater(
   amount ? (shouldDouble ? amount * 2 : amount) : 0
 )(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUndoableReducer<State, PayloadByType>({
+const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
 export const ReducerWithPreviousStateAndPayloadExample: FC = () => {
-  const [{ count, amount }, handlers] = useUndoableReducer(
+  const [{ count, amount }, handlers] = useBoundUnducer(
     reducer,
     {
       count: 0,

@@ -11,7 +11,7 @@ import React, { FC, useReducer } from 'react';
 import {
   useFlexibleUndo,
   PayloadFromTo,
-  UReducer,
+  Unducer,
   makeUndoableUpdater,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
@@ -38,7 +38,7 @@ const undoableAddHandler = makeUndoableUpdater(
   count => merge({ count })
 )((_: void) => state => state.amount || 0)(addUpdater, subtractUpdater);
 
-const reducer: UReducer<State, PayloadByType> = (prevState, action) => {
+const reducer: Unducer<State, PayloadByType> = (prevState, action) => {
   const isUndo = action.meta?.isUndo;
   switch (action.type) {
     case 'add':
@@ -73,15 +73,16 @@ export const ReducerAndMakeUndoableUpdaterExample: FC = () => {
   } = useFlexibleUndo<PayloadByType>({
     handlers: {
       add: {
-        drdo: () => dispatch({ type: 'add' }),
+        drdo: () => dispatch({ type: 'add', meta: { isUndo: false } }),
         undo: () => dispatch({ type: 'add', meta: { isUndo: true } }),
       },
       subtract: {
-        drdo: () => dispatch({ type: 'subtract' }),
+        drdo: () => dispatch({ type: 'subtract', meta: { isUndo: false } }),
         undo: () => dispatch({ type: 'subtract', meta: { isUndo: true } }),
       },
       updateAmount: {
-        drdo: payload => dispatch({ type: 'updateAmount', payload }),
+        drdo: payload =>
+          dispatch({ type: 'updateAmount', payload, meta: { isUndo: false } }),
         undo: payload =>
           dispatch({ type: 'updateAmount', payload, meta: { isUndo: true } }),
       },
