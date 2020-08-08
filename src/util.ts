@@ -16,6 +16,8 @@ import {
   DispatchPBT,
   Reducer,
   HandlersByType,
+  StateUpdater,
+  UActionUnion,
 } from './index.types';
 import {
   mapObject,
@@ -64,6 +66,11 @@ export const makeUndoableHandler = <S, R>(
   );
 
 type InferState<S> = S extends SetStateAction<infer S2> ? S2 : S;
+
+export const makeFTHandler = <S, R>(
+  stateSetter: (s: S) => R
+): PayloadHandler<PayloadFromTo<InferState<S>>, R> => ({ to }) =>
+  stateSetter(to);
 
 export const makeUndoableFTHandler = <S, R>(stateSetter: (s: S) => R) =>
   combineHandlers<PayloadFromTo<InferState<S>>, R>(
@@ -178,15 +185,26 @@ export const bindUndoableActionCreators = <PBT extends PayloadByType>(
     },
   ]);
 
-export const bindActionCreatorsAndUndoMap = <PBT extends PayloadByType>(
+export const bindSeparateActionCreators = <PBT extends PayloadByType>(
   dispatch: DispatchPBT<PBT>,
-  actionCreators: ActionCreatorsByType<PBT>,
-  undoMap: UndoMap<PBT>
+  drdoActionCreators: ActionCreatorsByType<PBT>,
+  undoActionCreators: UndoMap<PBT>
 ) =>
-  mapObject(actionCreators)<UndoableHandlersByType<PBT>>(([type, creator]) => [
+  mapObject(drdoActionCreators)<UndoableHandlersByType<PBT>>(
+    ([type, creator]) => [
+      type,
+      {
+        drdo: payload => dispatch(creator(payload)),
+        undo: payload => dispatch(undoActionCreators[type](payload)),
+      },
+    ]
+  );
+
+export const combineHandlersByType = <PBT extends PayloadByType>(
+  drdoHandlers: HandlersByType<PBT>,
+  undoHandlers: HandlersByType<PBT>
+) =>
+  mapObject(drdoHandlers)<UndoableHandlersByType<PBT>>(([type, handler]) => [
     type,
-    {
-      drdo: payload => dispatch(creator(payload)),
-      undo: payload => dispatch(undoMap[type](payload)),
-    },
+    combineHandlers(handler, undoHandlers[type]),
   ]);

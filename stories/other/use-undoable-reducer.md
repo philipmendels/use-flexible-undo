@@ -34,7 +34,7 @@ const countUpdater = makeUpdater(
 const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   add: countUpdater(addUpdater),
   subtract: countUpdater(subtractUpdater),
-  updateAmount: ({ to }) => merge({ amount: to }),
+  updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
 export const UseUndoableReducerExample: FC = () => {

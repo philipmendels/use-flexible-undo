@@ -8,6 +8,7 @@ import { UseUndoableUnducerExample } from './use-undoable-unducer';
 import UseUndoableUnducerReadme from './use-undoable-unducer.md';
 import { UseUndoableReducerExample } from './use-undoable-reducer';
 import UseUndoableReducerReadme from './use-undoable-reducer.md';
+import { UseFlexibleUndoInverseExample } from './use-flexible-undo-inverse';
 
 storiesOf('useFlexibleUndo/other', module)
   //@ts-ignore
@@ -34,6 +35,12 @@ storiesOf('useFlexibleUndo/other', module)
     readme: {
       // content: UsingReducerIntro,
       // sidebar: UsingReducerReadme,
+    },
+  })
+  .add('useFexibleUndoInverse', () => <UseFlexibleUndoInverseExample />, {
+    readme: {
+      // content: UsingReducerIntro,
+      // sidebar: UseUndoableUnducerReadme,
     },
   })
   .add('useUndoableUnducer', () => <UseUndoableUnducerExample />, {

@@ -1,57 +1,21 @@
-import React, { FC } from 'react';
-import {
-  useFlexibleUndo,
-  PayloadFromTo,
-  makeUpdater,
-  makeReducer,
-  invertFTHandler,
-  useBoundReducerWithUndoMap,
-} from '../../.';
-import { merge, addUpdater, subtractUpdater } from '../examples-util';
+import React, { FC, useState } from 'react';
+import { makeHandler, invertFTHandler } from '../../.';
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
+import { useFlexibleUndoInverse } from '../../src/use-flexible-undo-inverse';
 import { makeFTHandler } from '../../src';
 
-type Nullber = number | null;
+export const UseFlexibleUndoInverseExample: FC = () => {
+  const [count, setCount] = useState(0);
+  const [amount, setAmount] = useState<number | null>(1);
 
-interface State {
-  count: number;
-  amount: Nullber;
-}
-
-interface PayloadByType {
-  add: void;
-  subtract: void;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
-const countUpdater = makeUpdater(
-  (state: State) => state.count,
-  count => merge({ count })
-)(() => state => state.amount || 0);
-
-const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
-  add: countUpdater(addUpdater),
-  subtract: countUpdater(subtractUpdater),
-  updateAmount: makeFTHandler(amount => merge({ amount })),
-});
-
-export const UseReducerWithUndoMapExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundReducerWithUndoMap(
-    reducer,
-    {
-      count: 0,
-      amount: 1,
-    },
-    actionCreators,
-    {
-      add: actionCreators.subtract,
-      subtract: actionCreators.add,
-      updateAmount: invertFTHandler(actionCreators.updateAmount),
-    }
-  );
+  const countHandler = makeHandler(setCount);
+  const addHandler = countHandler(addUpdater);
+  const subHandler = countHandler(subtractUpdater);
+  const updateAmountHandler = makeFTHandler(setAmount);
 
   const {
     undoables,
@@ -60,8 +24,17 @@ export const UseReducerWithUndoMapExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
-    handlers,
+  } = useFlexibleUndoInverse({
+    drdoHandlers: {
+      add: addHandler,
+      subtract: subHandler,
+      updateAmount: updateAmountHandler,
+    },
+    undoHandlers: {
+      add: subHandler,
+      subtract: addHandler,
+      updateAmount: invertFTHandler(updateAmountHandler),
+    },
   });
 
   const { add, subtract, updateAmount } = undoables;
@@ -83,10 +56,10 @@ export const UseReducerWithUndoMapExample: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add()}>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => subtract()}>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
             subtract
           </button>
         </div>

@@ -217,8 +217,8 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
   initialHistory = createInitialHistory(),
   reducer,
   initialState,
-  actionCreators,
-  undoMap,
+  undoActionCreators,
+  drdoActionCreators,
   options,
 }: UseUndoableReducerProps<S, PBT>) => {
   const { clearFutureOnDo } = {
@@ -229,7 +229,10 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
   const {
     reducer: unducer,
     actionCreators: unducerActionCreators,
-  } = useMemo(() => makeUnducer(reducer, undoMap), [reducer, undoMap]);
+  } = useMemo(() => makeUnducer(reducer, undoActionCreators), [
+    reducer,
+    undoActionCreators,
+  ]);
 
   const [
     { state, history },
@@ -252,7 +255,7 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
 
   const undoables = useMemo(
     () =>
-      mapObject(actionCreators)<HandlersByType<PBT>>(([type, creator]) => [
+      mapObject(drdoActionCreators)<HandlersByType<PBT>>(([type, creator]) => [
         type,
         payload => {
           doUndoable({
@@ -261,7 +264,7 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
           });
         },
       ]),
-    [actionCreators, clearFutureOnDo, doUndoable]
+    [drdoActionCreators, clearFutureOnDo, doUndoable]
   );
 
   const canUndo = useMemo(() => isUndoPossible(history), [history]);

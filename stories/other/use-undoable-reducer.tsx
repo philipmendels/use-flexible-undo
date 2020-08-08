@@ -11,6 +11,7 @@ import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
+import { makeFTHandler } from '../../src';
 
 type Nullber = number | null;
 
@@ -33,7 +34,7 @@ const countUpdater = makeUpdater(
 const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   add: countUpdater(addUpdater),
   subtract: countUpdater(subtractUpdater),
-  updateAmount: ({ to }) => merge({ amount: to }),
+  updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
 export const UseUndoableReducerExample: FC = () => {

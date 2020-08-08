@@ -86,6 +86,7 @@ export type UAction<T = string, P = any> = Action<
   P,
   {
     isUndo?: boolean;
+    clearFutureOnDo?: boolean;
   }
 >;
 
@@ -144,6 +145,11 @@ export interface UFUProps<PBT extends PayloadByType>
   handlers: UndoableHandlersByType<PBT>;
 }
 
+export interface UFUInverseProps<PBT extends PayloadByType>
+  extends UFUCommonProps<PBT> {
+  drdoHandlers: HandlersByType<PBT>;
+  undoHandlers: HandlersByType<PBT>;
+}
 export interface PositionOnBranch {
   globalIndex: number;
   actionId: string;
@@ -205,8 +211,8 @@ export interface UseUndoableUnducerProps<S, PBT extends PayloadByType>
 export interface UseUndoableReducerProps<S, PBT extends PayloadByType>
   extends ReducerCommonProps<S, PBT> {
   reducer: Reducer<S, PBT>;
-  actionCreators: ActionCreatorsByType<PBT>;
-  undoMap: UndoMap<PBT>;
+  drdoActionCreators: ActionCreatorsByType<PBT>;
+  undoActionCreators: UndoMap<PBT>;
 }
 
 export interface UndoableState<S, PBT> {
@@ -214,7 +220,7 @@ export interface UndoableState<S, PBT> {
   state: S;
 }
 
-interface PBT_UndoableReducer_Common {
+export interface PBT_UndoableReducer_Common {
   undo: void;
   redo: void;
   timeTravel: {
