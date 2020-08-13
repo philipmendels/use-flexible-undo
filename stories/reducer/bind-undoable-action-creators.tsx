@@ -13,6 +13,7 @@ import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
+import { makeUnducer2 } from '../../src/util';
 
 type Nullber = number | null;
 
@@ -32,7 +33,7 @@ const undoableAddHandler = makeUndoableUpdater(
   count => merge({ count })
 )(() => state => state.amount || 0)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
+const { reducer, actionCreators } = makeUnducer2<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
@@ -44,6 +45,7 @@ export const BindUndoableActionCreatorsExample: FC = () => {
     amount: 1,
   });
 
+  
   const handlers = bindUndoableActionCreators(dispatch, actionCreators);
 
   const {

@@ -18,6 +18,8 @@ import {
   HandlersByType,
   StateUpdater,
   UActionUnion,
+  ActionUnion,
+  UndoableActionCreatorsByType,
 } from './index.types';
 import {
   mapObject,
@@ -150,6 +152,41 @@ export const makeUnducer = <S, PBT extends PayloadByType>(
       },
     ]
   ),
+});
+
+interface PBT2<PBT extends PayloadByType> {
+  undoAction: ActionUnion<PBT>;
+  drdoAction: ActionUnion<PBT>;
+}
+
+export const makeUnducer2 = <S, PBT extends PayloadByType>(
+  stateUpdaters: UndoableStateUpdatersByType<S, PBT>
+) => ({
+  reducer: ((state, { payload, type }) => {
+    const updater = stateUpdaters[payload.type];
+    return updater
+      ? type === 'undoAction'
+        ? updater.undo(payload.payload)(state)
+        : type === 'drdoAction'
+        ? updater.drdo(payload.payload)(state)
+        : state
+      : state;
+  }) as Reducer<S, PBT2<PBT>>,
+  actionCreators: mapObject(stateUpdaters)<
+    UndoableActionCreatorsByType<PBT2<PBT>>
+  >(([type, _]) => [
+    type,
+    {
+      drdo: payload => ({
+        type: 'drdoAction',
+        payload: {
+          type,
+          payload,
+        },
+      }),
+      undo: makeActionCreator(type),
+    },
+  ]),
 });
 
 export const makeReducer = <S, PBT extends PayloadByType>(

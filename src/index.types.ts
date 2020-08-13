@@ -1,4 +1,6 @@
 import { Dispatch } from 'react';
+import { type } from 'ramda';
+import { actionsStyle } from '../stories/styles';
 
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
@@ -70,6 +72,48 @@ export type ActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (
 
 export type ActionCreatorsByType<PBT extends PayloadByType> = {
   [T in keyof PBT]: ActionCreator<PBT, T>;
+};
+
+type G = 'blaat' | 'bloop';
+
+const isUndo = <K extends G>(b: K, a: UndoAction<G>): a is UndoAction<K> =>
+  a.startsWith(b) && a.endsWith('_undo');
+
+type WithType<T> = {
+  type: T;
+};
+
+type UndoAction<T extends string> = string & {
+  __type: 'UndoAction';
+  __of: T;
+};
+
+type Act =
+  | {
+      type: UndoAction<'blaat'>;
+      payload: 4;
+    }
+  | {
+      type: UndoAction<'bloop'>;
+      payload: 'a';
+    };
+
+const isUndoA = <K extends G>(
+  b: K,
+  a: WithType<UndoAction<G>>
+): a is WithType<UndoAction<K>> =>
+  a.type.startsWith(b) && a.type.endsWith('_undo');
+
+const red = (action: Act) => {
+  if (isUndoA('blaat', action)) {
+    action.payload.toFixed();
+  } else if (action.type === 'a') {
+    action.payload.toLocaleLowerCase();
+  }
+};
+
+export type UndoableActionCreatorsByType<PBT extends PayloadByType> = {
+  [T in keyof PBT]: Undoable<ActionCreator<PBT, T>>;
 };
 
 export type HistoryItem<T = string, P = any> = Action<T, P> & {
