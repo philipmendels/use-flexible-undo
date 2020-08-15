@@ -5,7 +5,7 @@ import {
   makeReducer,
   invertFTHandler,
   useUndoableReducer,
-} from '../../.';
+} from '../../src';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -52,8 +52,8 @@ export const UseUndoableReducerExample: FC = () => {
       count: 0,
       amount: 1,
     },
-    actionCreators,
-    undoMap: {
+    drdoActionCreators: actionCreators,
+    undoActionCreators: {
       add: actionCreators.subtract,
       subtract: actionCreators.add,
       updateAmount: invertFTHandler(actionCreators.updateAmount),

@@ -86,7 +86,6 @@ export type UAction<T = string, P = any> = Action<
   P,
   {
     isUndo?: boolean;
-    clearFutureOnDo?: boolean;
   }
 >;
 
@@ -106,14 +105,19 @@ export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
   [T in keyof PBT]: Undoable<UActionCreator<PBT, T>>;
 };
 
+export type URActionUnion<PBT extends PayloadByType> = ActionUnion<
+  PBT,
+  { isUndoable: true; clearFutureOnDo: boolean }
+>;
+
 export type Unducer<S, PBT extends PayloadByType> = (
   state: S,
   action: UActionUnion<PBT>
 ) => S;
 
-export type Reducer<S, PBT extends PayloadByType> = (
+export type Reducer<S, PBT extends PayloadByType, M = undefined> = (
   state: S,
-  action: ActionUnion<PBT>
+  action: ActionUnion<PBT, M>
 ) => S;
 
 export type UDispatch<PBT extends PayloadByType> = Dispatch<UActionUnion<PBT>>;
