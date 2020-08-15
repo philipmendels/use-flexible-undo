@@ -60,8 +60,8 @@ export type Action<T = string, P = any, M = undefined> = P extends
       payload: P;
     } & Meta<M>;
 
-export type ActionUnion<PBT extends PayloadByType> = {
-  [T in keyof PBT]: Action<T, PBT[T]>;
+export type ActionUnion<PBT extends PayloadByType, M = undefined> = {
+  [T in keyof PBT]: Action<T, PBT[T], M>;
 }[keyof PBT];
 
 export type ActionCreator<PBT extends PayloadByType, T extends keyof PBT> = (

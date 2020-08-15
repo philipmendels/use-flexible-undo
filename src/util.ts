@@ -16,8 +16,6 @@ import {
   DispatchPBT,
   Reducer,
   HandlersByType,
-  StateUpdater,
-  UActionUnion,
 } from './index.types';
 import {
   mapObject,
