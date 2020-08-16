@@ -1,4 +1,4 @@
-import { Reducer as ReducerReact } from 'react';
+import { Dispatch } from 'react';
 
 import {
   PayloadByType,
@@ -6,11 +6,15 @@ import {
   Reducer,
   UndoMap,
   UndoableState,
-  PBT_UndoableReducer_Common,
+  PBT_UndoableReducer,
   Unducer,
   UActionUnion,
   HistoryItemUnion,
   URActionUnion,
+  ActionCreatorsByType,
+  HandlersWithOptionsByType,
+  UndoableReducer,
+  UndoableUActionCreatorsByType,
 } from './index.types';
 import {
   getCurrentBranch,
@@ -25,6 +29,7 @@ import {
   getActionForRedo,
   getTTActions,
 } from './updaters';
+import { mapObject } from './util-internal';
 
 const reduce = <S, PBT extends PayloadByType>(
   reducer: Reducer<S, PBT> | Unducer<S, PBT>,
@@ -118,13 +123,10 @@ const timeTravel = <S, PBT extends PayloadByType>(
 export const makeUndoableReducer = <S, PBT extends PayloadByType>(
   reducer: Reducer<S, PBT> | Unducer<S, PBT>,
   undoMap?: UndoMap<PBT>
-): ReducerReact<
-  UndoableState<S, PBT>,
-  ActionUnion<PBT_UndoableReducer_Common> | URActionUnion<PBT>
-> => (prevState, reducerAction) => {
+): UndoableReducer<S, PBT> => (prevState, reducerAction) => {
   if (reducerAction.meta?.isUndoable) {
     const { history, state } = prevState;
-    const { clearFutureOnDo } = reducerAction.meta;
+    const clearFutureOnDo = reducerAction.meta.clearFutureOnDo || false;
     const { type, payload } = reducerAction;
     const historyItem = createHistoryItem(type, payload);
     return {
@@ -132,7 +134,7 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
       state: reduce(reducer, false, reducerAction, state, undoMap),
     };
   } else {
-    const ra = reducerAction as ActionUnion<PBT_UndoableReducer_Common>;
+    const ra = reducerAction as ActionUnion<PBT_UndoableReducer>;
     switch (ra.type) {
       case 'undo': {
         const { history, state } = prevState;
@@ -228,3 +230,21 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
     }
   }
 };
+
+export const bindActionCreators = <PBT extends PayloadByType>(
+  dispatch: Dispatch<URActionUnion<PBT>>,
+  actionCreators: ActionCreatorsByType<PBT> | UndoableUActionCreatorsByType<PBT>
+) =>
+  mapObject(actionCreators as ActionCreatorsByType<PBT>)<
+    HandlersWithOptionsByType<PBT>
+  >(([type]) => [
+    type,
+    (payload, clearFutureOnDo) => {
+      // TODO: call actionCreator?
+      dispatch({
+        type,
+        payload,
+        meta: { isUndoable: true, clearFutureOnDo },
+      } as URActionUnion<PBT>);
+    },
+  ]);

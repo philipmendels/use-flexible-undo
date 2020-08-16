@@ -12,6 +12,7 @@ import { NumberInput } from '../components/number-input';
 import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
 import { makeFTHandler } from '../../src';
+import { makeUndoableReducer } from '../../src/make-undoable-reducer';
 
 type Nullber = number | null;
 
@@ -37,6 +38,12 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
+const undoableReducer = makeUndoableReducer(reducer, {
+  add: actionCreators.subtract,
+  subtract: actionCreators.add,
+  updateAmount: invertFTHandler(actionCreators.updateAmount),
+});
+
 export const UseUndoableReducerExample: FC = () => {
   const {
     state,
@@ -47,17 +54,12 @@ export const UseUndoableReducerExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableReducer({
-    reducer,
+    reducer: undoableReducer,
     initialState: {
       count: 0,
       amount: 1,
     },
-    drdoActionCreators: actionCreators,
-    undoActionCreators: {
-      add: actionCreators.subtract,
-      subtract: actionCreators.add,
-      updateAmount: invertFTHandler(actionCreators.updateAmount),
-    },
+    actionCreators,
   });
 
   const { count, amount } = state;

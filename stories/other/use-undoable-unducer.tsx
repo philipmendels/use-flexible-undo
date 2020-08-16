@@ -5,13 +5,14 @@ import {
   invertHandlers,
   makeUndoableFTHandler,
   makeUndoableUpdater,
-  useUndoableUnducer,
+  useUndoableReducer,
 } from '../../src';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
+import { makeUndoableReducer } from '../../src/make-undoable-reducer';
 
 type Nullber = number | null;
 
@@ -37,6 +38,8 @@ const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
+const undoableReducer = makeUndoableReducer(reducer);
+
 export const UseUndoableUnducerExample: FC = () => {
   const {
     state,
@@ -46,8 +49,8 @@ export const UseUndoableUnducerExample: FC = () => {
     redo,
     timeTravel,
     switchToBranch,
-  } = useUndoableUnducer({
-    reducer,
+  } = useUndoableReducer({
+    reducer: undoableReducer,
     initialState: {
       count: 0,
       amount: 1,

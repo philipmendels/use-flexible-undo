@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { Dispatch, Reducer as ReducerReact } from 'react';
 
 export type PayloadByType<T extends string = string, P = any> = Record<T, P>;
 
@@ -6,6 +6,10 @@ export type PayloadHandler<P, R = void> = (payload: P) => R;
 
 export type HandlersByType<PBT extends PayloadByType> = {
   [K in keyof PBT]: PayloadHandler<PBT[K]>;
+};
+
+export type HandlersWithOptionsByType<PBT extends PayloadByType> = {
+  [K in keyof PBT]: (payload: PBT[K], clearFutureOnDo?: boolean) => void;
 };
 
 export type StateUpdater<P, S> = (payload: P) => (state: S) => S;
@@ -107,7 +111,7 @@ export type UndoableUActionCreatorsByType<PBT extends PayloadByType> = {
 
 export type URActionUnion<PBT extends PayloadByType> = ActionUnion<
   PBT,
-  { isUndoable: true; clearFutureOnDo: boolean }
+  { isUndoable: true; clearFutureOnDo?: boolean }
 >;
 
 export type Unducer<S, PBT extends PayloadByType> = (
@@ -201,22 +205,18 @@ export type UndoMap<PBT extends PayloadByType> = {
   [K in keyof PBT]: (payload: PBT[K]) => ActionUnion<PBT>;
 };
 
-interface ReducerCommonProps<S, PBT extends PayloadByType>
-  extends UFUCommonProps<PBT> {
-  initialState: S;
-}
-
-export interface UseUndoableUnducerProps<S, PBT extends PayloadByType>
-  extends ReducerCommonProps<S, PBT> {
-  reducer: Unducer<S, PBT>;
-  actionCreators: UndoableUActionCreatorsByType<PBT>;
-}
+export type UndoableReducer<S, PBT extends PayloadByType> = ReducerReact<
+  UndoableState<S, PBT>,
+  ActionUnion<PBT_UndoableReducer> | URActionUnion<PBT>
+>;
 
 export interface UseUndoableReducerProps<S, PBT extends PayloadByType>
-  extends ReducerCommonProps<S, PBT> {
-  reducer: Reducer<S, PBT>;
-  drdoActionCreators: ActionCreatorsByType<PBT>;
-  undoActionCreators: UndoMap<PBT>;
+  extends UFUCommonProps<PBT> {
+  initialState: S;
+  reducer: UndoableReducer<S, PBT>;
+  actionCreators:
+    | ActionCreatorsByType<PBT>
+    | UndoableUActionCreatorsByType<PBT>;
 }
 
 export interface UndoableState<S, PBT> {
@@ -224,7 +224,7 @@ export interface UndoableState<S, PBT> {
   state: S;
 }
 
-export interface PBT_UndoableReducer_Common {
+export interface PBT_UndoableReducer {
   undo: void;
   redo: void;
   timeTravel: {
@@ -238,21 +238,5 @@ export interface PBT_UndoableReducer_Common {
   switchToBranch: {
     branchId: string;
     travelTo?: BranchSwitchModus;
-  };
-}
-
-export interface PBT_UndoableReducer<PBT extends PayloadByType>
-  extends PBT_UndoableReducer_Common {
-  doUndoable: {
-    action: ActionUnion<PBT>;
-    clearFutureOnDo?: boolean;
-  };
-}
-
-export interface PBT_UndoableUnducer<PBT extends PayloadByType>
-  extends PBT_UndoableReducer_Common {
-  doUndoable: {
-    action: UActionUnion<PBT>;
-    clearFutureOnDo?: boolean;
   };
 }

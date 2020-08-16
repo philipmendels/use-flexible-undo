@@ -13,14 +13,13 @@ import {
   isRedoPossible,
 } from './updaters';
 import { defaultOptions } from './constants';
-import { makeUndoableReducer } from './make-undoable-reducer';
+import { bindActionCreators } from './make-undoable-reducer';
 
 export const useUndoableReducer = <S, PBT extends PayloadByType>({
   initialHistory = createInitialHistory(),
   reducer,
   initialState,
-  undoActionCreators,
-  drdoActionCreators,
+  actionCreators,
   options,
 }: UseUndoableReducerProps<S, PBT>) => {
   const { clearFutureOnDo } = {
@@ -28,29 +27,18 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
     ...options,
   };
 
-  const undoableReducer = useMemo(
-    () => makeUndoableReducer(reducer, undoActionCreators),
-    [reducer, undoActionCreators]
-  );
-
-  const [{ state, history }, dispatch] = useReducer(undoableReducer, {
+  const [{ state, history }, dispatch] = useReducer(reducer, {
     state: initialState,
     history: initialHistory,
   });
 
-  const undoables = useMemo(
-    () =>
-      mapObject(drdoActionCreators)<HandlersByType<PBT>>(([type, creator]) => [
-        type,
-        payload => {
-          dispatch({
-            ...creator(payload),
-            meta: { isUndoable: true, clearFutureOnDo },
-          });
-        },
-      ]),
-    [drdoActionCreators, clearFutureOnDo]
-  );
+  const undoables = useMemo(() => {
+    const acs = bindActionCreators(dispatch, actionCreators);
+    return mapObject(acs)<HandlersByType<PBT>>(([type, ac]) => [
+      type,
+      payload => ac(payload, clearFutureOnDo),
+    ]);
+  }, [actionCreators, clearFutureOnDo]);
 
   const canUndo = useMemo(() => isUndoPossible(history), [history]);
   const canRedo = useMemo(() => isRedoPossible(history), [history]);

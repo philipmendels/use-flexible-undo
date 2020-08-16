@@ -5,4 +5,3 @@ export * from './use-bound-unducer';
 export * from './use-bound-reducer';
 export * from './use-bind-separate-action-creators';
 export * from './use-undoable-reducer';
-export * from './use-undoable-unducer';
