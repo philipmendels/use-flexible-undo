@@ -28,12 +28,13 @@ import {
   getTTActions,
 } from './updaters';
 import { defaultOptions } from './constants';
+import { combineHandlersByType } from './util';
 
-export const useFlexibleUndo = <PBT extends PayloadByType>({
-  handlers,
-  options,
-  initialHistory = createInitialHistory(),
-}: UFUProps<PBT>) => {
+export const useFlexibleUndo = <PBT extends PayloadByType>(
+  props: UFUProps<PBT>
+) => {
+  const { options, initialHistory = createInitialHistory() } = props;
+
   const [history, setHistory] = useState(initialHistory);
 
   const { clearFutureOnDo } = {
@@ -41,18 +42,26 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
     ...options,
   };
 
-  const undoables = useMemo(
+  const convertedHandlers = useMemo(
     () =>
-      mapObject(handlers)<HandlersByType<PBT>>(([type, handler]) => [
+      props.handlers
+        ? props.handlers
+        : combineHandlersByType(props.drdoHandlers, props.undoHandlers),
+    [props.handlers, props.drdoHandlers, props.undoHandlers]
+  );
+
+  const undoables = useMemo(() => {
+    return mapObject(convertedHandlers)<HandlersByType<PBT>>(
+      ([type, handler]) => [
         type,
         payload => {
           const action = createHistoryItem(type, payload);
           handler.drdo(payload);
           setHistory(addHistoryItem(action, clearFutureOnDo));
         },
-      ]),
-    [clearFutureOnDo, handlers]
-  );
+      ]
+    );
+  }, [clearFutureOnDo, convertedHandlers]);
 
   const canUndo = useMemo(() => isUndoPossible(history), [history]);
 
@@ -88,12 +97,20 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
   );
 
   const undo = useCallback(() => {
-    handleUndoRedo(isUndoPossible, getSideEffectForUndo(handlers), undoUpdater);
-  }, [handleUndoRedo, handlers]);
+    handleUndoRedo(
+      isUndoPossible,
+      getSideEffectForUndo(convertedHandlers),
+      undoUpdater
+    );
+  }, [handleUndoRedo, convertedHandlers]);
 
   const redo = useCallback(() => {
-    handleUndoRedo(isRedoPossible, getSideEffectForRedo(handlers), redoUpdater);
-  }, [handleUndoRedo, handlers]);
+    handleUndoRedo(
+      isRedoPossible,
+      getSideEffectForRedo(convertedHandlers),
+      redoUpdater
+    );
+  }, [handleUndoRedo, convertedHandlers]);
 
   const timeTravelCurrentBranch = useCallback(
     (newIndex: number) => {
@@ -108,13 +125,13 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
             if (direction === 'undo') {
               actions.forEach(action => {
                 queuedSideEffectsRef.current.push(
-                  getSideEffectForUndoAction(handlers)(action)
+                  getSideEffectForUndoAction(convertedHandlers)(action)
                 );
               });
             } else {
               actions.forEach(action => {
                 queuedSideEffectsRef.current.push(
-                  getSideEffectForRedoAction(handlers)(action)
+                  getSideEffectForRedoAction(convertedHandlers)(action)
                 );
               });
             }
@@ -128,7 +145,7 @@ export const useFlexibleUndo = <PBT extends PayloadByType>({
         }
       });
     },
-    [handlers]
+    [convertedHandlers]
   );
 
   const timeTravel = useCallback(

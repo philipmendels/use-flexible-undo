@@ -148,10 +148,19 @@ interface UFUCommonProps<PBT extends PayloadByType> {
   options?: UFUOptions;
   initialHistory?: History<PBT>;
 }
-export interface UFUProps<PBT extends PayloadByType>
-  extends UFUCommonProps<PBT> {
-  handlers: UndoableHandlersByType<PBT>;
-}
+export type UFUProps<PBT extends PayloadByType> = UFUCommonProps<PBT> &
+  (
+    | {
+        handlers: UndoableHandlersByType<PBT>;
+        drdoHandlers?: undefined;
+        undoHandlers?: undefined;
+      }
+    | {
+        handlers?: undefined;
+        drdoHandlers: HandlersByType<PBT>;
+        undoHandlers: HandlersByType<PBT>;
+      }
+  );
 
 export interface UFUInverseProps<PBT extends PayloadByType>
   extends UFUCommonProps<PBT> {

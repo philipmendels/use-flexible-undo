@@ -5,14 +5,13 @@ import {
   makeUpdater,
   makeReducer,
   invertFTHandler,
-  useBoundReducerWithUndoMap,
 } from '../../.';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeFTHandler } from '../../src';
+import { makeFTHandler, useBoundUnducer } from '../../src';
 
 type Nullber = number | null;
 
@@ -39,19 +38,19 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
 });
 
 export const UseReducerWithUndoMapExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundReducerWithUndoMap(
+  const [{ count, amount }, handlers] = useBoundUnducer({
     reducer,
-    {
+    initialState: {
       count: 0,
       amount: 1,
     },
-    actionCreators,
-    {
+    drdoActionCreators: actionCreators,
+    undoActionCreators: {
       add: actionCreators.subtract,
       subtract: actionCreators.add,
       updateAmount: invertFTHandler(actionCreators.updateAmount),
-    }
-  );
+    },
+  });
 
   const {
     undoables,

@@ -120,10 +120,14 @@ const timeTravel = <S, PBT extends PayloadByType>(
   return newState;
 };
 
+type MakeUndoableReducerArgs<S, PBT extends PayloadByType> =
+  | [Reducer<S, PBT>, UndoMap<PBT>]
+  | [Unducer<S, PBT>];
+
 export const makeUndoableReducer = <S, PBT extends PayloadByType>(
-  reducer: Reducer<S, PBT> | Unducer<S, PBT>,
-  undoMap?: UndoMap<PBT>
+  ...args: MakeUndoableReducerArgs<S, PBT>
 ): UndoableReducer<S, PBT> => (prevState, reducerAction) => {
+  const [reducer, undoMap] = args;
   if (reducerAction.meta?.isUndoable) {
     const { history, state } = prevState;
     const clearFutureOnDo = reducerAction.meta.clearFutureOnDo || false;

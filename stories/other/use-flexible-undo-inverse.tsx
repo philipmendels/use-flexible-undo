@@ -5,8 +5,7 @@ import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { useFlexibleUndoInverse } from '../../src/use-flexible-undo-inverse';
-import { makeFTHandler } from '../../src';
+import { makeFTHandler, useFlexibleUndo } from '../../src';
 
 export const UseFlexibleUndoInverseExample: FC = () => {
   const [count, setCount] = useState(0);
@@ -24,7 +23,7 @@ export const UseFlexibleUndoInverseExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndoInverse({
+  } = useFlexibleUndo({
     drdoHandlers: {
       add: addHandler,
       subtract: subHandler,
