@@ -28,7 +28,7 @@ import {
   getBranchSwitchProps,
   getActionForRedo,
   getTTActions,
-} from './updaters';
+} from './helpers';
 import { mapObject } from './util-internal';
 
 const reduce = <S, PBT extends PayloadByType>(

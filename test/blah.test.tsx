@@ -1,5 +1,5 @@
 import { History, HistoryItemUnion } from '../src';
-import { getPathFromCommonAncestor, updatePath } from '../src/updaters';
+import { getPathFromCommonAncestor, updatePath } from '../src/helpers';
 
 interface PBT {
   act: string;

@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../../.';
+import { useFlexibleUndo } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -32,6 +32,8 @@ export const DeltaPayloadExample: FC = () => {
       },
     },
   });
+
+  console.log(history);
 
   const { add, subtract } = undoables;
 

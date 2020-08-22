@@ -16,7 +16,7 @@ import {
   getCurrentBranch,
   isUndoPossible,
   isRedoPossible,
-} from '../../src/updaters';
+} from '../../src/helpers';
 
 interface BranchNavProps<PBT extends PayloadByType> {
   history: History<PBT>;

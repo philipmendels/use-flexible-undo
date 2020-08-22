@@ -26,7 +26,7 @@ import {
   getNewPosition,
   getBranchSwitchProps,
   getTTActions,
-} from './updaters';
+} from './helpers';
 import { defaultOptions } from './constants';
 import { combineHandlersByType } from './util';
 

@@ -1,35 +1,131 @@
-# useFlexibleUndo ⎌
+# useFlexibleUndo
 
-**useFlexibleUndo** is a [custom React hook](https://reactjs.org/docs/hooks-custom.html) that that keeps a **history of undoable actions** - as opposed to a history of snapshots of (a slice of) state. **How you manage your state is up to you** and independent of the undo mechanism.
+This library allows you to add a branching undo history to your React project. Because ... the very first thing every user will demand for any kind of app is a branching undo history.
 
-See the StoryBook for a wide range of interactive examples with documentation and code.
+No, all jokes aside, like me you might be interested to experiment with undo/redo UI 😎 and implementation 🤓. This lib gives you two [React hooks](https://reactjs.org/docs/hooks-custom.html) to do so. They keep track of a branching history of undoable actions (as opposed to a history of snapshots of app state). Both offer identical functionality and an almost identical API, but they differ in how they integrate with your app state:
 
-## motivation
+- **useUndoableEffects** allows you to add undo/redo functionality on top of existing state, which means that the undo history state and your app state are managed separately. You can use this hook together with (multiple calls to) useState, useReducer or any combination thereof. Quite nice for prototyping.
+- **useUndoableReducer** manages your application state and undo history state together. This hook takes an undoable reducer which can be created with the included utility **makeUndoableReducer**.
 
-I have used [Redux-Undo](https://github.com/omnidan/redux-undo) to add undo functionality to some projects in which I used [Redux](https://redux.js.org/) for state management. It works great. I did however feel the urge to explore If I could make a more flexible alternative that I could easily use in more lightweight projects (without global state and with less indirection) - including prototypes. Additionally I am interested in learning (ongoing process) about the differences (pros and cons) of having an action history vs a history of state snapshots, and their relation to some more nerdy 🤓 topics such a nonlinear undo and infinite undo.
+Check out the StoryBook for a wide range of examples with documentation and source code.
 
-## warning
-
-This library cannot be used to undo 'real-life' events such as:
-
-- breaking up with your girl/boyfriend.
-- launching a nuclear missile
-- missing an open chance in the football WC final against Spain
-
-## makeUndoable
-
-**makeUndoable** takes an object with an action type and undo/redo handlers. The undo and redo handlers take the payload (here named "amount") as single argument and use it to update the state. Here we make a single undoable function "add". Each time we call "add" the redo handler will be called once immediately, and an action with type "add" and a simple delta value of type number as payload will be stored in the history, so we can undo/redo later.
+## useUndoableEffects
 
 ```typescript
-const add = makeUndoable<number>({
-  type: 'add',
-  drdo: amount => setCount(prev => prev + amount),
-  undo: amount => setCount(prev => prev - amount),
-});
+import React, { FC, useState } from 'react';
+import { useFlexibleUndo } from 'use-flexible-undo';
+
+// action Payload By action Type
+interface PBT {
+  add: number;
+  subtract: number;
+  updateCount: {
+    from: number;
+    to: number;
+  };
+}
+
+export const MyFunctionComponent: FC = () => {
+  const [count, setCount] = useState(0);
+  const [amount, setAmount] = useState<number | null>(1);
+
+  const {
+    undoables,
+    canUndo,
+    undo,
+    canRedo,
+    redo,
+    history,
+    timeTravel,
+    switchToBranch,
+  } = useFlexibleUndo<PBT>({
+    handlers: {
+      add: {
+        drdo: amount => setCount(prev => prev + amount),
+        undo: amount => setCount(prev => prev - amount),
+      },
+      subtract: {
+        drdo: amount => setCount(prev => prev - amount),
+        undo: amount => setCount(prev => prev + amount),
+      },
+      updateCount: {
+        drdo: ({ to }) => setCount(to),
+        undo: ({ from }) => setCount(from),
+      },
+    },
+  });
+
+  const { add, subtract, updateAmount } = undoables;
+
+  return <> your UI here </>;
+};
 ```
 
-<img src="https://github.com/philipmendels/use-flexible-undo/raw/master/assets/use-flexible-undo.png" width="500"/>
+```typescript
+import React, { FC, useState } from 'react';
+import {
+  useFlexibleUndo,
+  makeUndoableFTHandler,
+  makeUndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
 
-## storing the previous state
+export const MyFunctionComponent: FC = () => {
+  const [count, setCount] = useState(0);
+  const [amount, setAmount] = useState<number | null>(1);
 
-<img src="https://github.com/philipmendels/use-flexible-undo/raw/master/assets/use-flexible-undo-2.png" width="792"/>
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    amount => prev => prev + amount
+    amount => prev => prev - amount
+  );
+
+  const { undoables, ...etc } = useFlexibleUndo({
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTHandler(setAmount),
+    },
+  });
+
+  const { add, subtract, updateAmount } = undoables;
+
+  return <> your UI here </>;
+};
+```
+
+```typescript
+import React, { FC, useState } from 'react';
+import {
+  useFlexibleUndo,
+  makeHandler,
+  makeFTHandler,
+  invertFTHandler,
+} from 'use-flexible-undo';
+
+export const MyFunctionComponent: FC = () => {
+  const [count, setCount] = useState(0);
+  const [amount, setAmount] = useState<number | null>(1);
+
+  const countHandler = makeHandler(setCount);
+  const addHandler = countHandler(amount => prev => prev + amount);
+  const subHandler = countHandler(amount => prev => prev - amount);
+  const updateAmountHandler = makeFTHandler(setAmount);
+
+  const { undoables, ...etc } = useFlexibleUndo({
+    drdoHandlers: {
+      add: addHandler,
+      subtract: subHandler,
+      updateAmount: updateAmountHandler,
+    },
+    undoHandlers: {
+      add: subHandler,
+      subtract: addHandler,
+      updateAmount: invertFTHandler(updateAmountHandler),
+    },
+  });
+
+  const { add, subtract, updateAmount } = undoables;
+
+  return <> your UI here </>;
+};
+```

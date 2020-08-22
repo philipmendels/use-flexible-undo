@@ -37,6 +37,10 @@ export const MakeHandlerExample: FC = () => {
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
+      updateCount: {
+        drdo: ({ to }) => setCount(to),
+        undo: ({ from }) => setCount(from),
+      },
     },
   });
 

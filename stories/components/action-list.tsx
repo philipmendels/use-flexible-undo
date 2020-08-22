@@ -14,7 +14,7 @@ import {
   getCurrentBranch,
   getCurrentIndex,
   getSideBranches,
-} from '../../src/updaters';
+} from '../../src/helpers';
 import { formatTime, useInterval } from './util';
 
 type ConvertFn<PBT extends PayloadByType> = (

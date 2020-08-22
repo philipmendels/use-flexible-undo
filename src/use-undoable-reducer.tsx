@@ -11,7 +11,7 @@ import {
   createInitialHistory,
   isUndoPossible,
   isRedoPossible,
-} from './updaters';
+} from './helpers';
 import { defaultOptions } from './constants';
 import { bindActionCreators } from './make-undoable-reducer';
 
