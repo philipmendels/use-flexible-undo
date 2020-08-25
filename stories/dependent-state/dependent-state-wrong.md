@@ -5,7 +5,7 @@ You **_should not_** directly refer to state dependencies from within your do/re
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   UndoableHandler,
   invertHandlers,
@@ -33,7 +33,7 @@ export const WrongHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

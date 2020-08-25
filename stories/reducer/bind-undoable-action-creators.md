@@ -2,12 +2,12 @@
 
 The utility **makeUnducer** takes an object with do/redo + undo state updater functions by action type. It returns an object with a reducer and do/redo + undo action creators by action type. The reducer can be passed to useReducer.
 
-The utility **bindUndoableActionCreators** takes the dispatch function (returned by useReducer) and an object with do/redo + undo action creators by action type, and returns an object with do/redo + undo handers by action type. These handers can be passed to **useFlexibleUndo**.
+The utility **bindUndoableActionCreators** takes the dispatch function (returned by useReducer) and an object with do/redo + undo action creators by action type, and returns an object with do/redo + undo handers by action type. These handers can be passed to **useUndoableEffects**.
 
 ```typescript
 import React, { FC, useReducer } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUnducer,
   PayloadFromTo,
   invertHandlers,
@@ -60,7 +60,7 @@ export const BindUndoableActionCreatorsExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

@@ -5,7 +5,7 @@ You are free to obtain your state dependencies from the previous state, or from 
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   invertHandlers,
   makeUndoableSetter,
@@ -43,7 +43,7 @@ export const PreviousStateAndPayloadExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

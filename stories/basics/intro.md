@@ -1,14 +1,14 @@
 ### Intro - Readme & Code
 
-The **useFlexibleUndo** hook takes a **handlers** object with pairs of do/redo ("drdo") and undo handlers by action type, and returns an **undoables** object with undoable functions by action type. Additionally the hook returns **canUndo** and **canRedo** booleans, and of course ... the **undo** and **redo** functions.
+The **useUndoableEffects** hook takes a **handlers** object with pairs of do/redo ("drdo") and undo handlers by action type, and returns an **undoables** object with undoable functions by action type. Additionally the hook returns **canUndo** and **canRedo** booleans, and of course ... the **undo** and **redo** functions.
 
-If you use TypeScript then you can type **useFlexibleUndo** with a record of payload by action type ("PBT"). Alternatively you could type the payloads within the handlers and let PBT be inferred.
+If you use TypeScript then you can type **useUndoableEffects** with a record of payload by action type ("PBT"). Alternatively you could type the payloads within the handlers and let PBT be inferred.
 
 Finally note that we could have just created one undoable function "add", and wrap that in a "subtract" function which negates its argument ( subtract = amount => add(-amount) ). That's fine, but has the possible downside that you cannot differentiate between the actions in the undo history. In the next example you can see what this history looks like.
 
 ```typescript
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from 'use-flexible-undo';
+import { useUndoableEffects } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 
 // action Payload By action Type
@@ -20,7 +20,7 @@ interface PBT {
 export const IntroExample: FC = () => {
   const [count, setCount] = useState(0);
 
-  const { undoables, canUndo, undo, canRedo, redo } = useFlexibleUndo<PBT>({
+  const { undoables, canUndo, undo, canRedo, redo } = useUndoableEffects<PBT>({
     handlers: {
       add: {
         drdo: amount => setCount(prev => prev + amount),

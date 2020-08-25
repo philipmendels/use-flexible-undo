@@ -5,7 +5,7 @@ Just as you can use the results of separate calls to useState inside you do/redo
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUnducer,
   makeUndoableFTHandler,
   invertHandlers,
@@ -38,11 +38,11 @@ const { reducer, actionCreators } = makeUnducer<State, PBT_Reducer>({
 });
 
 export const ReducerAndUseStateExample: FC = () => {
-  const [{ count }, handlers] = useBoundUnducer(
+  const [{ count }, handlers] = useBoundUnducer({
     reducer,
-    { count: 0 },
-    actionCreators
-  );
+    initialState: { count: 0 },
+    actionCreators,
+  });
   const [amount, setAmount] = useState<number | null>(1);
 
   const {
@@ -52,7 +52,7 @@ export const ReducerAndUseStateExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       ...handlers,
       updateAmount: makeUndoableFTHandler(setAmount),

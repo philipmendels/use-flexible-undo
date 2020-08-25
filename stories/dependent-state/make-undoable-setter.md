@@ -17,7 +17,7 @@ This may not be a one-size-fits-all solution. Feel free to write your own soluti
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   invertHandlers,
   makeUndoableFTHandler,
   makeUndoableSetter,
@@ -53,7 +53,7 @@ export const MakeUndoableSetterExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

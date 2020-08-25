@@ -1,18 +1,18 @@
 ```typescript
 import React, { FC } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   PayloadFromTo,
   makeUpdater,
   makeReducer,
   invertFTHandler,
-  useBoundReducerWithUndoMap,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
+import { makeFTHandler, useBoundUnducer } from '../../src';
 
 type Nullber = number | null;
 
@@ -39,19 +39,19 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
 });
 
 export const UseReducerWithUndoMapExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundReducerWithUndoMap(
+  const [{ count, amount }, handlers] = useBoundUnducer({
     reducer,
-    {
+    initialState: {
       count: 0,
       amount: 1,
     },
-    actionCreators,
-    {
+    drdoActionCreators: actionCreators,
+    undoActionCreators: {
       add: actionCreators.subtract,
       subtract: actionCreators.add,
       updateAmount: invertFTHandler(actionCreators.updateAmount),
-    }
-  );
+    },
+  });
 
   const {
     undoables,
@@ -60,7 +60,7 @@ export const UseReducerWithUndoMapExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

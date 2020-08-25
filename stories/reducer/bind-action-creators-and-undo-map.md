@@ -1,12 +1,13 @@
 ```typescript
 import React, { FC, useReducer } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   PayloadFromTo,
   makeUpdater,
-  makeReducer,
+  makeFTHandler,
   invertFTHandler,
-  bindActionCreatorsAndUndoMap,
+  makeReducer,
+  bindSeparateActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -44,7 +45,7 @@ export const BindActionCreatorsAndUndoMapExample: FC = () => {
     amount: 1,
   });
 
-  const handlers = bindActionCreatorsAndUndoMap(dispatch, actionCreators, {
+  const handlers = bindSeparateActionCreators(dispatch, actionCreators, {
     add: actionCreators.subtract,
     subtract: actionCreators.add,
     updateAmount: invertFTHandler(actionCreators.updateAmount),
@@ -57,7 +58,7 @@ export const BindActionCreatorsAndUndoMapExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

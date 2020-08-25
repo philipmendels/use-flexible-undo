@@ -9,7 +9,7 @@ And again for TypeScript users: Note that we do not need to type anything anymor
 ```typescript
 import React, { useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   wrapFTHandler,
 } from 'use-flexible-undo';
@@ -33,7 +33,7 @@ export const MakeUndoableFTHandlerExample: React.FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       updateCount: makeUndoableFTHandler(setCount),
     },

@@ -5,7 +5,7 @@ You are free to obtain your state dependencies from the previous state, or from 
 ```typescript
 import React, { FC } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUnducer,
   PayloadFromTo,
   invertHandlers,
@@ -46,14 +46,14 @@ const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
 });
 
 export const ReducerWithPreviousStateAndPayloadExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundUnducer(
+  const [{ count, amount }, handlers] = useBoundUnducer({
     reducer,
-    {
+    initialState: {
       count: 0,
       amount: 1,
     },
-    actionCreators
-  );
+    actionCreators,
+  });
 
   const {
     undoables,
@@ -62,7 +62,7 @@ export const ReducerWithPreviousStateAndPayloadExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

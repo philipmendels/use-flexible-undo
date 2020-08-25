@@ -2,7 +2,7 @@
 
 This library allows you to add a branching undo history to your React project. Because ... the very first thing every user will demand for any kind of app is a branching undo history.
 
-No, all jokes aside, like me you might be interested to experiment with undo/redo UI 😎 and implementation 🤓. This lib gives you two [React hooks](https://reactjs.org/docs/hooks-custom.html) to do so. They keep track of a branching history of undoable actions (as opposed to a history of snapshots of app state). Both offer identical functionality and an almost identical API, but they differ in how they integrate with your app state:
+No, all jokes aside, like me you might be interested to experiment with undo/redo UI 😎 and implementation 🤓. This lib gives you two [React hooks](https://reactjs.org/docs/hooks-custom.html) to do so. They keep track of a branching history of undoable actions (as opposed to a history of snapshots of app state). Both hooks offer identical functionality and an almost identical API, but they differ in how they integrate with your app state:
 
 - **useUndoableEffects** allows you to add undo/redo functionality on top of existing state, which means that the undo history state and your app state are managed separately. You can use this hook together with (multiple calls to) useState, useReducer or any combination thereof. Quite nice for prototyping.
 - **useUndoableReducer** manages your application state and undo history state together. This hook takes an undoable reducer which can be created with the included utility **makeUndoableReducer**.
@@ -19,7 +19,7 @@ import { useFlexibleUndo } from 'use-flexible-undo';
 interface PBT {
   add: number;
   subtract: number;
-  updateCount: {
+  updateAmount: {
     from: number;
     to: number;
   };
@@ -48,9 +48,9 @@ export const MyFunctionComponent: FC = () => {
         drdo: amount => setCount(prev => prev - amount),
         undo: amount => setCount(prev => prev + amount),
       },
-      updateCount: {
-        drdo: ({ to }) => setCount(to),
-        undo: ({ from }) => setCount(from),
+      updateAmount: {
+        drdo: ({ to }) => setAmount(to),
+        undo: ({ from }) => setAmount(from),
       },
     },
   });

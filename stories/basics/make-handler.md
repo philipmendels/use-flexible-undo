@@ -11,7 +11,7 @@ And for TypeScript users: Note that we do not need to type anything anymore. The
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeHandler,
   combineHandlers,
 } from 'use-flexible-undo';
@@ -33,14 +33,10 @@ export const MakeHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),
-      updateCount: {
-        drdo: ({ to }) => setCount(to),
-        undo: ({ from }) => setCount(from),
-      },
     },
   });
 

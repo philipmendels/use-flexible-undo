@@ -9,7 +9,7 @@ In this example you can see that manually writing a reducer and calling dispatch
 ```typescript
 import React, { FC, useReducer } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   PayloadFromTo,
   Unducer,
   makeUndoableUpdater,
@@ -70,7 +70,7 @@ export const ReducerAndMakeUndoableUpdaterExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useUndoableEffects<PayloadByType>({
     handlers: {
       add: {
         drdo: () => dispatch({ type: 'add', meta: { isUndo: false } }),

@@ -1,11 +1,11 @@
 ### useBoundUnducer - Readme & Code
 
-The hook **useBoundUnducer** is a basic wrapper for useReducer and bindUndoableActionCreators. It takes a reducer, the initial state and an object with do/redo + undo action creators by action type. It returns (in a tuple) the current state and an object with do/redo + undo handlers by action type. This handlers object is memoized inside the hook, and can be passed to **useFlexibleUndo**.
+The hook **useBoundUnducer** is a basic wrapper for useReducer and bindUndoableActionCreators. It takes a reducer, the initial state and an object with do/redo + undo action creators by action type. It returns (in a tuple) the current state and an object with do/redo + undo handlers by action type. This handlers object is memoized inside the hook, and can be passed to **useUndoableEffects**.
 
 ```typescript
 import React, { FC } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUnducer,
   PayloadFromTo,
   useBoundUnducer,
@@ -44,14 +44,14 @@ const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
 });
 
 export const UseUndoableReducerExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundUnducer(
+  const [{ count, amount }, handlers] = useBoundUnducer({
     reducer,
-    {
+    initialState: {
       count: 0,
       amount: 1,
     },
-    actionCreators
-  );
+    actionCreators,
+  });
 
   const {
     undoables,
@@ -60,7 +60,7 @@ export const UseUndoableReducerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

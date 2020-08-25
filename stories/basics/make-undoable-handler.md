@@ -9,7 +9,7 @@ The utility **invertHandlers** takes an object with 'drdo' and 'undo' as keys an
 ```typescript
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableHandler,
   invertHandlers,
 } from 'use-flexible-undo';
@@ -33,7 +33,7 @@ export const MakeUndoableHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

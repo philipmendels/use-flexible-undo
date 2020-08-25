@@ -33,8 +33,6 @@ export const DeltaPayloadExample: FC = () => {
     },
   });
 
-  console.log(history);
-
   const { add, subtract } = undoables;
 
   return (
