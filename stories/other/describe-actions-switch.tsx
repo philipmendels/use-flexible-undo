@@ -1,13 +1,13 @@
 import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
   ActionUnion,
   Action,
-} from '../../.';
+} from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -53,7 +53,7 @@ export const DescribeActionsSwitch: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useUndoableEffects<PayloadByType>({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

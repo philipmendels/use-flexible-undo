@@ -8,7 +8,7 @@ import {
   History,
   BranchConnection,
   BranchSwitchModus,
-} from '../../.';
+} from 'use-flexible-undo';
 import { GitBranchIcon, DotIcon } from '@primer/octicons-react';
 import {
   getCurrentBranch,

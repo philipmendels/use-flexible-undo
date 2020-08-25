@@ -5,7 +5,7 @@ import {
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
-} from '../../.';
+} from 'use-flexible-undo';
 import { rootClass, uiContainerClass, getStackItemClass } from '../styles';
 import { NumberInput } from '../components/number-input';
 

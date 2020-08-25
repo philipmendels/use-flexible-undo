@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo, makeUndoableFTHandler, wrapFTHandler } from '../../.';
+import {
+  useUndoableEffects,
+  makeUndoableFTHandler,
+  wrapFTHandler,
+} from 'use-flexible-undo';
 import {
   addUpdater,
   subtractUpdater,
@@ -20,7 +24,7 @@ export const MakeUndoableFTHandlerExample: React.FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       updateCount: makeUndoableFTHandler(setCount),
     },

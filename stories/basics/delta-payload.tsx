@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from 'use-flexible-undo';
+import { useUndoableEffects } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -20,7 +20,7 @@ export const DeltaPayloadExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PBT>({
+  } = useUndoableEffects<PBT>({
     handlers: {
       add: {
         drdo: amount => setCount(prev => prev + amount),

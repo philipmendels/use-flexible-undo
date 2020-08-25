@@ -2,17 +2,17 @@ import React, { FC } from 'react';
 import {
   PayloadFromTo,
   makeUpdater,
-  makeReducer,
+  makeFTHandler,
   invertFTHandler,
+  makeReducer,
+  makeUndoableReducer,
   useUndoableReducer,
-} from '../../src';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { ActionList } from '../components/action-list';
 import { BranchNav } from '../components/branch-nav';
-import { makeFTHandler } from '../../src';
-import { makeUndoableReducer } from '../../src/make-undoable-reducer';
 
 type Nullber = number | null;
 

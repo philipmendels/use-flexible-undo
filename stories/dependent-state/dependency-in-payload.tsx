@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
@@ -27,7 +27,7 @@ export const DependencyInPayloadExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

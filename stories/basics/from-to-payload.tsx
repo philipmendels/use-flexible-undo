@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useFlexibleUndo, PayloadFromTo } from '../../.';
+import { useUndoableEffects, PayloadFromTo } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -20,7 +20,7 @@ export const FromToPayloadExample: React.FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PBT>({
+  } = useUndoableEffects<PBT>({
     handlers: {
       updateCount: {
         drdo: ({ to }) => setCount(to),

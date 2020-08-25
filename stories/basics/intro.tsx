@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo } from '../../.';
+import { useUndoableEffects } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 
 // action Payload By action Type
@@ -11,7 +11,7 @@ interface PBT {
 export const IntroExample: FC = () => {
   const [count, setCount] = useState(0);
 
-  const { undoables, canUndo, undo, canRedo, redo } = useFlexibleUndo<PBT>({
+  const { undoables, canUndo, undo, canRedo, redo } = useUndoableEffects<PBT>({
     handlers: {
       add: {
         drdo: amount => setCount(prev => prev + amount),

@@ -1,13 +1,13 @@
 import React, { FC, useReducer } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUnducer,
   PayloadFromTo,
   invertHandlers,
   makeUndoableFTHandler,
   bindUndoableActionCreators,
   makeUndoableUpdater,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -53,7 +53,7 @@ export const BindUndoableActionCreatorsExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

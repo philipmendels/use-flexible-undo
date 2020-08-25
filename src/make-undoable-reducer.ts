@@ -1,5 +1,3 @@
-import { Dispatch } from 'react';
-
 import {
   PayloadByType,
   ActionUnion,
@@ -11,10 +9,7 @@ import {
   UActionUnion,
   HistoryItemUnion,
   URActionUnion,
-  ActionCreatorsByType,
-  HandlersWithOptionsByType,
   UndoableReducer,
-  UndoableUActionCreatorsByType,
 } from './index.types';
 import {
   getCurrentBranch,
@@ -29,7 +24,6 @@ import {
   getActionForRedo,
   getTTActions,
 } from './helpers';
-import { mapObject } from './util-internal';
 
 const reduce = <S, PBT extends PayloadByType>(
   reducer: Reducer<S, PBT> | Unducer<S, PBT>,
@@ -234,21 +228,3 @@ export const makeUndoableReducer = <S, PBT extends PayloadByType>(
     }
   }
 };
-
-export const bindActionCreators = <PBT extends PayloadByType>(
-  dispatch: Dispatch<URActionUnion<PBT>>,
-  actionCreators: ActionCreatorsByType<PBT> | UndoableUActionCreatorsByType<PBT>
-) =>
-  mapObject(actionCreators as ActionCreatorsByType<PBT>)<
-    HandlersWithOptionsByType<PBT>
-  >(([type]) => [
-    type,
-    (payload, clearFutureOnDo) => {
-      // TODO: call actionCreator?
-      dispatch({
-        type,
-        payload,
-        meta: { isUndoable: true, clearFutureOnDo },
-      } as URActionUnion<PBT>);
-    },
-  ]);

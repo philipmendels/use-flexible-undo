@@ -30,7 +30,7 @@ import {
 import { defaultOptions } from './constants';
 import { combineHandlersByType } from './util';
 
-export const useFlexibleUndo = <PBT extends PayloadByType>(
+export const useUndoableEffects = <PBT extends PayloadByType>(
   props: UFUProps<PBT>
 ) => {
   const { options, initialHistory = createInitialHistory() } = props;

@@ -1,10 +1,10 @@
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   UndoableHandler,
   invertHandlers,
-} from '../../.';
+} from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
@@ -28,7 +28,7 @@ export const WrongHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

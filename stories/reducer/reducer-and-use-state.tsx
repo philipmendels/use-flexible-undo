@@ -1,12 +1,12 @@
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUnducer,
   makeUndoableFTHandler,
   invertHandlers,
   useBoundUnducer,
   makeUndoableUpdater,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -33,11 +33,11 @@ const { reducer, actionCreators } = makeUnducer<State, PBT_Reducer>({
 });
 
 export const ReducerAndUseStateExample: FC = () => {
-  const [{ count }, handlers] = useBoundUnducer(
+  const [{ count }, handlers] = useBoundUnducer({
     reducer,
-    { count: 0 },
-    actionCreators
-  );
+    initialState: { count: 0 },
+    actionCreators,
+  });
   const [amount, setAmount] = useState<number | null>(1);
 
   const {
@@ -47,7 +47,7 @@ export const ReducerAndUseStateExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       ...handlers,
       updateAmount: makeUndoableFTHandler(setAmount),

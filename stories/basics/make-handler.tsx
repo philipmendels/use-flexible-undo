@@ -1,5 +1,9 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeHandler, combineHandlers } from '../../.';
+import {
+  useUndoableEffects,
+  makeHandler,
+  combineHandlers,
+} from 'use-flexible-undo';
 import { rootStyle, topUIStyle, actionsStyle, countStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
@@ -18,7 +22,7 @@ export const MakeHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: combineHandlers(addHandler, subHandler),
       subtract: combineHandlers(subHandler, addHandler),

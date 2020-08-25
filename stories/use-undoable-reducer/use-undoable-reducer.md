@@ -6,7 +6,7 @@ import {
   makeReducer,
   invertFTHandler,
   useUndoableReducer,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';

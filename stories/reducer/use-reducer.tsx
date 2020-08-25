@@ -1,10 +1,10 @@
 import React, { FC, useReducer } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   PayloadFromTo,
   Unducer,
   makeUndoableUpdater,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { ActionList } from '../components/action-list';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -61,7 +61,7 @@ export const ReducerAndMakeUndoableUpdaterExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useUndoableEffects<PayloadByType>({
     handlers: {
       add: {
         drdo: () => dispatch({ type: 'add', meta: { isUndo: false } }),

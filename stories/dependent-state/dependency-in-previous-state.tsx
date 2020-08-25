@@ -1,10 +1,10 @@
 import React, { FC, useState } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -38,7 +38,7 @@ export const DependencyInPreviousStateExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

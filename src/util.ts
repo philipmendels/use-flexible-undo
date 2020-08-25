@@ -16,13 +16,15 @@ import {
   DispatchPBT,
   Reducer,
   HandlersByType,
+  URActionUnion,
+  HandlersWithOptionsByType,
 } from './index.types';
 import {
   mapObject,
   makeUActionCreator,
   makeActionCreator,
 } from './util-internal';
-import { SetStateAction } from 'react';
+import { SetStateAction, Dispatch } from 'react';
 
 export const combineHandlers = <P, R>(
   drdo: PayloadHandler<P, R>,
@@ -205,4 +207,22 @@ export const combineHandlersByType = <PBT extends PayloadByType>(
   mapObject(drdoHandlers)<UndoableHandlersByType<PBT>>(([type, handler]) => [
     type,
     combineHandlers(handler, undoHandlers[type]),
+  ]);
+
+export const bindActionCreatorsWithOptions = <PBT extends PayloadByType>(
+  dispatch: Dispatch<URActionUnion<PBT>>,
+  actionCreators: ActionCreatorsByType<PBT> | UndoableUActionCreatorsByType<PBT>
+) =>
+  mapObject(actionCreators as ActionCreatorsByType<PBT>)<
+    HandlersWithOptionsByType<PBT>
+  >(([type]) => [
+    type,
+    (payload, clearFutureOnDo) => {
+      // TODO: call actionCreator?
+      dispatch({
+        type,
+        payload,
+        meta: { isUndoable: true, clearFutureOnDo },
+      } as URActionUnion<PBT>);
+    },
   ]);

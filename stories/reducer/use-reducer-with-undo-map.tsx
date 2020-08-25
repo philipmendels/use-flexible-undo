@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   PayloadFromTo,
   makeUpdater,
   makeReducer,
   invertFTHandler,
-} from '../../.';
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
@@ -59,7 +59,7 @@ export const UseReducerWithUndoMapExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers,
   });
 

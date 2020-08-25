@@ -1,11 +1,15 @@
 import React, { FC, useState } from 'react';
-import { makeHandler, invertFTHandler } from '../../.';
+import {
+  useUndoableEffects,
+  makeHandler,
+  makeFTHandler,
+  invertFTHandler,
+} from 'use-flexible-undo';
 import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeFTHandler, useFlexibleUndo } from '../../src';
 
 export const UseFlexibleUndoInverseExample: FC = () => {
   const [count, setCount] = useState(0);
@@ -23,7 +27,7 @@ export const UseFlexibleUndoInverseExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     drdoHandlers: {
       add: addHandler,
       subtract: subHandler,

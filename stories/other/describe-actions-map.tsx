@@ -1,12 +1,12 @@
 import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
-  useFlexibleUndo,
+  useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
   ActionUnion,
-} from '../../.';
+} from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -27,8 +27,8 @@ type PayloadDescribers = {
 };
 
 const payloadDescribers: PayloadDescribers = {
-  add: amount => `Increase count by ${amount}`,
-  subtract: amount => `Decrease count by ${amount}`,
+  add: amount => `Add ${amount} to count`,
+  subtract: amount => `Subtract ${amount} from count`,
   updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
   start: () => 'Start',
 };
@@ -52,7 +52,7 @@ export const DescribeActionsMap: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo<PayloadByType>({
+  } = useUndoableEffects<PayloadByType>({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

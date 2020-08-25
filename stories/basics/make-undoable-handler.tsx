@@ -1,5 +1,9 @@
 import React, { FC, useState } from 'react';
-import { useFlexibleUndo, makeUndoableHandler, invertHandlers } from '../../.';
+import {
+  useUndoableEffects,
+  makeUndoableHandler,
+  invertHandlers,
+} from 'use-flexible-undo';
 import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
@@ -20,7 +24,7 @@ export const MakeUndoableHandlerExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

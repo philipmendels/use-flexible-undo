@@ -13,7 +13,7 @@ import {
   isRedoPossible,
 } from './helpers';
 import { defaultOptions } from './constants';
-import { bindActionCreators } from './make-undoable-reducer';
+import { bindActionCreatorsWithOptions } from './util';
 
 export const useUndoableReducer = <S, PBT extends PayloadByType>({
   initialHistory = createInitialHistory(),
@@ -33,7 +33,7 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
   });
 
   const undoables = useMemo(() => {
-    const acs = bindActionCreators(dispatch, actionCreators);
+    const acs = bindActionCreatorsWithOptions(dispatch, actionCreators);
     return mapObject(acs)<HandlersByType<PBT>>(([type, ac]) => [
       type,
       payload => ac(payload, clearFutureOnDo),

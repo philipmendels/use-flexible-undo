@@ -1,13 +1,13 @@
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import {
-  useFlexibleUndo,
+  useUndoableEffects,
   invertHandlers,
   makeUndoableHandler,
   UFUOptions,
   UndoableHandlersByType,
   PayloadFromTo,
   makeUndoableFTHandler,
-} from '../../.';
+} from 'use-flexible-undo';
 
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -52,7 +52,7 @@ export const MemoizationExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useFlexibleUndo({
+  } = useUndoableEffects({
     // No need to add the payload types,
     // they will be inferred from the handlers.
     handlers,
