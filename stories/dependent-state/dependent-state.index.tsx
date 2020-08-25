@@ -21,7 +21,7 @@ import { PreviousStateAndPayloadExample } from './previous-state-and-payload';
 import PreviousStateAndPayloadIntro from './previous-state-and-payload-intro.md';
 import PreviousStateAndPayloadReadme from './previous-state-and-payload.md';
 
-storiesOf('useFlexibleUndo/dependent state', module)
+storiesOf('useUndoableEffects/dependent state', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add(`don't do this`, () => <WrongHandlerExample />, {

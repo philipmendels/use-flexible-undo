@@ -41,7 +41,7 @@ import MakeUndoableFromToHandlerReadme from './make-undoable-from-to-handler.md'
 // import MakeUndoablesExtractIntro from './make-undoables-extract-intro.md';
 // import MakeUndoablesExtractReadme from './make-undoables-extract.md';
 
-storiesOf('useFlexibleUndo/basics', module)
+storiesOf('useUndoableEffects/basics', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('intro', () => <IntroExample />, {

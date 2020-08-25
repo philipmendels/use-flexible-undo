@@ -6,7 +6,7 @@ import { HistoryChangeExample } from './history-change';
 import { MemoizationExample } from './memoization';
 import { UseFlexibleUndoInverseExample } from './use-flexible-undo-inverse';
 
-storiesOf('useFlexibleUndo/other', module)
+storiesOf('useUndoableEffects/other', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('describe-actions-switch', () => <DescribeActionsSwitch />, {

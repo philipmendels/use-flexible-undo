@@ -27,7 +27,7 @@ import BindActionCreatorsAndUndoMapReadme from './bind-action-creators-and-undo-
 import { UseReducerWithUndoMapExample } from './use-reducer-with-undo-map';
 import UseReducerWithUndoMapReadme from './use-reducer-with-undo-map.md';
 
-storiesOf('useFlexibleUndo/reducer', module)
+storiesOf('useUndoableEffects/reducer', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add(
