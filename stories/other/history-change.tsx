@@ -1,6 +1,5 @@
 import React, { FC, useState, useRef, useEffect } from 'react';
 import {
-  PayloadFromTo,
   useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
@@ -11,17 +10,9 @@ import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
 
-type Nullber = number | null;
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
 export const HistoryChangeExample: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
+  const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     amount => prev => prev + amount,
@@ -35,7 +26,7 @@ export const HistoryChangeExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useUndoableEffects<PayloadByType>({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),

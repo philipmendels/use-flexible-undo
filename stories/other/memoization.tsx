@@ -3,9 +3,6 @@ import {
   useUndoableEffects,
   invertHandlers,
   makeUndoableHandler,
-  UFUOptions,
-  UndoableHandlersByType,
-  PayloadFromTo,
   makeUndoableFTHandler,
 } from 'use-flexible-undo';
 
@@ -14,26 +11,11 @@ import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
 
-type Nullber = number | null;
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
-// Define constant options outside of the component.
-// It they are dynamic (stateful) then wrap them
-// in useMemo just like the handlers below.
-const options: UFUOptions = {
-  clearFutureOnDo: false,
-};
-
 export const MemoizationExample: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
+  const [amount, setAmount] = useState<number | null>(1);
 
-  const handlers: UndoableHandlersByType<PayloadByType> = useMemo(() => {
+  const handlers = useMemo(() => {
     const undoableAddHandler = makeUndoableHandler(setCount)(
       amount => prev => prev + amount,
       amount => prev => prev - amount
@@ -53,10 +35,10 @@ export const MemoizationExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableEffects({
-    // No need to add the payload types,
-    // they will be inferred from the handlers.
     handlers,
-    options,
+    options: {
+      clearFutureOnDo: false,
+    },
   });
 
   // Just for checking that memoization works.

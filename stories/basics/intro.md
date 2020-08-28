@@ -4,7 +4,7 @@ The **useUndoableEffects** hook takes a **handlers** object with pairs of do/red
 
 If you use TypeScript then you can type **useUndoableEffects** with a record of payload by action type ("PBT"). Alternatively you could type the payloads within the handlers and let PBT be inferred.
 
-Finally note that we could have just created one undoable function "add", and wrap that in a "subtract" function which negates its argument ( subtract = amount => add(-amount) ). That's fine, but has the possible downside that you cannot differentiate between the actions in the undo history. In the next example you can see what this history looks like.
+Finally note that we can also omit the "subtract" function and instead simply call the "add" function with a negated payload. This however has the downside that the user cannot differentiate between the actions in the undo history (they would all have type "add"). It's up to you if you care about that or not. In the next example you can see what the history looks like.
 
 ```typescript
 import React, { FC, useState } from 'react';
