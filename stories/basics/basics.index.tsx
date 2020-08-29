@@ -90,7 +90,7 @@ storiesOf('useUndoableEffects/basics', module)
       },
     }
   )
-  .add('invertFTHandler', () => <InvertFTHandlerExample />, {
+  .add('makeFTHandler & invertFTHandler', () => <InvertFTHandlerExample />, {
     readme: {
       content: InvertFTHandlerIntro,
       sidebar: InvertFTHandlerReadme,

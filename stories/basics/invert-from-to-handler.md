@@ -1,4 +1,10 @@
-### InvertFTHandler - Readme & Code
+### makeFTHandler & invertFTHandler - Readme & Code
+
+If for some reason you prefer to keep your do/redo and undo handlers separate, you can omit the "handlers" prop and directly pass them to the "drdoHandlers" and "undoHandlers" props. As an alternative to using **makeUndoableFTHandler** and then separating the handlers, you can use the following utils:
+
+The utility **makeFTHandler** takes a state setter function (e.g. the one returned from React.useState) as single argument. It returns a function that takes an object with the current "from" state and the new "to" state as payload.
+
+The utility **invertFTHandler** takes a function that takes an object with the current "from" state and the new "to" state as payload, and wraps it in a function that switches the "from" and "to" fields of the payload.
 
 ```typescript
 import React, { useState } from 'react';
