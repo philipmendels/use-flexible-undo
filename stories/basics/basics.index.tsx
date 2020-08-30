@@ -33,7 +33,7 @@ import { InvertFTHandlerExample } from './invert-from-to-handler';
 import InvertFTHandlerIntro from './invert-from-to-handler-intro.md';
 import InvertFTHandlerReadme from './invert-from-to-handler.md';
 
-storiesOf('useUndoableEffects/basics', module)
+storiesOf('useUndoableEffects/payload & handlers', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('intro', () => <IntroExample />, {

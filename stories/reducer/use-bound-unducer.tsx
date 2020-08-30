@@ -38,7 +38,7 @@ const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
-export const UseUndoableReducerExample: FC = () => {
+export const UseBoundUnducerExample: FC = () => {
   const [{ count, amount }, handlers] = useBoundUnducer({
     reducer,
     initialState: {

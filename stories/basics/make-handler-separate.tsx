@@ -3,13 +3,14 @@ import { useUndoableEffects, makeHandler } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, actionsStyle, countStyle } from '../styles';
 import { BranchNav } from '../components/branch-nav';
 import { ActionList } from '../components/action-list';
+import { addUpdater, subtractUpdater } from '../examples-util';
 
 export const SeparateDrdoAndUndoHandlersExample: FC = () => {
   const [count, setCount] = useState(0);
 
   const countHandler = makeHandler(setCount);
-  const addHandler = countHandler(amount => prev => prev + amount);
-  const subHandler = countHandler(amount => prev => prev - amount);
+  const addHandler = countHandler(addUpdater);
+  const subHandler = countHandler(subtractUpdater);
 
   const {
     undoables,

@@ -101,23 +101,39 @@ export const makeUndoableSetter = <S, R>(
 export const makeUpdater = <S, S_PART>(
   getter: (state: S) => S_PART,
   setter: (newState: S_PART) => (state: S) => S
-) => <P, INPUT>(selector: (payload: P) => (state: S) => INPUT) => (
+) => <P, INPUT>(
+  selector: (payload: P) => (state: S) => INPUT,
+  condition: (payload: P) => (state: S) => boolean
+) => (
   updaterMaker: UpdaterMaker<INPUT, S_PART>
 ): PayloadHandler<P, Updater<S>> => payload => prev =>
-  setter(updaterMaker(selector(payload)(prev))(getter(prev)))(prev);
+  condition(payload)(prev)
+    ? setter(updaterMaker(selector(payload)(prev))(getter(prev)))(prev)
+    : prev;
 
 export const makeUndoableUpdater = <S, S_PART>(
   getter: (state: S) => S_PART,
   setter: (newState: S_PART) => (state: S) => S
-) => <P, INPUT>(selector: (payload: P) => (state: S) => INPUT) => (
+) => <P, INPUT>(
+  selector: (payload: P) => (state: S) => INPUT,
+  condition: (payload: P) => (state: S) => boolean
+) => (
   updaterForDrdoMaker: UpdaterMaker<INPUT, S_PART>,
   updaterForUndoMaker: UpdaterMaker<INPUT, S_PART>
 ) =>
   combineHandlers<P, Updater<S>>(
     payload => prev =>
-      setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(prev),
+      condition(payload)(prev)
+        ? setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(
+            prev
+          )
+        : prev,
     payload => prev =>
-      setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(prev)
+      condition(payload)(prev)
+        ? setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(
+            prev
+          )
+        : prev
   );
 
 export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(

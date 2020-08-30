@@ -1,18 +1,19 @@
 ```typescript
-import React, { FC } from 'react';
+import React, { FC, useReducer } from 'react';
 import {
   useUndoableEffects,
   PayloadFromTo,
   makeUpdater,
-  makeReducer,
+  makeFTHandler,
   invertFTHandler,
+  makeReducer,
+  bindSeparateActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeFTHandler, useBoundUnducer } from '../../src';
 
 type Nullber = number | null;
 
@@ -38,19 +39,16 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
-export const UseReducerWithUndoMapExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundUnducer({
-    reducer,
-    initialState: {
-      count: 0,
-      amount: 1,
-    },
-    drdoActionCreators: actionCreators,
-    undoActionCreators: {
-      add: actionCreators.subtract,
-      subtract: actionCreators.add,
-      updateAmount: invertFTHandler(actionCreators.updateAmount),
-    },
+export const BindSeparateActionCreatorsExample: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
+    count: 0,
+    amount: 1,
+  });
+
+  const handlers = bindSeparateActionCreators(dispatch, actionCreators, {
+    add: actionCreators.subtract,
+    subtract: actionCreators.add,
+    updateAmount: invertFTHandler(actionCreators.updateAmount),
   });
 
   const {

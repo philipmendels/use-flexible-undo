@@ -1,23 +1,17 @@
-### useBoundUnducer - Readme & Code
-
-The hook **useBoundUnducer** is a basic wrapper for useReducer and bindUndoableActionCreators. It takes a reducer, the initial state and an object with do/redo + undo action creators by action type. It returns (in a tuple) the current state and an object with do/redo + undo handlers by action type. This handlers object is memoized inside the hook, and can be passed to **useUndoableEffects**.
-
-```typescript
 import React, { FC } from 'react';
 import {
   useUndoableEffects,
-  makeUnducer,
   PayloadFromTo,
-  useBoundUnducer,
-  makeUndoableFTHandler,
-  invertHandlers,
-  makeUndoableUpdater,
+  makeUpdater,
+  makeReducer,
+  invertFTHandler,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
-import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
+import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
+import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { ActionList } from '../components/action-list';
+import { makeFTHandler, useBoundUnducer } from '../../src';
 
 type Nullber = number | null;
 
@@ -32,25 +26,30 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoableUpdater(
+const countUpdater = makeUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(() => state => state.amount || 0)(addUpdater, subtractUpdater);
+)(() => state => state.amount || 0);
 
-const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
+const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
+  add: countUpdater(addUpdater),
+  subtract: countUpdater(subtractUpdater),
+  updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
-export const UseUndoableReducerExample: FC = () => {
+export const UseBoundUnducerWithSepActionCreatorsExample: FC = () => {
   const [{ count, amount }, handlers] = useBoundUnducer({
     reducer,
     initialState: {
       count: 0,
       amount: 1,
     },
-    actionCreators,
+    drdoActionCreators: actionCreators,
+    undoActionCreators: {
+      add: actionCreators.subtract,
+      subtract: actionCreators.add,
+      updateAmount: invertFTHandler(actionCreators.updateAmount),
+    },
   });
 
   const {
@@ -105,4 +104,3 @@ export const UseUndoableReducerExample: FC = () => {
     </div>
   );
 };
-```

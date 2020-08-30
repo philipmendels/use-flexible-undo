@@ -1,18 +1,11 @@
-```typescript
 import React, { FC, useReducer } from 'react';
-import {
-  useUndoableEffects,
-  PayloadFromTo,
-  Reducer,
-  invertHandlers,
-  invertFTHandler,
-} from 'use-flexible-undo';
+import { useUndoableEffects, PayloadFromTo, Unducer } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { ActionList } from '../components/action-list';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeUpdater } from '../../src';
+import { makeUndoableUpdater } from '../../src';
 
 type Nullber = number | null;
 
@@ -27,40 +20,53 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const countUpdater = makeUpdater(
+const undoableAddUpdater = makeUndoableUpdater(
   (state: State) => state.count, // getter
   count => merge({ count }) // setter
 )(
   (_: void) => state => state.amount || 0, // dependency selector
   () => state => Boolean(state.amount) // condition
-);
+)(addUpdater, subtractUpdater);
 
-const reducer: Reducer<State, PayloadByType> = (prevState, action) => {
+const unducer: Unducer<State, PayloadByType> = (prevState, action) => {
+  const isUndo = action.meta?.isUndo;
   switch (action.type) {
     case 'add':
-      return countUpdater(addUpdater)()(prevState);
+      return isUndo
+        ? undoableAddUpdater.undo()(prevState)
+        : undoableAddUpdater.drdo()(prevState);
     case 'subtract':
-      return countUpdater(subtractUpdater)()(prevState);
+      return isUndo
+        ? undoableAddUpdater.drdo()(prevState)
+        : undoableAddUpdater.undo()(prevState);
     case 'updateAmount':
-      return { ...prevState, amount: action.payload.to };
+      const { from, to } = action.payload;
+      return { ...prevState, amount: isUndo ? from : to };
     default:
       return prevState;
   }
 };
 
-export const ReducerAndMakeUpdaterExample: FC = () => {
-  const [{ count, amount }, dispatch] = useReducer(reducer, {
+const makeHandlers = <R extends unknown>(fn: (isUndo: boolean) => R) => ({
+  drdo: fn(false),
+  undo: fn(true),
+});
+
+export const UnducerAndMakeUndoableUpdaterExample: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(unducer, {
     count: 0,
     amount: 1,
   });
 
-  const addHandlers = {
-    drdo: () => dispatch({ type: 'add' }),
-    undo: () => dispatch({ type: 'subtract' }),
-  };
+  const makeAddHandler = (isUndo: boolean) => () =>
+    dispatch({ type: 'add', meta: { isUndo } });
 
-  const updateAmountHandler = (payload: PayloadFromTo<Nullber>) =>
-    dispatch({ type: 'updateAmount', payload });
+  const makeSubtractHandler = (isUndo: boolean) => () =>
+    dispatch({ type: 'subtract', meta: { isUndo } });
+
+  const makeUpdateAmountHandler = (isUndo: boolean) => (
+    payload: PayloadFromTo<Nullber>
+  ) => dispatch({ type: 'updateAmount', payload, meta: { isUndo } });
 
   const {
     undoables,
@@ -71,12 +77,9 @@ export const ReducerAndMakeUpdaterExample: FC = () => {
     switchToBranch,
   } = useUndoableEffects<PayloadByType>({
     handlers: {
-      add: addHandlers,
-      subtract: invertHandlers(addHandlers),
-      updateAmount: {
-        drdo: updateAmountHandler,
-        undo: invertFTHandler(updateAmountHandler),
-      },
+      add: makeHandlers(makeAddHandler),
+      subtract: makeHandlers(makeSubtractHandler),
+      updateAmount: makeHandlers(makeUpdateAmountHandler),
     },
   });
 
@@ -121,4 +124,3 @@ export const ReducerAndMakeUpdaterExample: FC = () => {
     </div>
   );
 };
-```
