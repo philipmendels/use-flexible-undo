@@ -24,12 +24,13 @@ export const PreviousStateAndPayloadExample: FC = () => {
     amount: 1,
   });
 
+  const selectAmount = (shouldDouble: boolean) => ({ amount }: State) =>
+    amount ? (shouldDouble ? amount * 2 : amount) : 0;
+
   const undoableAddHandler = makeUndoableSetter(setState)(
     state => state.count,
     count => merge({ count })
-  )((shouldDouble: boolean) => ({ amount }) =>
-    amount ? (shouldDouble ? amount * 2 : amount) : 0
-  )(addUpdater, subtractUpdater);
+  )(selectAmount)(addUpdater, subtractUpdater);
 
   const {
     undoables,

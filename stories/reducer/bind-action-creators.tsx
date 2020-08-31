@@ -1,14 +1,12 @@
-### Previous state and payload - Readme & Code
-
-You are free to obtain your state dependencies from the previous state, or from the action payload, or from a combination of the two. In this somewhat contrived :) example "shouldDouble" is not part of state (there is a dedicated button for "add x 2"), hence we simply pass a static boolean value as the action payload.
-
-```typescript
-import React, { FC, useState } from 'react';
+import React, { FC, useReducer } from 'react';
 import {
   useUndoableEffects,
-  makeUndoableFTHandler,
-  invertHandlers,
-  makeUndoableSetter,
+  PayloadFromTo,
+  makeUpdater,
+  makeFTHandler,
+  invertFTHandler,
+  makeReducer,
+  bindActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
@@ -23,19 +21,30 @@ interface State {
   amount: Nullber;
 }
 
-export const PreviousStateAndPayloadExample: FC = () => {
-  const [{ count, amount }, setState] = useState<State>({
+interface PayloadByType {
+  add: void;
+  subtract: void;
+  updateAmount: PayloadFromTo<Nullber>;
+}
+
+const countUpdater = makeUpdater(
+  (state: State) => state.count,
+  count => merge({ count })
+)(() => state => state.amount || 0);
+
+const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
+  add: countUpdater(addUpdater),
+  subtract: countUpdater(subtractUpdater),
+  updateAmount: makeFTHandler(amount => merge({ amount })),
+});
+
+export const BindActionCreatorsExample: FC = () => {
+  const [{ count, amount }, dispatch] = useReducer(reducer, {
     count: 0,
     amount: 1,
   });
 
-  const selectAmount = (shouldDouble: boolean) => ({ amount }: State) =>
-    amount ? (shouldDouble ? amount * 2 : amount) : 0;
-
-  const undoableAddHandler = makeUndoableSetter(setState)(
-    state => state.count,
-    count => merge({ count })
-  )(selectAmount)(addUpdater, subtractUpdater);
+  const drdoHandlers = bindActionCreators(dispatch, actionCreators);
 
   const {
     undoables,
@@ -45,12 +54,11 @@ export const PreviousStateAndPayloadExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableEffects({
-    handlers: {
-      add: undoableAddHandler,
-      subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTHandler((amount: Nullber) =>
-        setState(merge({ amount }))
-      ),
+    drdoHandlers,
+    undoHandlers: {
+      add: drdoHandlers.subtract,
+      subtract: drdoHandlers.add,
+      updateAmount: invertFTHandler(drdoHandlers.updateAmount),
     },
   });
 
@@ -73,13 +81,10 @@ export const PreviousStateAndPayloadExample: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add(false)}>
+          <button disabled={!amount} onClick={() => add()}>
             add
           </button>
-          <button disabled={!amount} onClick={() => add(true)}>
-            add x 2
-          </button>
-          <button disabled={!amount} onClick={() => subtract(false)}>
+          <button disabled={!amount} onClick={() => subtract()}>
             subtract
           </button>
         </div>
@@ -98,4 +103,3 @@ export const PreviousStateAndPayloadExample: FC = () => {
     </div>
   );
 };
-```

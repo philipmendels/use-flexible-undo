@@ -24,10 +24,12 @@ export const MakeUndoableSetterExample: FC = () => {
     amount: 1,
   });
 
+  const selectAmount = (_: void) => (state: State) => state.amount || 0;
+
   const undoableAddHandler = makeUndoableSetter(setState)(
     state => state.count,
     count => merge({ count })
-  )((_: void) => state => state.amount || 0)(addUpdater, subtractUpdater);
+  )(selectAmount)(addUpdater, subtractUpdater);
 
   const {
     undoables,

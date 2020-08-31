@@ -6,13 +6,14 @@ import {
   makeUpdater,
   makeReducer,
   invertFTHandler,
+  makeFTHandler,
+  useBindSeparateActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeFTHandler, useBoundUnducer } from '../../src';
 
 type Nullber = number | null;
 
@@ -38,8 +39,8 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
-export const UseBoundUnducerWithSepActionCreatorsExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundUnducer({
+export const UseBindSeparateActionCreatorsExample: FC = () => {
+  const [{ count, amount }, handlers] = useBindSeparateActionCreators({
     reducer,
     initialState: {
       count: 0,

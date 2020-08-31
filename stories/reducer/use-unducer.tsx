@@ -1,11 +1,15 @@
 import React, { FC, useReducer } from 'react';
-import { useUndoableEffects, PayloadFromTo, Unducer } from 'use-flexible-undo';
+import {
+  useUndoableEffects,
+  PayloadFromTo,
+  Unducer,
+  makeUndoableUpdater,
+} from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { ActionList } from '../components/action-list';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeUndoableUpdater } from '../../src';
 
 type Nullber = number | null;
 
@@ -20,13 +24,12 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
+const selectAmount = (_: void) => (state: State) => state.amount || 0;
+
 const undoableAddUpdater = makeUndoableUpdater(
-  (state: State) => state.count, // getter
-  count => merge({ count }) // setter
-)(
-  (_: void) => state => state.amount || 0, // dependency selector
-  () => state => Boolean(state.amount) // condition
-)(addUpdater, subtractUpdater);
+  (state: State) => state.count,
+  count => merge({ count })
+)(selectAmount)(addUpdater, subtractUpdater);
 
 const unducer: Unducer<State, PayloadByType> = (prevState, action) => {
   const isUndo = action.meta?.isUndo;

@@ -6,13 +6,13 @@ import {
   Reducer,
   invertHandlers,
   invertFTHandler,
+  makeUpdater,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { ActionList } from '../components/action-list';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { makeUpdater } from '../../src';
 
 type Nullber = number | null;
 
@@ -27,13 +27,12 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
+const selectAmount = (_: void) => (state: State) => state.amount || 0;
+
 const countUpdater = makeUpdater(
-  (state: State) => state.count, // getter
-  count => merge({ count }) // setter
-)(
-  (_: void) => state => state.amount || 0, // dependency selector
-  () => state => Boolean(state.amount) // condition
-);
+  (state: State) => state.count,
+  count => merge({ count })
+)(selectAmount);
 
 const reducer: Reducer<State, PayloadByType> = (prevState, action) => {
   switch (action.type) {

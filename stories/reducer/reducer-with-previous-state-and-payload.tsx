@@ -5,8 +5,8 @@ import {
   PayloadFromTo,
   invertHandlers,
   makeUndoableFTHandler,
-  useBoundUnducer,
   makeUndoableUpdater,
+  useBindUndoableActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
@@ -27,22 +27,23 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
+const selectAmount = (shouldDouble: boolean) => ({ amount }: State) =>
+  amount ? (shouldDouble ? amount * 2 : amount) : 0;
+
 const undoableAddHandler = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)((shouldDouble: boolean) => ({ amount }) =>
-  amount ? (shouldDouble ? amount * 2 : amount) : 0
-)(addUpdater, subtractUpdater);
+)(selectAmount)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
+const { unducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddHandler,
   subtract: invertHandlers(undoableAddHandler),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
 export const ReducerWithPreviousStateAndPayloadExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundUnducer({
-    reducer,
+  const [{ count, amount }, handlers] = useBindUndoableActionCreators({
+    unducer,
     initialState: {
       count: 0,
       amount: 1,

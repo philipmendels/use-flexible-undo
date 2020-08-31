@@ -8,10 +8,10 @@ import {
   useUndoableEffects,
   makeUnducer,
   PayloadFromTo,
-  useBoundUnducer,
   makeUndoableFTHandler,
   invertHandlers,
   makeUndoableUpdater,
+  useBindUndoableActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
@@ -32,20 +32,22 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const undoableAddHandler = makeUndoableUpdater(
+const selectAmount = (_: void) => (state: State) => state.amount || 0;
+
+const undoableAddUpdater = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(() => state => state.amount || 0)(addUpdater, subtractUpdater);
+)(selectAmount)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
+const { unducer, actionCreators } = makeUnducer<State, PayloadByType>({
+  add: undoableAddUpdater,
+  subtract: invertHandlers(undoableAddUpdater),
   updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
 });
 
-export const UseBoundUnducerExample: FC = () => {
-  const [{ count, amount }, handlers] = useBoundUnducer({
-    reducer,
+export const useBindUndoableActionCreatorsExample: FC = () => {
+  const [{ count, amount }, handlers] = useBindUndoableActionCreators({
+    unducer,
     initialState: {
       count: 0,
       amount: 1,

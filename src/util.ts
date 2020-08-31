@@ -78,23 +78,40 @@ export const makeUndoableFTHandler = <S, R>(stateSetter: (s: S) => R) =>
     ({ from }) => stateSetter(from)
   );
 
+const shouldUpdate = <P, S>(
+  payload: P,
+  prev: S,
+  condition?: (payload: P) => (state: S) => boolean
+) => !condition || condition(payload)(prev);
+
 export const makeUndoableSetter = <S, R>(
   stateSetter: (stateUpdater: Updater<S>) => R
 ) => <S_PART>(
   getter: (state: S) => S_PART,
   setter: (newState: S_PART) => (state: S) => S
-) => <P, INPUT>(selector: (payload: P) => (state: S) => INPUT) => (
+) => <P, INPUT>(
+  selector: (payload: P) => (state: S) => INPUT,
+  condition?: (payload: P) => (state: S) => boolean
+) => (
   updaterForDrdoMaker: UpdaterMaker<INPUT, S_PART>,
   updaterForUndoMaker: UpdaterMaker<INPUT, S_PART>
 ) =>
   combineHandlers<P, R>(
     payload =>
       stateSetter(prev =>
-        setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(prev)
+        shouldUpdate(payload, prev, condition)
+          ? setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(
+              prev
+            )
+          : prev
       ),
     payload =>
       stateSetter(prev =>
-        setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(prev)
+        shouldUpdate(payload, prev, condition)
+          ? setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(
+              prev
+            )
+          : prev
       )
   );
 
@@ -103,11 +120,11 @@ export const makeUpdater = <S, S_PART>(
   setter: (newState: S_PART) => (state: S) => S
 ) => <P, INPUT>(
   selector: (payload: P) => (state: S) => INPUT,
-  condition: (payload: P) => (state: S) => boolean
+  condition?: (payload: P) => (state: S) => boolean
 ) => (
   updaterMaker: UpdaterMaker<INPUT, S_PART>
 ): PayloadHandler<P, Updater<S>> => payload => prev =>
-  condition(payload)(prev)
+  shouldUpdate(payload, prev, condition)
     ? setter(updaterMaker(selector(payload)(prev))(getter(prev)))(prev)
     : prev;
 
@@ -116,20 +133,20 @@ export const makeUndoableUpdater = <S, S_PART>(
   setter: (newState: S_PART) => (state: S) => S
 ) => <P, INPUT>(
   selector: (payload: P) => (state: S) => INPUT,
-  condition: (payload: P) => (state: S) => boolean
+  condition?: (payload: P) => (state: S) => boolean
 ) => (
   updaterForDrdoMaker: UpdaterMaker<INPUT, S_PART>,
   updaterForUndoMaker: UpdaterMaker<INPUT, S_PART>
 ) =>
   combineHandlers<P, Updater<S>>(
     payload => prev =>
-      condition(payload)(prev)
+      shouldUpdate(payload, prev, condition)
         ? setter(updaterForDrdoMaker(selector(payload)(prev))(getter(prev)))(
             prev
           )
         : prev,
     payload => prev =>
-      condition(payload)(prev)
+      shouldUpdate(payload, prev, condition)
         ? setter(updaterForUndoMaker(selector(payload)(prev))(getter(prev)))(
             prev
           )
@@ -149,7 +166,7 @@ export const wrapFTHandler = <S, R>(
 export const makeUnducer = <S, PBT extends PayloadByType>(
   stateUpdaters: UndoableStateUpdatersByType<S, PBT>
 ) => ({
-  reducer: ((state, { payload, type, meta }) => {
+  unducer: ((state, { payload, type, meta }) => {
     const updater = stateUpdaters[type];
     return updater
       ? meta && meta.isUndo

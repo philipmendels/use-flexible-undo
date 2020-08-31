@@ -9,8 +9,8 @@ import {
   makeUnducer,
   makeUndoableFTHandler,
   invertHandlers,
-  useBoundUnducer,
   makeUndoableUpdater,
+  useBindUndoableActionCreators,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
 import { topUIStyle, rootStyle, countStyle, actionsStyle } from '../styles';
@@ -27,19 +27,21 @@ interface PBT_Reducer {
   subtract: number;
 }
 
-const undoableAddHandler = makeUndoableUpdater(
+const selectAmount = (amount: number) => () => amount;
+
+const undoableAddUpdater = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)((amount: number) => () => amount)(addUpdater, subtractUpdater);
+)(selectAmount)(addUpdater, subtractUpdater);
 
-const { reducer, actionCreators } = makeUnducer<State, PBT_Reducer>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
+const { unducer, actionCreators } = makeUnducer<State, PBT_Reducer>({
+  add: undoableAddUpdater,
+  subtract: invertHandlers(undoableAddUpdater),
 });
 
 export const ReducerAndUseStateExample: FC = () => {
-  const [{ count }, handlers] = useBoundUnducer({
-    reducer,
+  const [{ count }, handlers] = useBindUndoableActionCreators({
+    unducer,
     initialState: { count: 0 },
     actionCreators,
   });

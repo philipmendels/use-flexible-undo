@@ -3,8 +3,10 @@ import React, { FC } from 'react';
 import {
   PayloadFromTo,
   makeUpdater,
-  makeReducer,
+  makeFTHandler,
   invertFTHandler,
+  makeReducer,
+  makeUndoableReducer,
   useUndoableReducer,
 } from 'use-flexible-undo';
 import { merge, addUpdater, subtractUpdater } from '../examples-util';
@@ -37,6 +39,12 @@ const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
+const undoableReducer = makeUndoableReducer(reducer, {
+  add: actionCreators.subtract,
+  subtract: actionCreators.add,
+  updateAmount: invertFTHandler(actionCreators.updateAmount),
+});
+
 export const UseUndoableReducerExample: FC = () => {
   const {
     state,
@@ -47,17 +55,12 @@ export const UseUndoableReducerExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableReducer({
-    reducer,
+    reducer: undoableReducer,
     initialState: {
       count: 0,
       amount: 1,
     },
     actionCreators,
-    undoMap: {
-      add: actionCreators.subtract,
-      subtract: actionCreators.add,
-      updateAmount: invertFTHandler(actionCreators.updateAmount),
-    },
   });
 
   const { count, amount } = state;
