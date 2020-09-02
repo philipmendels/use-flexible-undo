@@ -15,6 +15,13 @@ export const topUIStyle = css`
   top: 0;
   border-bottom: 1px solid #ddd;
   margin: 20px 0;
+  select {
+    font-size: 14px;
+    font-family: Verdana, sans-serif;
+    padding: 4px 8px;
+    margin-right: 10px;
+    width: 200px;
+  }
   button,
   input[type='number'] {
     font-size: 14px;
@@ -61,16 +68,14 @@ export const countStyle = css`
 
 export const actionsStyle = css`
   display: flex;
+  align-items: center;
   margin-bottom: 20px;
+  white-space: nowrap;
 `;
 
-export const getStackItemClass = (props: {
-  active: boolean;
-  range: 'past' | 'future';
-}) => css`
+export const getStackItemStyle = (props: { active: boolean }) => css`
   padding: 6px 0;
   cursor: default;
-  color: ${props.range === 'future' ? '#BBB' : 'black'};
   ${props.active
     ? 'color: #48a7f6;'
     : `
