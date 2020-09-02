@@ -23,7 +23,7 @@ export const useInterval = (
   }, [delay]);
 };
 
-export const getLastItem = <T extends any>(array: T[]) =>
+export const getLastItem = <T extends unknown>(array: T[]) =>
   array[array.length - 1];
 
 export const formatTime = (created: Date, now: Date): string => {

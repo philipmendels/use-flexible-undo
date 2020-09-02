@@ -14,8 +14,7 @@ import {
   getStackItemStyle,
 } from '../styles';
 import { NumberInput } from '../components/number-input';
-
-const getLastItem = <T extends unknown>(array: T[]) => array[array.length - 1];
+import { getLastItem } from '../components/util';
 
 export const SwitchToBranchExample: FC = () => {
   const [count, setCount] = useState(0);
