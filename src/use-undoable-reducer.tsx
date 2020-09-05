@@ -17,7 +17,7 @@ import { bindActionCreatorsWithOptions } from './util';
 
 export const useUndoableReducer = <S, PBT extends PayloadByType>({
   initialHistory = createInitialHistory(),
-  reducer,
+  undoableReducer,
   initialState,
   actionCreators,
   options,
@@ -27,7 +27,7 @@ export const useUndoableReducer = <S, PBT extends PayloadByType>({
     ...options,
   };
 
-  const [{ state, history }, dispatch] = useReducer(reducer, {
+  const [{ state, history }, dispatch] = useReducer(undoableReducer, {
     state: initialState,
     history: initialHistory,
   });

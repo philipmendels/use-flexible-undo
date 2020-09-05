@@ -1,22 +1,26 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
 } from 'use-flexible-undo';
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
+import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { ActionList } from '../components/action-list';
+import { reviver } from './reviver';
 
-export const HistoryChangeExample: FC = () => {
+const localStorageKey = 'ufu-local-storage-example';
+
+export const LocalStorageExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+    addUpdater,
+    subtractUpdater
   );
 
   const {
@@ -26,6 +30,7 @@ export const HistoryChangeExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
+    setHistory,
   } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
@@ -36,14 +41,35 @@ export const HistoryChangeExample: FC = () => {
 
   const { add, subtract, updateAmount } = undoables;
 
-  const prevHistoryRef = useRef(history);
   useEffect(() => {
-    console.log('history change', {
-      from: prevHistoryRef.current,
-      to: history,
-    });
-    prevHistoryRef.current = history;
-  }, [history]);
+    try {
+      const data = localStorage.getItem(localStorageKey);
+      if (data) {
+        const parsed = JSON.parse(data, reviver);
+        setHistory(parsed.history);
+        setCount(parsed.count);
+        setAmount(parsed.amount);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [setHistory]); // linter does not know setHistory is stable
+
+  useEffect(() => {
+    // optionally throttle this
+    try {
+      localStorage.setItem(
+        localStorageKey,
+        JSON.stringify({
+          count,
+          amount,
+          history,
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }, [amount, count, history]);
 
   return (
     <div className={rootStyle}>

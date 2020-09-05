@@ -1,31 +1,24 @@
-import React, { FC, useState, useEffect, useMemo } from 'react';
+import React, { FC, useState, useRef, useEffect } from 'react';
 import {
   useUndoableEffects,
-  invertHandlers,
-  makeUndoableHandler,
   makeUndoableFTHandler,
+  makeUndoableHandler,
+  invertHandlers,
 } from 'use-flexible-undo';
-
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
+import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { ActionList } from '../components/action-list';
 
-export const MemoizationExample: FC = () => {
+export const HistoryChangeExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
-  const handlers = useMemo(() => {
-    const undoableAddHandler = makeUndoableHandler(setCount)(
-      amount => prev => prev + amount,
-      amount => prev => prev - amount
-    );
-    return {
-      add: undoableAddHandler,
-      subtract: invertHandlers(undoableAddHandler),
-      updateAmount: makeUndoableFTHandler(setAmount),
-    };
-  }, []);
+  const undoableAddHandler = makeUndoableHandler(setCount)(
+    addUpdater,
+    subtractUpdater
+  );
 
   const {
     undoables,
@@ -35,20 +28,24 @@ export const MemoizationExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableEffects({
-    handlers,
-    options: {
-      // options do not need to be memoized / extracted
-      clearFutureOnDo: false,
+    handlers: {
+      add: undoableAddHandler,
+      subtract: invertHandlers(undoableAddHandler),
+      updateAmount: makeUndoableFTHandler(setAmount),
     },
   });
 
-  // Just for checking that memoization works.
-  // Effect should only run once instead of every render.
-  useEffect(() => {
-    console.log('undoables changed', undoables);
-  }, [undoables]);
-
   const { add, subtract, updateAmount } = undoables;
+
+  const prevHistoryRef = useRef(history);
+
+  useEffect(() => {
+    console.log('history change', {
+      from: prevHistoryRef.current,
+      to: history,
+    });
+    prevHistoryRef.current = history;
+  }, [history]);
 
   return (
     <div className={rootStyle}>

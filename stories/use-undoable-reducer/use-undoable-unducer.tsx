@@ -27,12 +27,12 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const selectAmount = (_: void) => (state: State) => state.amount || 0;
+const selectDependency = (_: void) => (state: State) => state.amount || 0;
 
 const undoableAddUpdater = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(selectAmount)(addUpdater, subtractUpdater);
+)(selectDependency)(addUpdater, subtractUpdater);
 
 const { unducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddUpdater,
@@ -52,7 +52,7 @@ export const UseUndoableUnducerExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableReducer({
-    reducer: undoableReducer,
+    undoableReducer,
     initialState: {
       count: 0,
       amount: 1,

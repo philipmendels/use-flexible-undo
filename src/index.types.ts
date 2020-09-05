@@ -222,7 +222,7 @@ export type UndoableReducer<S, PBT extends PayloadByType> = ReducerReact<
 export interface UseUndoableReducerProps<S, PBT extends PayloadByType>
   extends UFUCommonProps<PBT> {
   initialState: S;
-  reducer: UndoableReducer<S, PBT>;
+  undoableReducer: UndoableReducer<S, PBT>;
   actionCreators:
     | ActionCreatorsByType<PBT>
     | UndoableUActionCreatorsByType<PBT>;

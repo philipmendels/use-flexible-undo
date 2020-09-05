@@ -65,6 +65,9 @@ export const MyFunctionComponent: FC = () => {
 };
 ```
 
+Mention no typing needed due to utils.
+Mention split up in multiple (styled) components.
+
 ```typescript
 import React, { FC, useState } from 'react';
 import {
@@ -73,6 +76,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
 } from 'use-flexible-undo';
+// following imports are not part of the library
 import { addUpdater, subtractUpdater } from '../examples-util';
 import {
   rootStyle,
@@ -89,8 +93,8 @@ export const MyFunctionComponent: FC = () => {
   const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    addUpdater,
-    subtractUpdater
+    addUpdater, // amount => prev => prev + amount
+    subtractUpdater //        ... => prev - amount
   );
 
   const {
@@ -103,13 +107,16 @@ export const MyFunctionComponent: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableEffects({
+    // types are inferred from setCount / setAmount
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
       updateAmount: makeUndoableFTHandler(setAmount),
     },
     options: {
-      clearFutureOnDo: false, // this is the default
+      clearFutureOnDo: false,
+      // This is the default.
+      // Not clearing the future means making a new branch.
     },
   });
 
@@ -118,6 +125,7 @@ export const MyFunctionComponent: FC = () => {
   const { branches, currentBranchId, currentPosition } = history;
   const { stack } = branches[currentBranchId];
 
+  // show the last-modified branch on top
   const branchList = Object.values(branches).sort(
     (a, b) =>
       getLastItem(b.stack).created.getTime() -
@@ -132,6 +140,8 @@ export const MyFunctionComponent: FC = () => {
           <label>
             amount =&nbsp;
             <NumberInput
+              // simpel util component that converts string
+              // to number/null and vice versa
               value={amount}
               onChange={value =>
                 updateAmount({
@@ -165,7 +175,7 @@ export const MyFunctionComponent: FC = () => {
           </button>
         </div>
       </div>
-
+      // we reverse the list so that we have the newest action on top
       {stack
         .slice() // copy, because reverse is a mutable operation
         .reverse() // alternatively, you could try to reverse with css :)
@@ -173,8 +183,8 @@ export const MyFunctionComponent: FC = () => {
           <div
             key={id}
             // We need to recalculate the index due to the reversal.
-            // Alternatively use timeTravelById if you do not care about
-            // the lookup cost
+            // Or you can use 'timeTravelById' if you do not care about
+            // the lookup cost.
             onClick={() => timeTravel(stack.length - 1 - index)}
             className={getStackItemStyle({
               active: id === currentPosition.actionId,
@@ -190,6 +200,8 @@ export const MyFunctionComponent: FC = () => {
 
 ## useUndoableReducer
 
+explain why, explain disadvantage of getting stuff from the prev state
+
 ```typescript
 import React, { FC } from 'react';
 import {
@@ -200,7 +212,7 @@ import {
   makeUndoableReducer,
   useUndoableReducer,
 } from 'use-flexible-undo';
-import { merge } from '../examples-util';
+import { addUpdater, subtractUpdater, merge } from '../examples-util';
 
 type nullber = number | null;
 
@@ -210,38 +222,43 @@ interface State {
 }
 
 interface PayloadByType {
-  add: void;
-  subtract: void;
+  add: void; // a void payload also means that the user will not see in
+  subtract: void; // the undo history UI how much was add/subtracted :(
   updateAmount: {
     from: nullber;
     to: nullber;
   };
 }
 
-const undoableAddHandler = makeUndoableUpdater(
+// get 'amount' from the previous state instead of from the payload
+const selectDependency = (payload: void) => (state: State) => state.amount || 0;
+
+const countUpdater = makeUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(() => state => state.amount || 0)(
-  amount => prev => prev + amount,
-  amount => prev => prev - amount
-);
+)(selectDependency);
 
-const { reducer, actionCreators } = makeUnducer<State, PayloadByType>({
-  add: undoableAddHandler,
-  subtract: invertHandlers(undoableAddHandler),
-  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
+const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
+  add: countUpdater(addUpdater),
+  subtract: countUpdater(subtractUpdater),
+  updateAmount: makeFTHandler(amount => merge({ amount })),
 });
 
-const undoableReducer = makeUndoableReducer(reducer);
+// create a higher-order reducer with separate action creators for 'undo'
+const undoableReducer = makeUndoableReducer(reducer, {
+  add: actionCreators.subtract,
+  subtract: actionCreators.add,
+  updateAmount: invertFTHandler(actionCreators.updateAmount),
+});
 
 export const MyFunctionComponent: FC = () => {
   const { state, undoables, ...etc } = useUndoableReducer({
-    reducer: undoableReducer,
+    undoableReducer,
+    actionCreators,
     initialState: {
       count: 0,
       amount: 1,
     },
-    actionCreators,
   });
 
   const { count, amount } = state;
@@ -250,4 +267,25 @@ export const MyFunctionComponent: FC = () => {
 
   return <> your UI here </>;
 };
+```
+
+more experimental, mention disadvantage
+
+```typescript
+const selectDependency = (payload: void) => (state: State) => state.amount || 0;
+
+const undoableAddUpdater = makeUndoableUpdater(
+  (state: State) => state.count,
+  count => merge({ count })
+)(selectDependency)(addUpdater, subtractUpdater);
+
+// 'undo' case is handled by the reducer internally
+const { unducer, actionCreators } = makeUnducer<State, PayloadByType>({
+  add: undoableAddUpdater,
+  subtract: invertHandlers(undoableAddUpdater),
+  updateAmount: makeUndoableFTHandler(amount => merge({ amount })),
+});
+
+// no need to pass action-creators for 'undo'
+const undoableReducer = makeUndoableReducer(unducer);
 ```

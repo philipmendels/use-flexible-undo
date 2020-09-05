@@ -54,7 +54,7 @@ export const UseUndoableReducerExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableReducer({
-    reducer: undoableReducer,
+    undoableReducer,
     initialState: {
       count: 0,
       amount: 1,

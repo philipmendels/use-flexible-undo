@@ -86,7 +86,9 @@ export const SwitchToBranchExample: FC = () => {
             onChange={e => switchToBranch(e.target.value, 'HEAD_OF_BRANCH')}
           >
             {branchList.map(b => (
-              <option value={b.id}>Branch {b.number}</option>
+              <option key={b.id} value={b.id}>
+                Branch {b.number}
+              </option>
             ))}
           </select>
           <button disabled={!canUndo} onClick={undo}>

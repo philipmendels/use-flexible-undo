@@ -1,41 +1,31 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { DescribeActionsSwitch } from './describe-actions-switch';
-import { DescribeActionsMap } from './describe-actions-map';
-import { HistoryChangeExample } from './history-change';
 import { MemoizationExample } from './memoization';
-import { UseFlexibleUndoInverseExample } from './use-flexible-undo-inverse';
+import { InitialStackExample } from './initial-stack';
+import { LocalStorageExample } from './local-storage';
+import { ReviveStateExample } from './revive-state';
 
-storiesOf('useUndoableEffects/other', module)
+storiesOf('useUndoableEffects/memoization & persistence', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
-  .add('describe-actions-switch', () => <DescribeActionsSwitch />, {
-    readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
-    },
-  })
-  .add('describe-actions-map', () => <DescribeActionsMap />, {
-    readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
-    },
-  })
-  .add('history-change', () => <HistoryChangeExample />, {
-    readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
-    },
-  })
   .add('memoization', () => <MemoizationExample />, {
     readme: {
       // content: UsingReducerIntro,
       // sidebar: UsingReducerReadme,
     },
   })
-  .add('useFexibleUndoInverse', () => <UseFlexibleUndoInverseExample />, {
+  .add('intial stack', () => <InitialStackExample />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UseUndoableUnducerReadme,
+      // sidebar: MakeUndoablesMeta1Readme,
+    },
+  })
+  .add('local storage', () => <LocalStorageExample />, {
+    readme: {
+      // sidebar: MakeUndoablesMeta1Readme,
+    },
+  })
+  .add('revive state', () => <ReviveStateExample />, {
+    readme: {
+      // sidebar: MakeUndoablesMeta1Readme,
     },
   });

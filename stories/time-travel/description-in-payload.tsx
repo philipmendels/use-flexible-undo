@@ -37,7 +37,7 @@ const payloadDescribers: PayloadDescribers = {
 const describeAction = (action: ActionUnion<PayloadByType>) =>
   payloadDescribers[action.type](action.payload as any);
 
-export const DescribeActionsMap: FC = () => {
+export const DescriptionInPayloadExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
