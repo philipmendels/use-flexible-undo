@@ -140,7 +140,7 @@ export const MyFunctionComponent: FC = () => {
           <label>
             amount =&nbsp;
             <NumberInput
-              // simpel util component that converts string
+              // simple util component that converts string
               // to number/null and vice versa
               value={amount}
               onChange={value =>
