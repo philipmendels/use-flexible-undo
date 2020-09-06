@@ -9,6 +9,7 @@ module.exports = ({ config }) => {
         loader: require.resolve('ts-loader'),
         options: {
           reportFiles: ['stories/**/*.{ts|tsx}'],
+          compilerOptions: { declaration: false },
         },
       },
     ],
