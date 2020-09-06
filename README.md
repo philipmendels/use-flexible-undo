@@ -9,7 +9,7 @@ All jokes aside, you might be interested in experimenting with undo-redo UI 😎
 - **useUndoableEffects** allows you to add undo/redo functionality independently of how you manage your app state. Updates to app state are modelled as a side-effect of updates to undo history state. You can use this hook together with (multiple calls to) useState, useReducer or a combination thereof. Quite nice for prototyping.
 - **useUndoableReducer** manages your application state and undo history state together. This hook takes an undoable reducer which can be created with the included utility **makeUndoableReducer**.
 
-Check out the StoryBook for a wide range of examples with documentation and source code.
+Check out the <a href="https://philipmendels.github.io/use-flexible-undo" target="_blank">StoryBook</a> for a wide range of examples with documentation and source code.
 
 ## useUndoableEffects
 
@@ -164,7 +164,9 @@ export const MyFunctionComponent: FC = () => {
             onChange={e => switchToBranch(e.target.value, 'HEAD_OF_BRANCH')}
           >
             {branchList.map(b => (
-              <option value={b.id}>Branch {b.number}</option>
+              <option key={b.id} value={b.id}>
+                Branch {b.number}
+              </option>
             ))}
           </select>
           <button disabled={!canUndo} onClick={undo}>
@@ -223,7 +225,7 @@ interface State {
 
 interface PayloadByType {
   add: void; // a void payload also means that the user will not see in
-  subtract: void; // the undo history UI how much was add/subtracted :(
+  subtract: void; // the undo history UI how much was added/subtracted :(
   updateAmount: {
     from: nullber;
     to: nullber;
