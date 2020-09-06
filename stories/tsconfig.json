@@ -1,6 +1,6 @@
 {
   "include": ["./"],
-  "files": ["./index.d.ts"],
+  "files": ["./typings.d.ts"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
