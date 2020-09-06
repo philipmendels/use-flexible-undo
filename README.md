@@ -1,4 +1,4 @@
-# useFlexibleUndo
+# use-flexible-undo
 
 This library enables you to add a branching undo history to your React project. Because ... the very first thing every user will demand for any kind of app is a branching undo history!
 
