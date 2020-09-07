@@ -7,7 +7,7 @@ This library enables you to add a branching undo history to your React project. 
 All jokes aside, you might be interested in experimenting with undo-redo UI 😎 and/or implementation 🤓. This lib gives you two React hooks to do so. They work with a history of undoable actions (as opposed to a history of snapshots of app state). Both hooks offer identical functionality and an almost identical API, but they differ in how they integrate with your app state:
 
 - **useUndoableEffects** allows you to add undo/redo functionality independently of how you manage your app state. Updates to app state are modelled as a side-effect of updates to undo history state. You can use this hook together with (multiple calls to) useState, useReducer or a combination thereof. Quite nice for prototyping.
-- **useUndoableReducer** manages your application state and undo history state together. This hook takes an undoable reducer which can be created with the included utility **makeUndoableReducer**.
+- **useUndoableReducer** integrates your application state and the undo history state. This hook takes an undoable reducer which can be created with the included utility **makeUndoableReducer**.
 
 The library does not contain UI-components.
 
@@ -37,7 +37,7 @@ The useUndoableEffects hook takes a **handlers** object with pairs of do/redo ("
 
 If you use TypeScript then you can type the hook with a record of payload by action type ("PBT"). Alternatively you could type the payloads within the handlers and let PBT be inferred.
 
-You are free to model the payloads however you like. Depending on your needs you can use them to store the state delta (see "add" and "subtract") or to for example store the old and the new state (see "updateAmount").
+You are free to model the payloads however you like. Depending on your needs you can use them to store the state delta (see "add" and "subtract") or for example the old and the new state (see "updateAmount").
 
 ```typescript
 import React, { FC, useState } from 'react';
@@ -91,7 +91,7 @@ export const MyFunctionComponent: FC = () => {
 };
 ```
 
-The library provides you with various utilities for generating your do/redo & undo handlers from your state setter functions. Using these has the added benefit that the payload types can be inferred. If you want you can of course still type the hook with a record of payload by action type, for some extra control.
+The library provides you with various utilities for generating your do/redo & undo handlers from your state setter functions. Using these utils has the added benefit that the payload types can be inferred. If you want you can of course still type the hook with a record of payload by action type, for some extra control.
 
 Apart from these utilities, the following example illustrates the usage of most of the return values of the hook: The **canUndo** and **canRedo** booleans, the **history** state, and the **undo**, **redo**, **timeTravel** and **switchToBranch** functions. The example includes some basic inline UI, but in your project you probably want to split this up in multiple (styled) components ;)
 
@@ -120,8 +120,8 @@ export const MyFunctionComponent: FC = () => {
   const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    addUpdater, // amount => prev => prev + amount
-    subtractUpdater //        ... => prev - amount
+    addUpdater, //     amount => prev => prev + amount
+    subtractUpdater // amount => prev => prev - amount
   );
 
   const {
@@ -227,6 +227,8 @@ export const MyFunctionComponent: FC = () => {
 };
 ```
 
+When using **useUndoableEffects** you have to make sure that you get your state dependencies (in this case "amount") in your do/redo & undo handlers from either the **action payload** or the **previous state**, and not directly from the component state. Otherwise you may break time-travel. See this [example](https://philipmendels.github.io/use-flexible-undo/?path=/story/useundoableeffects-dependent-state--don-t-do-this) to see this in action.
+
 ### useUndoableReducer
 
 If you want to keep your undo-history state and you application state integrated, and/or if you want to extract your state update logic from your component(s) for performance or testability, then you can create a reducer (from scratch or with the included utils). You can pass this reducer together with an object map of undo action creators by action type to **makeUndoableReducer**. The resulting undoable reducer can be used directly with React's useReducer, or you can provide it to **useUndoableReducer**. This is a simple wrapper for useReducer, and it gives you a similar API as **useUndoableEffects**.
@@ -236,10 +238,10 @@ The following example also shows that you are free to get your state dependencie
 ```typescript
 import React, { FC } from 'react';
 import {
-  makeUnducer,
-  invertHandlers,
-  makeUndoableFTHandler,
-  makeUndoableUpdater,
+  makeUpdater,
+  makeFTHandler,
+  invertFTHandler,
+  makeReducer,
   makeUndoableReducer,
   useUndoableReducer,
 } from 'use-flexible-undo';
