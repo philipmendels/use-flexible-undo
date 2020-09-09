@@ -1,3 +1,12 @@
+### Memoization - Readme & Code
+
+The hook **useUndoableEffects** converts the do/redo and undo handlers to undoable functions. This conversion happens every render if the **handlers** object reference has changed. If you want to avoid this in order to improve performance, and/or if you want the **undoables** object returned by the hook to be referentially stable, then you can memoize the **handlers** object with React's **useMemo**.
+
+Wrapping the handlers in useMemo has the additional benefit that if you erroneously create a direct dependency on state in your handlers, you will notice this because eslint-plugin-react-hooks will ask you to add the dependency to the dependency array. Instead of doing that you should fix it by moving the dependency to the action payload or the previous state. See [this story](./?path=/story/useundoableeffects-dependent-state--don-t-do-this) for more explanation.
+
+It is _not_ necessary to memoize the **options** object. If your options are constant (i.e. if the user can not change them through the UI) you can define them outside of the function component, but that will require additional typing if you use TypeScript.
+
+```typescript
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import {
   useUndoableEffects,
@@ -97,3 +106,4 @@ export const MemoizationExample: FC = () => {
     </div>
   );
 };
+```

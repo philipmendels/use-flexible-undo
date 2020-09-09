@@ -1,6 +1,10 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+
 import { MemoizationExample } from './memoization';
+import MemoizationIntro from './memoization.intro.md';
+import MemoizationReadme from './memoization.md';
+
 import { InitialStackExample } from './initial-stack';
 import { LocalStorageExample } from './local-storage';
 import { ReviveStateExample } from './revive-state';
@@ -10,8 +14,8 @@ storiesOf('useUndoableEffects/memoization & persistence', module)
   .addParameters({ options: { theme: {} } })
   .add('memoization', () => <MemoizationExample />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: MemoizationIntro,
+      sidebar: MemoizationReadme,
     },
   })
   .add('intial stack', () => <InitialStackExample />, {
