@@ -1,4 +1,4 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -41,17 +41,21 @@ export const ReviveStateExample: FC = () => {
 
   const { add, subtract, updateAmount } = undoables;
 
-  const indexToRestoreRef = useRef(0);
-
   // LOAD ON STARTUP
   useEffect(() => {
     try {
       const data = localStorage.getItem(localStorageKey);
       if (data) {
         const hist: typeof history = JSON.parse(data, reviver);
-        indexToRestoreRef.current = hist.currentPosition.globalIndex;
+        // backup the index:
+        const indexToRestore = hist.currentPosition.globalIndex;
+        // reset the index to zero:
         hist.currentPosition.globalIndex = 0;
         setHistory(hist);
+        // This will only give you the same results if the you
+        // keep the initial application state (count, amount)
+        // constant between save and load:
+        timeTravel(indexToRestore);
       }
     } catch (error) {
       console.log(error);
@@ -59,20 +63,11 @@ export const ReviveStateExample: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // REVIVE STATE
-  useEffect(() => {
-    if (
-      indexToRestoreRef.current !== 0 &&
-      history.branches[history.currentBranchId].stack.length !== 0
-    ) {
-      timeTravel(indexToRestoreRef.current);
-      indexToRestoreRef.current = 0;
-    }
-  }, [timeTravel, history.branches, history.currentBranchId]);
-
-  // AUTO SAVE
+  // AUTO SAVE ON CHANGE
   useEffect(() => {
     try {
+      // For illustration purposes we do not save the application
+      // state (count, amount), only the history state.
       localStorage.setItem(localStorageKey, JSON.stringify(history));
     } catch (error) {
       console.log(error);

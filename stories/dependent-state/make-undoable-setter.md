@@ -8,7 +8,7 @@ The curried utility function **makeUndoableSetter** takes:
 - a function for updating slice B in A.  
   ->
 - a function P -> A -> C for deriving a state change value C based on the action payload and/or the previous state A
-- an optional predicate function P -> A -> boolean for conditionally applying the update
+- an optional predicate function P -> A -> boolean, for conditionally applying the entire update  
   ->
 - a curried updater function C -> B -> B for the do/redo handler
 - a curried updater function C -> B -> B for the undo handler

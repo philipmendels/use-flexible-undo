@@ -233,7 +233,7 @@ When using **useUndoableEffects** you have to make sure that you get your state 
 
 If you want to keep your undo-history state and you application state integrated, and/or if you want to extract your state update logic from your component(s) for performance or testability, then you can create a reducer (from scratch or with the included utils). You can pass this reducer together with an object map of undo action creators by action type to **makeUndoableReducer**. The resulting undoable reducer can be used directly with React's useReducer, or you can provide it to **useUndoableReducer**. This is a simple wrapper for useReducer, and it gives you a similar API as **useUndoableEffects**.
 
-The following example also shows that you are free to get your state dependencies from the previous state instead of from the action payload. This however does have a possible downside: You will not have access to these values when rendering the UI for the undo history.
+The following example also shows that you are free to get your state dependencies from the previous state instead of from the action payload. This however does have a possible downside: You will not have direct access to the previous state for each action in the undo history UI, so the user will only see the action types.
 
 ```typescript
 import React, { FC } from 'react';
