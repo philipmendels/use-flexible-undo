@@ -81,9 +81,11 @@ export type HistoryItem<T = string, P = any> = Action<T, P> & {
   id: string;
 };
 
-export type HistoryItemUnion<PBT extends PayloadByType> = {
-  [T in keyof PBT]: HistoryItem<T, PBT[T]>;
-}[keyof PBT];
+export type HistoryItemUnion<PBT extends PayloadByType> =
+  | {
+      [T in keyof PBT]: HistoryItem<T, PBT[T]>;
+    }[keyof PBT]
+  | HistoryItem<'start', void>;
 
 export type UAction<T = string, P = any> = Action<
   T,
@@ -162,11 +164,6 @@ export type UFUProps<PBT extends PayloadByType> = UFUCommonProps<PBT> &
       }
   );
 
-export interface UFUInverseProps<PBT extends PayloadByType>
-  extends UFUCommonProps<PBT> {
-  drdoHandlers: HandlersByType<PBT>;
-  undoHandlers: HandlersByType<PBT>;
-}
 export interface PositionOnBranch {
   globalIndex: number;
   actionId: string;

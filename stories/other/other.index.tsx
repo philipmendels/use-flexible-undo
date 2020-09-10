@@ -5,8 +5,17 @@ import { MemoizationExample } from './memoization';
 import MemoizationIntro from './memoization.intro.md';
 import MemoizationReadme from './memoization.md';
 
-import { InitialStackExample } from './initial-stack';
+import { InitialHistoryExample } from './initial-history';
+import InitialHistoryIntro from './initial-history.intro.md';
+import InitialHistoryReadme from './initial-history.md';
+
+import { InitialHistoryTypedExample } from './initial-history-typed';
+import InitialHistoryTypedReadme from './initial-history-typed.md';
+
 import { LocalStorageExample } from './local-storage';
+import LocalStorageIntro from './local-storage.intro.md';
+import LocalStorageReadme from './local-storage.md';
+
 import { ReviveStateExample } from './revive-state';
 
 storiesOf('useUndoableEffects/memoization & persistence', module)
@@ -18,17 +27,25 @@ storiesOf('useUndoableEffects/memoization & persistence', module)
       sidebar: MemoizationReadme,
     },
   })
-  .add('intial stack', () => <InitialStackExample />, {
+  .add('initialHistory parsed', () => <InitialHistoryExample />, {
     readme: {
-      // sidebar: MakeUndoablesMeta1Readme,
+      content: InitialHistoryIntro,
+      sidebar: InitialHistoryReadme,
     },
   })
-  .add('local storage', () => <LocalStorageExample />, {
+  .add('initialHistory typed', () => <InitialHistoryTypedExample />, {
     readme: {
-      // sidebar: MakeUndoablesMeta1Readme,
+      // content: InitialHistoryTypedIntro,
+      sidebar: InitialHistoryTypedReadme,
     },
   })
-  .add('revive state', () => <ReviveStateExample />, {
+  .add('setHistory from localStorage', () => <LocalStorageExample />, {
+    readme: {
+      content: LocalStorageIntro,
+      sidebar: LocalStorageReadme,
+    },
+  })
+  .add('recreate state', () => <ReviveStateExample />, {
     readme: {
       // sidebar: MakeUndoablesMeta1Readme,
     },
