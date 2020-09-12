@@ -43,15 +43,15 @@ export const LocalStorageExample: FC = () => {
 
   // LOAD ON STARTUP
   useEffect(() => {
+    console.log('--- INIT localStorage example ---');
+    console.log('Load app state and history state from localStorage');
     try {
       const data = localStorage.getItem(localStorageKey);
       if (data) {
         const parsed = JSON.parse(data, reviver);
-        setTimeout(() => {
-          setHistory(parsed.history);
-          setCount(parsed.count);
-          setAmount(parsed.amount);
-        }, 3000);
+        setHistory(parsed.history);
+        setCount(parsed.count);
+        setAmount(parsed.amount);
       }
     } catch (error) {
       console.log(error);
@@ -61,6 +61,7 @@ export const LocalStorageExample: FC = () => {
 
   // AUTO SAVE ON CHANGE
   useEffect(() => {
+    console.log('Save app state and history state to localStorage');
     try {
       localStorage.setItem(
         localStorageKey,

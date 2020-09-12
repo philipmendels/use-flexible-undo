@@ -1,9 +1,9 @@
-### initialHistory parsed - Readme & Code
+### Restoring state from history - Readme & Code
 
-You can use the **initialHistory** prop to initialize the history state with static data. Here the data is a snapshot created using JSON.stringify. See the next example for how to construct the data manually in TypeScript.
+Perhaps not very practical, but nice as a proof-of-concept: You can rebuild your application state from your history state. You will however only get the same result if your initial application state remains constant between saving and loading. On the other hand, you can also change the initial state on purpose if you want to explore different outcomes 😬.
 
 ```typescript
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -17,62 +17,9 @@ import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 import { reviver } from './reviver';
 
-const initialHistory = JSON.parse(
-  `{
-    "currentBranchId": "06913f31-a94c-4c26-951c-41076f5318eb",
-    "currentPosition": {
-      "actionId": "c3c2a14b-afe6-4d90-9dc6-6cf46e017ba3",
-      "globalIndex": 0
-    },
-    "branches": { 
-      "06913f31-a94c-4c26-951c-41076f5318eb": {
-        "id": "06913f31-a94c-4c26-951c-41076f5318eb",
-        "number": 1,
-        "created": "2020-09-05T00:02:09.484Z",
-        "stack": [
-          {
-            "type": "start",
-            "created": "2020-09-05T00:02:09.484Z",
-            "id": "c3c2a14b-afe6-4d90-9dc6-6cf46e017ba3"
-          },
-          {
-            "type": "add",
-            "payload": 1,
-            "created": "2020-09-05T00:02:14.500Z",
-            "id": "69f6dcce-4f3f-4db6-a52b-dc35f5ebc51d"
-          },
-          { 
-            "type": "updateAmount",
-            "payload": { "from": 1, "to": 2},
-            "created": "2020-09-05T00:02:15.375Z",
-            "id": "4e9ec882-c72b-4615-b9ce-d8c368e4af40" 
-          },
-          { 
-            "type": "add",
-            "payload": 2,
-            "created": "2020-09-05T00:02:15.895Z",
-            "id": "100eb7c5-9522-4319-b0cb-d27e18043974"
-          },
-          { 
-            "type": "updateAmount",
-            "payload": { "from": 2, "to": 3 },
-            "created": "2020-09-05T00:02:16.554Z",
-            "id": "504b5aed-5909-48b1-bd69-874844c478c2"
-          },
-          {
-            "type": "add",
-            "payload": 3,
-            "created": "2020-09-05T00:02:17.335Z",
-            "id": "c49926b7-0174-4cbd-a3a1-353704e93160"
-          }
-        ]
-      }
-    }
-  }`,
-  reviver
-);
+const localStorageKey = 'ufu-revive-state-example';
 
-export const InitialHistoryExample: FC = () => {
+export const RestoreStateFromHistoryExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
@@ -88,16 +35,53 @@ export const InitialHistoryExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
+    setHistory,
   } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
       updateAmount: makeUndoableFTHandler(setAmount),
     },
-    initialHistory,
   });
 
   const { add, subtract, updateAmount } = undoables;
+
+  // LOAD ON STARTUP
+  useEffect(() => {
+    console.log('--- INIT restore state example ---');
+    console.log('load history state from localStorage');
+    try {
+      const data = localStorage.getItem(localStorageKey);
+      if (data) {
+        const hist: typeof history = JSON.parse(data, reviver);
+        // backup the index:
+        const indexToRestore = hist.currentPosition.globalIndex;
+        // reset the index to zero:
+        hist.currentPosition.globalIndex = 0;
+        setHistory(hist);
+        console.log('restore application state from history');
+        // This will only give you the same results if the you
+        // keep the initial application state (count, amount)
+        // constant inbetween save and load:
+        timeTravel(indexToRestore);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // AUTO SAVE ON CHANGE
+  useEffect(() => {
+    try {
+      console.log('save history state to localStorage');
+      // For the sake of this example we do not save the application
+      // state (count, amount), only the history state.
+      localStorage.setItem(localStorageKey, JSON.stringify(history));
+    } catch (error) {
+      console.log(error);
+    }
+  }, [history]);
 
   return (
     <div className={rootStyle}>

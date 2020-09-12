@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useRef, useEffect, useCallback } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -10,11 +10,8 @@ import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
-import { reviver } from './reviver';
 
-const localStorageKey = 'ufu-revive-state-example';
-
-export const RestoreStateFromHistoryExample: FC = () => {
+export const HistoryChangeExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
@@ -30,7 +27,6 @@ export const RestoreStateFromHistoryExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-    setHistory,
   } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
@@ -41,42 +37,25 @@ export const RestoreStateFromHistoryExample: FC = () => {
 
   const { add, subtract, updateAmount } = undoables;
 
-  // LOAD ON STARTUP
+  const prevHistoryRef = useRef(history);
+
   useEffect(() => {
-    console.log('--- INIT restore state example ---');
-    console.log('load history state from localStorage');
-    try {
-      const data = localStorage.getItem(localStorageKey);
-      if (data) {
-        const hist: typeof history = JSON.parse(data, reviver);
-        // backup the index:
-        const indexToRestore = hist.currentPosition.globalIndex;
-        // reset the index to zero:
-        hist.currentPosition.globalIndex = 0;
-        setHistory(hist);
-        console.log('restore application state from history');
-        // This will only give you the same results if the you
-        // keep the initial application state (count, amount)
-        // constant inbetween save and load:
-        timeTravel(indexToRestore);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    console.log("--- INIT 'logging history state changes' example ---");
   }, []);
 
-  // AUTO SAVE ON CHANGE
   useEffect(() => {
-    try {
-      console.log('save history state to localStorage');
-      // For the sake of this example we do not save the application
-      // state (count, amount), only the history state.
-      localStorage.setItem(localStorageKey, JSON.stringify(history));
-    } catch (error) {
-      console.log(error);
-    }
+    console.log('history change', {
+      from: prevHistoryRef.current,
+      to: history,
+    });
+    prevHistoryRef.current = history;
   }, [history]);
+
+  // You can wrap this in useCallback if you need:
+  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
+    console.log('timeTravel to index', args[0]);
+    timeTravel(...args);
+  };
 
   return (
     <div className={rootStyle}>
@@ -111,7 +90,7 @@ export const RestoreStateFromHistoryExample: FC = () => {
       </div>
       <ActionList
         history={history}
-        timeTravel={timeTravel}
+        timeTravel={timeTravelWithLog}
         switchToBranch={switchToBranch}
       />
     </div>

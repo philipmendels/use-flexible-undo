@@ -1,6 +1,6 @@
 ### Memoization - Readme & Code
 
-The hook **useUndoableEffects** converts the do/redo and undo handlers to undoable functions. This conversion happens every render if the **handlers** object reference has changed. If you want to avoid this in order to improve performance, and/or if you want the **undoables** object returned by the hook to be referentially stable, then you can memoize the **handlers** object with React's **useMemo**.
+The hook **useUndoableEffects** converts the do/redo and undo handlers to undoable functions. This conversion will happen every render if the **handlers** object reference is not stable (e.g. if you create the object inline). If you want to avoid this, in order to improve performance and/or if you want the **undoables** object returned by the hook to be referentially stable, then you can memoize the **handlers** object with React's **useMemo**.
 
 Wrapping the handlers in useMemo has the additional benefit that if you erroneously create a direct dependency on state in your handlers, you will notice this because eslint-plugin-react-hooks will ask you to add the dependency to the dependency array. Instead of doing that you should fix it by moving the dependency to the action payload or the previous state. See [this story](./?path=/story/useundoableeffects-dependent-state--don-t-do-this) for more explanation.
 
@@ -52,17 +52,17 @@ export const MemoizationExample: FC = () => {
   });
 
   useEffect(() => {
-    console.log('memo example: INIT');
+    console.log('--- INIT memoization example ---');
   }, []);
 
   useEffect(() => {
-    console.log('memo example: UPDATE');
+    console.log('component render');
   });
 
   // Just for checking that memoization works.
   // Effect should only run once instead of every render.
   useEffect(() => {
-    console.log('memo example: UNDOABLES CHANGED');
+    console.log('undoables changed');
   }, [undoables]);
 
   const { add, subtract, updateAmount } = undoables;

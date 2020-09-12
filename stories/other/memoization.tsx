@@ -43,17 +43,17 @@ export const MemoizationExample: FC = () => {
   });
 
   useEffect(() => {
-    console.log('memo example: INIT');
+    console.log('--- INIT memoization example ---');
   }, []);
 
   useEffect(() => {
-    console.log('memo example: UPDATE');
+    console.log('component render');
   });
 
   // Just for checking that memoization works.
   // Effect should only run once instead of every render.
   useEffect(() => {
-    console.log('memo example: UNDOABLES CHANGED');
+    console.log('undoables changed');
   }, [undoables]);
 
   const { add, subtract, updateAmount } = undoables;

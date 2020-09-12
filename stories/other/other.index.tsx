@@ -5,26 +5,39 @@ import { MemoizationExample } from './memoization';
 import MemoizationIntro from './memoization.intro.md';
 import MemoizationReadme from './memoization.md';
 
+import { HistoryChangeExample } from '../other/history-change';
+import HistoryChangeReadme from '../other/history-change.md';
+import HistoryChangeIntro from '../other/history-change.intro.md';
+
 import { InitialHistoryExample } from './initial-history';
 import InitialHistoryIntro from './initial-history.intro.md';
 import InitialHistoryReadme from './initial-history.md';
 
 import { InitialHistoryTypedExample } from './initial-history-typed';
+import InitialHistoryTypedIntro from './initial-history-typed.intro.md';
 import InitialHistoryTypedReadme from './initial-history-typed.md';
 
 import { LocalStorageExample } from './local-storage';
 import LocalStorageIntro from './local-storage.intro.md';
 import LocalStorageReadme from './local-storage.md';
 
-import { ReviveStateExample } from './revive-state';
+import { RestoreStateFromHistoryExample } from './revive-state';
+import RestoreStateFromHistoryReadme from './revive-state.md';
+import RestoreStateFromHistoryIntro from './revive-state.intro.md';
 
-storiesOf('useUndoableEffects/memoization & persistence', module)
+storiesOf('useUndoableEffects/memoization, logging & persistence', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('memoization', () => <MemoizationExample />, {
     readme: {
       content: MemoizationIntro,
       sidebar: MemoizationReadme,
+    },
+  })
+  .add('logging history state changes', () => <HistoryChangeExample />, {
+    readme: {
+      content: HistoryChangeIntro,
+      sidebar: HistoryChangeReadme,
     },
   })
   .add('initialHistory parsed', () => <InitialHistoryExample />, {
@@ -35,7 +48,7 @@ storiesOf('useUndoableEffects/memoization & persistence', module)
   })
   .add('initialHistory typed', () => <InitialHistoryTypedExample />, {
     readme: {
-      // content: InitialHistoryTypedIntro,
+      content: InitialHistoryTypedIntro,
       sidebar: InitialHistoryTypedReadme,
     },
   })
@@ -45,8 +58,13 @@ storiesOf('useUndoableEffects/memoization & persistence', module)
       sidebar: LocalStorageReadme,
     },
   })
-  .add('recreate state', () => <ReviveStateExample />, {
-    readme: {
-      // sidebar: MakeUndoablesMeta1Readme,
-    },
-  });
+  .add(
+    'restore application state from history',
+    () => <RestoreStateFromHistoryExample />,
+    {
+      readme: {
+        content: RestoreStateFromHistoryIntro,
+        sidebar: RestoreStateFromHistoryReadme,
+      },
+    }
+  );

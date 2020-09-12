@@ -6,10 +6,9 @@ import { SwitchToBranchExample } from './switch-to-branch';
 
 import { DescribeActionsSwitch } from './describe-actions-switch';
 import { DescribeActionsMap } from './describe-actions-map';
-import { HistoryChangeExample } from './history-change';
 import { DescriptionInPayloadExample } from './description-in-payload';
 
-storiesOf('useUndoableEffects/history and time travel', module)
+storiesOf('useUndoableEffects/time travel', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('time travel by id', () => <TimeTravelByIdExample />, {
@@ -43,12 +42,6 @@ storiesOf('useUndoableEffects/history and time travel', module)
     },
   })
   .add('description-in-payload', () => <DescriptionInPayloadExample />, {
-    readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
-    },
-  })
-  .add('history-change', () => <HistoryChangeExample />, {
     readme: {
       // content: UsingReducerIntro,
       // sidebar: UsingReducerReadme,

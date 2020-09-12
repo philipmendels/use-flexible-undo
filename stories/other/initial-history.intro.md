@@ -1,3 +1,3 @@
-### Initial history - Example
+### initialHistory parsed - Example
 
-This example is initialized with static data that is passed as the **initialHistory** prop.
+In this example the history state is initialized from a JSON string which is parsed and passed as the **initialHistory** prop.

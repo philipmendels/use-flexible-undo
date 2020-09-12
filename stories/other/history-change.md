@@ -1,4 +1,9 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+### Logging history state changes - Readme & Code
+
+In the current implementation **useUndoableEffects** takes no callbacks. If you want to respond to (upcoming) state changes you can either wrap one or more of the functions (undo, redo, timeTravel, switchToBranch) that the hook returns, or you can watch for changes in the history state by means of useEffect or useLayoutEffect.
+
+```typescript
+import React, { FC, useState, useRef, useEffect, useCallback } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -40,12 +45,22 @@ export const HistoryChangeExample: FC = () => {
   const prevHistoryRef = useRef(history);
 
   useEffect(() => {
+    console.log("--- INIT 'logging history state changes' example ---");
+  }, []);
+
+  useEffect(() => {
     console.log('history change', {
       from: prevHistoryRef.current,
       to: history,
     });
     prevHistoryRef.current = history;
   }, [history]);
+
+  // You can wrap this in useCallback if you need:
+  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
+    console.log('timeTravel to index', args[0]);
+    timeTravel(...args);
+  };
 
   return (
     <div className={rootStyle}>
@@ -80,9 +95,10 @@ export const HistoryChangeExample: FC = () => {
       </div>
       <ActionList
         history={history}
-        timeTravel={timeTravel}
+        timeTravel={timeTravelWithLog}
         switchToBranch={switchToBranch}
       />
     </div>
   );
 };
+```

@@ -1,6 +1,6 @@
 ### State delta as payload - Readme & Code
 
-In the previous example there were only basic undo and redo buttons. Here we use the **history** state and the **switchToBranch** and **timeTravel** functions returned by **useUndoableEffects** to create an interactive, branching undo history. The UI for this is not part of the library, but we will address the functionality in more detail in "history and time travel" chapter. Finally note that we do not necessarily need to use the **canUndo** and **canRedo** booleans. They are returned by the hook for convenience, but you can derive them yourself from the **history** state as well. Here this is hidden within the "BranchNav" component.
+In the previous example there were only basic undo and redo buttons. Here we use the **history** state and the **switchToBranch** and **timeTravel** functions returned by **useUndoableEffects** to create an interactive, branching undo history. The UI for this is not part of the library, but we will address the functionality in more detail in "time travel" chapter. Finally note that we do not necessarily need to use the **canUndo** and **canRedo** booleans. They are returned by the hook for convenience, but you can derive them yourself from the **history** state as well. Here this is hidden within the "BranchNav" component.
 
 ```typescript
 import React, { FC, useState } from 'react';

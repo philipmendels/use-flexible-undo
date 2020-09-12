@@ -5,7 +5,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
   History,
-} from '../../src';
+} from 'use-flexible-undo';
 import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';

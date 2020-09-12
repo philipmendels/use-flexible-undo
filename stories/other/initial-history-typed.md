@@ -1,3 +1,7 @@
+### initialHistory typed - Readme & Code
+
+If you want to construct the initial history state manually (e.g. for a static example like we have here) then you can use the generic **History** type which needs as type argument a record of payload by type. Make sure that you add an initial action with type "start" at index 0 of the current branch. This initial action cannot be undone but can be clicked in the history UI to undo the first user action (which is at index 1). The text "start" has no function at all (it's just the index 0 that matters) but it is the only action type that is automatically defined for you and this is currently not customizable. Of course you do not need to use the text literally in the UI.
+
 ```typescript
 import React, { FC, useState } from 'react';
 import {
@@ -6,7 +10,7 @@ import {
   makeUndoableHandler,
   invertHandlers,
   History,
-} from '../../src';
+} from 'use-flexible-undo';
 import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { ActionList } from '../components/action-list';
