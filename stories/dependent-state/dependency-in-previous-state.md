@@ -1,6 +1,8 @@
 ### Dependency in previous state - Readme & Code
 
-As an alternative to passing a state dependency as (part of) the action payload, you can store all dependent state together and get the dependencies from the previous state in your do/redo & undo handlers. In this example and the following two examples we use useState to define our combined state. In the next chapter we take a look at useReducer.
+As an alternative to passing a state dependency as (part of) the action payload, you can store all dependent state together and get the dependencies from the previous state in your do/redo & undo handlers. This however does have a possible downside: You will not have direct access to the previous state for each action in the undo history UI, so the user will only see the action types.
+
+In this example and the following two examples we use useState to define our combined state. In the next chapter we take a look at useReducer.
 
 The utility function **makeUndoableFTHandler** is explained in the previous chapter. The only difference is that we use it here to update a slice of the combined state object. We use a simple utility **merge** to merge the slice into the combined state, in stead of writing "prev => ({ ...prev, amount })".
 

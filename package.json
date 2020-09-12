@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -50,6 +50,7 @@
     "undo-redo",
     "typescript"
   ],
+  "description": "React hooks for creating a branching undo/redo history",
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@emotion/styled": "^10.0.27",
@@ -77,7 +78,7 @@
     "ts-loader": "^8.0.3",
     "tsdx": "^0.13.3",
     "tslib": "^2.0.1",
-    "typescript": "^4.0.2"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "ramda": "^0.27.0",

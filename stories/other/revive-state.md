@@ -1,3 +1,8 @@
+### Restoring state from history - Readme & Code
+
+Perhaps not very practical, but nice as a proof-of-concept: You can rebuild your application state from your history state. You will however only get the same result if your initial application state remains constant between saving and loading. On the other hand, you can also change the initial state on purpose if you want to explore different outcomes 😬.
+
+```typescript
 import React, { FC, useState, useEffect } from 'react';
 import {
   useUndoableEffects,
@@ -117,3 +122,4 @@ export const RestoreStateFromHistoryExample: FC = () => {
     </div>
   );
 };
+```

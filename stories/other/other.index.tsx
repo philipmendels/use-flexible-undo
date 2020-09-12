@@ -1,31 +1,70 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { MemoizationExample } from './memoization';
-import { InitialStackExample } from './initial-stack';
-import { LocalStorageExample } from './local-storage';
-import { ReviveStateExample } from './revive-state';
 
-storiesOf('useUndoableEffects/memoization & persistence', module)
+import { MemoizationExample } from './memoization';
+import MemoizationIntro from './memoization.intro.md';
+import MemoizationReadme from './memoization.md';
+
+import { HistoryChangeExample } from '../other/history-change';
+import HistoryChangeReadme from '../other/history-change.md';
+import HistoryChangeIntro from '../other/history-change.intro.md';
+
+import { InitialHistoryExample } from './initial-history';
+import InitialHistoryIntro from './initial-history.intro.md';
+import InitialHistoryReadme from './initial-history.md';
+
+import { InitialHistoryTypedExample } from './initial-history-typed';
+import InitialHistoryTypedIntro from './initial-history-typed.intro.md';
+import InitialHistoryTypedReadme from './initial-history-typed.md';
+
+import { LocalStorageExample } from './local-storage';
+import LocalStorageIntro from './local-storage.intro.md';
+import LocalStorageReadme from './local-storage.md';
+
+import { RestoreStateFromHistoryExample } from './revive-state';
+import RestoreStateFromHistoryReadme from './revive-state.md';
+import RestoreStateFromHistoryIntro from './revive-state.intro.md';
+
+storiesOf('useUndoableEffects/memoization, logging & persistence', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add('memoization', () => <MemoizationExample />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: MemoizationIntro,
+      sidebar: MemoizationReadme,
     },
   })
-  .add('intial stack', () => <InitialStackExample />, {
+  .add('logging history state changes', () => <HistoryChangeExample />, {
     readme: {
-      // sidebar: MakeUndoablesMeta1Readme,
+      content: HistoryChangeIntro,
+      sidebar: HistoryChangeReadme,
     },
   })
-  .add('local storage', () => <LocalStorageExample />, {
+  .add('initialHistory parsed', () => <InitialHistoryExample />, {
     readme: {
-      // sidebar: MakeUndoablesMeta1Readme,
+      content: InitialHistoryIntro,
+      sidebar: InitialHistoryReadme,
     },
   })
-  .add('revive state', () => <ReviveStateExample />, {
+  .add('initialHistory typed', () => <InitialHistoryTypedExample />, {
     readme: {
-      // sidebar: MakeUndoablesMeta1Readme,
+      content: InitialHistoryTypedIntro,
+      sidebar: InitialHistoryTypedReadme,
     },
-  });
+  })
+  .add('setHistory from localStorage', () => <LocalStorageExample />, {
+    readme: {
+      content: LocalStorageIntro,
+      sidebar: LocalStorageReadme,
+    },
+  })
+  .add(
+    'restore application state from history',
+    () => <RestoreStateFromHistoryExample />,
+    {
+      readme: {
+        content: RestoreStateFromHistoryIntro,
+        sidebar: RestoreStateFromHistoryReadme,
+      },
+    }
+  );

@@ -1,3 +1,10 @@
+### setHistory from localStorage - Readme & Code
+
+You can use the **setHistory** function which is returned by the hook to dynamically restore (or update) the history state. Make sure to restore your application state as well to keep the state in sync. Alternatively you can recreate your application state from the history state (see next example), but that requires your initial application state to be constant inbetween save and load.
+
+When your application state grows and you find it incovenient to access and update each slice of application state individually when saving and loading, you can opt to create a combined state object with useState (in this case combining "count" and "amount"). If you also want to integrate the history state then take a look at **useUndoableReducer**.
+
+```typescript
 import React, { FC, useState, useEffect } from 'react';
 import {
   useUndoableEffects,
@@ -12,9 +19,9 @@ import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 import { reviver } from './reviver';
 
-const localStorageKey = 'ufu-revive-state-example';
+const localStorageKey = 'ufu-local-storage-example';
 
-export const RestoreStateFromHistoryExample: FC = () => {
+export const LocalStorageExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
@@ -43,22 +50,15 @@ export const RestoreStateFromHistoryExample: FC = () => {
 
   // LOAD ON STARTUP
   useEffect(() => {
-    console.log('--- INIT restore state example ---');
-    console.log('load history state from localStorage');
+    console.log('--- INIT localStorage example ---');
+    console.log('Load app state and history state from localStorage');
     try {
       const data = localStorage.getItem(localStorageKey);
       if (data) {
-        const hist: typeof history = JSON.parse(data, reviver);
-        // backup the index:
-        const indexToRestore = hist.currentPosition.globalIndex;
-        // reset the index to zero:
-        hist.currentPosition.globalIndex = 0;
-        setHistory(hist);
-        console.log('restore application state from history');
-        // This will only give you the same results if the you
-        // keep the initial application state (count, amount)
-        // constant inbetween save and load:
-        timeTravel(indexToRestore);
+        const parsed = JSON.parse(data, reviver);
+        setHistory(parsed.history);
+        setCount(parsed.count);
+        setAmount(parsed.amount);
       }
     } catch (error) {
       console.log(error);
@@ -68,15 +68,20 @@ export const RestoreStateFromHistoryExample: FC = () => {
 
   // AUTO SAVE ON CHANGE
   useEffect(() => {
+    console.log('Save app state and history state to localStorage');
     try {
-      console.log('save history state to localStorage');
-      // For the sake of this example we do not save the application
-      // state (count, amount), only the history state.
-      localStorage.setItem(localStorageKey, JSON.stringify(history));
+      localStorage.setItem(
+        localStorageKey,
+        JSON.stringify({
+          count,
+          amount,
+          history,
+        })
+      );
     } catch (error) {
       console.log(error);
     }
-  }, [history]);
+  }, [amount, count, history]);
 
   return (
     <div className={rootStyle}>
@@ -117,3 +122,4 @@ export const RestoreStateFromHistoryExample: FC = () => {
     </div>
   );
 };
+```

@@ -41,7 +41,10 @@ export const LocalStorageExample: FC = () => {
 
   const { add, subtract, updateAmount } = undoables;
 
+  // LOAD ON STARTUP
   useEffect(() => {
+    console.log('--- INIT localStorage example ---');
+    console.log('Load app state and history state from localStorage');
     try {
       const data = localStorage.getItem(localStorageKey);
       if (data) {
@@ -53,10 +56,12 @@ export const LocalStorageExample: FC = () => {
     } catch (error) {
       console.log(error);
     }
-  }, [setHistory]); // linter does not know setHistory is stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // AUTO SAVE ON CHANGE
   useEffect(() => {
-    // optionally throttle this
+    console.log('Save app state and history state to localStorage');
     try {
       localStorage.setItem(
         localStorageKey,
