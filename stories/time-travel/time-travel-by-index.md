@@ -1,3 +1,10 @@
+### Time travel by index - Readme & Code
+
+The **timeTravel** function takes as first argument the action index that you want to travel to, and optionally as second argument the id of the branch that you want to travel to. The latter defaults to the id of the current branch. The index is relative to the branch that you want to travel to.
+
+The actions of each branch are stored in an array so travelling by index is the cheapest way. If you don't care about the lookup cost you can use the **timeTravelById** function, which is shown in the next example.
+
+```typescript
 import React, { FC, useState } from 'react';
 import {
   useUndoableEffects,
@@ -102,3 +109,4 @@ export const TimeTravelByIndexExample: FC = () => {
     </div>
   );
 };
+```

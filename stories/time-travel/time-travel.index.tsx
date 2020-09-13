@@ -1,7 +1,18 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { TimeTravelByIdExample } from './time-travel-by-id';
+
+import { OptionsExample } from './options';
+import OptionsIntro from './options.intro.md';
+import OptionsReadme from './options.md';
+
 import { TimeTravelByIndexExample } from './time-travel-by-index';
+import TimeTravelByIndexIntro from './time-travel-by-index.intro.md';
+import TimeTravelByIndexReadme from './time-travel-by-index.md';
+
+import { TimeTravelByIdExample } from './time-travel-by-id';
+import TimeTravelByIdIntro from './time-travel-by-id.intro.md';
+import TimeTravelByIdReadme from './time-travel-by-id.md';
+
 import { SwitchToBranchExample } from './switch-to-branch';
 
 import { DescribeActionsSwitch } from './describe-actions-switch';
@@ -11,16 +22,22 @@ import { DescriptionInPayloadExample } from './description-in-payload';
 storiesOf('useUndoableEffects/time travel', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
-  .add('time travel by id', () => <TimeTravelByIdExample />, {
+  .add('option to clear the future', () => <OptionsExample />, {
     readme: {
-      // content:
-      // sidebar: ReducerAndMakeUpdaterReadme,
+      content: OptionsIntro,
+      sidebar: OptionsReadme,
     },
   })
   .add('time travel by index', () => <TimeTravelByIndexExample />, {
     readme: {
-      // content:
-      // sidebar: ReducerAndMakeUpdaterReadme,
+      content: TimeTravelByIndexIntro,
+      sidebar: TimeTravelByIndexReadme,
+    },
+  })
+  .add('time travel by id', () => <TimeTravelByIdExample />, {
+    readme: {
+      content: TimeTravelByIdIntro,
+      sidebar: TimeTravelByIdReadme,
     },
   })
   .add('switch branch', () => <SwitchToBranchExample />, {

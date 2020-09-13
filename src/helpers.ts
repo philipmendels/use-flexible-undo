@@ -85,20 +85,40 @@ export const addActionToCurrentBranch = <PBT extends PayloadByType>(
   );
 };
 
-const clearFuture = <PBT extends PayloadByType>(prev: History<PBT>) => {
+const clearFuture = <PBT extends PayloadByType>(
+  prev: History<PBT>
+): History<PBT> => {
   const currentIndex = getCurrentIndex(prev);
   const currentBranch = getCurrentBranch(prev);
-  // TODO: delete orphan branches
-  return mergeDeep(
-    {
-      branches: {
-        [currentBranch.id]: {
-          stack: currentBranch.stack.slice(0, currentIndex + 1),
-        },
+  // remove orphan branches:
+  // TODO: improve algorithm
+  const filteredBranches = Object.fromEntries(
+    Object.entries(prev.branches).filter(([id, b]) => {
+      if (id === currentBranch.id) {
+        return true;
+      } else {
+        let parent = b.parent!;
+        while (parent.branchId !== currentBranch.id) {
+          parent = prev.branches[parent.branchId].parent!;
+        }
+        if (parent.position.globalIndex > currentIndex) {
+          return false;
+        }
+        return true;
+      }
+    })
+  );
+
+  return {
+    ...prev,
+    branches: {
+      ...filteredBranches,
+      [currentBranch.id]: {
+        ...currentBranch,
+        stack: currentBranch.stack.slice(0, currentIndex + 1),
       },
     },
-    prev
-  );
+  };
 };
 
 export const getReparentedBranches = (

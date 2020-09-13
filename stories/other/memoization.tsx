@@ -5,7 +5,7 @@ import {
   invertHandlers,
   makeUndoableFTHandler,
 } from 'use-flexible-undo';
-
+import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
@@ -17,8 +17,8 @@ export const MemoizationExample: FC = () => {
 
   const handlers = useMemo(() => {
     const undoableAddHandler = makeUndoableHandler(setCount)(
-      amount => prev => prev + amount,
-      amount => prev => prev - amount
+      addUpdater,
+      subtractUpdater
     );
     return {
       add: undoableAddHandler,

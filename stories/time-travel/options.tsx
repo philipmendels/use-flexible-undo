@@ -1,4 +1,4 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -11,9 +11,11 @@ import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-export const HistoryChangeExample: FC = () => {
+export const OptionsExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
+
+  const [clearFutureOnDo, setClearFutureOnDo] = useState(false);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     addUpdater,
@@ -33,29 +35,12 @@ export const HistoryChangeExample: FC = () => {
       subtract: invertHandlers(undoableAddHandler),
       updateAmount: makeUndoableFTHandler(setAmount),
     },
+    options: {
+      clearFutureOnDo,
+    },
   });
 
   const { add, subtract, updateAmount } = undoables;
-
-  const prevHistoryRef = useRef(history);
-
-  useEffect(() => {
-    console.log("--- INIT 'logging history state changes' example ---");
-  }, []);
-
-  useEffect(() => {
-    console.log('history change', {
-      from: prevHistoryRef.current,
-      to: history,
-    });
-    prevHistoryRef.current = history;
-  }, [history]);
-
-  // You can wrap this in useCallback if you need:
-  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
-    console.log('timeTravel to index', args[0]);
-    timeTravel(...args);
-  };
 
   return (
     <div className={rootStyle}>
@@ -81,6 +66,14 @@ export const HistoryChangeExample: FC = () => {
             subtract
           </button>
         </div>
+        <div className={actionsStyle}>
+          <input
+            type="checkbox"
+            checked={clearFutureOnDo}
+            onChange={e => setClearFutureOnDo(e.target.checked)}
+          />
+          &nbsp;clearFutureOnDo
+        </div>
         <BranchNav
           history={history}
           switchToBranch={switchToBranch}
@@ -90,7 +83,7 @@ export const HistoryChangeExample: FC = () => {
       </div>
       <ActionList
         history={history}
-        timeTravel={timeTravelWithLog}
+        timeTravel={timeTravel}
         switchToBranch={switchToBranch}
       />
     </div>
