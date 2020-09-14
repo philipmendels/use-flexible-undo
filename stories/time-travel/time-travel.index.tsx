@@ -14,6 +14,8 @@ import TimeTravelByIdIntro from './time-travel-by-id.intro.md';
 import TimeTravelByIdReadme from './time-travel-by-id.md';
 
 import { SwitchToBranchExample } from './switch-to-branch';
+import SwitchToBranchReadme from './switch-to-branch.md';
+import SwitchToBranchIntro from './switch-to-branch.intro.md';
 
 import { DescribeActionsSwitch } from './describe-actions-switch';
 import { DescribeActionsMap } from './describe-actions-map';
@@ -42,8 +44,8 @@ storiesOf('useUndoableEffects/time travel', module)
   })
   .add('switch branch', () => <SwitchToBranchExample />, {
     readme: {
-      // content:
-      // sidebar: ReducerAndMakeUpdaterReadme,
+      content: SwitchToBranchIntro,
+      sidebar: SwitchToBranchReadme,
     },
   })
   .add('describe-actions-switch', () => <DescribeActionsSwitch />, {
