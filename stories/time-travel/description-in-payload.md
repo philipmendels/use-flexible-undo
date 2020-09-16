@@ -1,3 +1,6 @@
+### Describe actions: details in payload - Readme & Code
+
+```typescript
 import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
@@ -142,3 +145,4 @@ export const DescriptionInPayloadExample: FC = () => {
     </div>
   );
 };
+```

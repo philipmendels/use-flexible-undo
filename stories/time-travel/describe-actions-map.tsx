@@ -5,7 +5,7 @@ import {
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
-  ActionUnion,
+  HistoryItemUnion,
 } from 'use-flexible-undo';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
@@ -20,10 +20,12 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
+type PBTWithStart = PayloadByType & {
+  start: void;
+};
+
 type PayloadDescribers = {
-  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
-} & {
-  start: () => ReactNode;
+  [K in keyof PBTWithStart]: (payload: PBTWithStart[K]) => ReactNode;
 };
 
 const payloadDescribers: PayloadDescribers = {
@@ -33,8 +35,11 @@ const payloadDescribers: PayloadDescribers = {
   start: () => 'Start',
 };
 
-const describeAction = (action: ActionUnion<PayloadByType>) =>
-  payloadDescribers[action.type](action.payload as any);
+const describeAction = ({
+  type,
+  payload,
+}: HistoryItemUnion<PayloadByType>): ReactNode =>
+  (payloadDescribers[type] as any)(payload);
 
 export const DescribeActionsMap: FC = () => {
   const [count, setCount] = useState(0);

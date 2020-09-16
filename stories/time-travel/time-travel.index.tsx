@@ -18,8 +18,16 @@ import SwitchToBranchReadme from './switch-to-branch.md';
 import SwitchToBranchIntro from './switch-to-branch.intro.md';
 
 import { DescribeActionsSwitch } from './describe-actions-switch';
+import DescribeActionsSwitchReadme from './describe-actions-switch.md';
+import DescribeActionsSwitchIntro from './describe-actions-switch.intro.md';
+
 import { DescribeActionsMap } from './describe-actions-map';
+import DescribeActionsMapReadme from './describe-actions-map.md';
+import DescribeActionsMapIntro from './describe-actions-map.intro.md';
+
 import { DescriptionInPayloadExample } from './description-in-payload';
+import DescriptionInPayloadReadme from './description-in-payload.md';
+import DescriptionInPayloadIntro from './description-in-payload.intro.md';
 
 storiesOf('useUndoableEffects/time travel', module)
   //@ts-ignore
@@ -50,19 +58,19 @@ storiesOf('useUndoableEffects/time travel', module)
   })
   .add('describe-actions-switch', () => <DescribeActionsSwitch />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: DescribeActionsSwitchIntro,
+      sidebar: DescribeActionsSwitchReadme,
     },
   })
   .add('describe-actions-map', () => <DescribeActionsMap />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: DescribeActionsMapIntro,
+      sidebar: DescribeActionsMapReadme,
     },
   })
   .add('description-in-payload', () => <DescriptionInPayloadExample />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: DescriptionInPayloadIntro,
+      sidebar: DescriptionInPayloadReadme,
     },
   });
