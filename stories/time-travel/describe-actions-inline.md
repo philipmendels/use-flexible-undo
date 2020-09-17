@@ -1,12 +1,14 @@
-import React, { FC, useState, ReactNode } from 'react';
+### Describe actions: inline - Readme & Code
+
+```typescript
+import React, { FC, useState } from 'react';
 import {
-  PayloadFromTo,
   useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
-  HistoryItemUnion,
 } from 'use-flexible-undo';
+import { addUpdater, subtractUpdater } from '../examples-util';
 import {
   rootStyle,
   topUIStyle,
@@ -17,35 +19,17 @@ import {
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-type Nullber = number | null;
-
-interface PayloadByType {
-  add: number;
-  subtract: number;
-  updateAmount: PayloadFromTo<Nullber>;
-}
-
-const describeAction = (action: HistoryItemUnion<PayloadByType>): ReactNode => {
-  switch (action.type) {
-    case 'add':
-      return `Increase count by ${action.payload}`;
-    case 'subtract':
-      return `Decrease count by ${action.payload}`;
-    case 'updateAmount':
-      const { from, to } = action.payload;
-      return `Update amount from ${from} to ${to}`;
-    case 'start':
-      return 'Start';
-  }
+const assertNever = (action: never): never => {
+  throw new Error('Unexpected action: ' + action);
 };
 
-export const DescribeActionsSwitch: FC = () => {
+export const DescribeActionsInlineExample: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<Nullber>(1);
+  const [amount, setAmount] = useState<number | null>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    amount => prev => prev + amount,
-    amount => prev => prev - amount
+    addUpdater,
+    subtractUpdater
   );
 
   const {
@@ -55,7 +39,7 @@ export const DescribeActionsSwitch: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useUndoableEffects<PayloadByType>({
+  } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
@@ -110,9 +94,22 @@ export const DescribeActionsSwitch: FC = () => {
               active: action.id === currentPosition.actionId,
             })}
           >
-            {action.created.toLocaleString() + ' - ' + describeAction(action)}
+            {// Types for actions (type, payload) are fully inferred,
+            //  but in practice you probably want to extract this code.
+            action.created.toLocaleString() +
+              ' - ' +
+              (action.type === 'add'
+                ? `Add ${action.payload} to count`
+                : action.type === 'subtract'
+                ? `Subtract ${action.payload} from count`
+                : action.type === 'updateAmount'
+                ? `Update amount from ${action.payload.from} to ${action.payload.to}`
+                : action.type === 'start'
+                ? 'Start'
+                : assertNever(action))}
           </div>
         ))}
     </div>
   );
 };
+```

@@ -17,11 +17,15 @@ import { SwitchToBranchExample } from './switch-to-branch';
 import SwitchToBranchReadme from './switch-to-branch.md';
 import SwitchToBranchIntro from './switch-to-branch.intro.md';
 
+import { DescribeActionsInlineExample } from './describe-actions-inline';
+import DescribeActionsInlineReadme from './describe-actions-inline.md';
+import DescribeActionsInlineIntro from './describe-actions-inline.intro.md';
+
 import { DescribeActionsSwitch } from './describe-actions-switch';
 import DescribeActionsSwitchReadme from './describe-actions-switch.md';
 import DescribeActionsSwitchIntro from './describe-actions-switch.intro.md';
 
-import { DescribeActionsMap } from './describe-actions-map';
+import { DescribeActionsMapExample } from './describe-actions-map';
 import DescribeActionsMapReadme from './describe-actions-map.md';
 import DescribeActionsMapIntro from './describe-actions-map.intro.md';
 
@@ -56,13 +60,19 @@ storiesOf('useUndoableEffects/time travel', module)
       sidebar: SwitchToBranchReadme,
     },
   })
+  .add('describe-actions-inline', () => <DescribeActionsInlineExample />, {
+    readme: {
+      content: DescribeActionsInlineIntro,
+      sidebar: DescribeActionsInlineReadme,
+    },
+  })
   .add('describe-actions-switch', () => <DescribeActionsSwitch />, {
     readme: {
       content: DescribeActionsSwitchIntro,
       sidebar: DescribeActionsSwitchReadme,
     },
   })
-  .add('describe-actions-map', () => <DescribeActionsMap />, {
+  .add('describe-actions-map', () => <DescribeActionsMapExample />, {
     readme: {
       content: DescribeActionsMapIntro,
       sidebar: DescribeActionsMapReadme,

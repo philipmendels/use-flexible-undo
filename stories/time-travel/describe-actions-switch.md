@@ -113,7 +113,7 @@ export const DescribeActionsSwitch: FC = () => {
               active: action.id === currentPosition.actionId,
             })}
           >
-            {describeAction(action)}
+            {action.created.toLocaleString() + ' - ' + describeAction(action)}
           </div>
         ))}
     </div>

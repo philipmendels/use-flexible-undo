@@ -20,28 +20,23 @@ interface PayloadByType {
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-type PBTWithStart = PayloadByType & {
-  start: void;
-};
-
 type PayloadDescribers = {
-  [K in keyof PBTWithStart]: (payload: PBTWithStart[K]) => ReactNode;
+  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
 };
 
 const payloadDescribers: PayloadDescribers = {
   add: amount => `Add ${amount} to count`,
   subtract: amount => `Subtract ${amount} from count`,
   updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
-  start: () => 'Start',
 };
 
 const describeAction = ({
   type,
   payload,
 }: HistoryItemUnion<PayloadByType>): ReactNode =>
-  (payloadDescribers[type] as any)(payload);
+  type === 'start' ? 'Start' : (payloadDescribers[type] as any)(payload);
 
-export const DescribeActionsMap: FC = () => {
+export const DescribeActionsMapExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<Nullber>(1);
 
