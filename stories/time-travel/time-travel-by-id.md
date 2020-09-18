@@ -1,4 +1,9 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+### Time travel by id - Readme & Code
+
+The **timeTravelById** function takes as first argument the id of the action that you want to travel to, and optionally as second argument the id of the branch that you want to travel to. The latter defaults to the id of the current branch.
+
+```typescript
+import React, { FC, useState } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -6,12 +11,16 @@ import {
   invertHandlers,
 } from 'use-flexible-undo';
 import { addUpdater, subtractUpdater } from '../examples-util';
-import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { ActionList } from '../components/action-list';
+import {
+  rootStyle,
+  topUIStyle,
+  countStyle,
+  actionsStyle,
+  getStackItemStyle,
+} from '../styles';
 import { NumberInput } from '../components/number-input';
-import { BranchNav } from '../components/branch-nav';
 
-export const HistoryChangeExample: FC = () => {
+export const TimeTravelByIdExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
@@ -22,40 +31,27 @@ export const HistoryChangeExample: FC = () => {
 
   const {
     undoables,
+    canUndo,
     undo,
+    canRedo,
     redo,
     history,
-    timeTravel,
-    switchToBranch,
+    timeTravelById,
   } = useUndoableEffects({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
       updateAmount: makeUndoableFTHandler(setAmount),
     },
+    options: {
+      clearFutureOnDo: true,
+    },
   });
 
   const { add, subtract, updateAmount } = undoables;
 
-  const prevHistoryRef = useRef(history);
-
-  useEffect(() => {
-    console.log("--- INIT 'logging history state changes' example ---");
-  }, []);
-
-  useEffect(() => {
-    console.log('history change', {
-      from: prevHistoryRef.current,
-      to: history,
-    });
-    prevHistoryRef.current = history;
-  }, [history]);
-
-  // You can wrap this in useCallback if you need:
-  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
-    console.log('timeTravel to index', args[0]);
-    timeTravel(...args);
-  };
+  const { branches, currentBranchId, currentPosition } = history;
+  const { stack } = branches[currentBranchId];
 
   return (
     <div className={rootStyle}>
@@ -81,18 +77,31 @@ export const HistoryChangeExample: FC = () => {
             subtract
           </button>
         </div>
-        <BranchNav
-          history={history}
-          switchToBranch={switchToBranch}
-          undo={undo}
-          redo={redo}
-        />
+        <div className={actionsStyle}>
+          <button disabled={!canUndo} onClick={undo}>
+            undo
+          </button>
+          <button disabled={!canRedo} onClick={redo}>
+            redo
+          </button>
+        </div>
       </div>
-      <ActionList
-        history={history}
-        timeTravel={timeTravelWithLog}
-        switchToBranch={switchToBranch}
-      />
+
+      {stack
+        .slice() // copy, because reverse is a mutable operation. You could also
+        .reverse() // try to reverse with css or write your own mapReverse function.
+        .map(({ id, type, payload }) => (
+          <div
+            key={id}
+            onClick={() => timeTravelById(id)}
+            className={getStackItemStyle({
+              active: id === currentPosition.actionId,
+            })}
+          >
+            {JSON.stringify({ type, payload })}
+          </div>
+        ))}
     </div>
   );
 };
+```

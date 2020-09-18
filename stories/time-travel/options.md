@@ -1,4 +1,9 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+### Option to clear the future - Readme & Code
+
+By default a new branch is created everytime you call an undoable function and the future is not empty (i.e. when you DO after UNDO). You can change this behaviour by setting the option **clearFutureOnDo** to true. This means that the future is cleared and no new branch is created. This also means that all branches that start (fork from the current branch) in the future are automatically deleted.
+
+```typescript
+import React, { FC, useState } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -11,9 +16,11 @@ import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-export const HistoryChangeExample: FC = () => {
+export const OptionsExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
+
+  const [clearFutureOnDo, setClearFutureOnDo] = useState(false);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
     addUpdater,
@@ -33,29 +40,12 @@ export const HistoryChangeExample: FC = () => {
       subtract: invertHandlers(undoableAddHandler),
       updateAmount: makeUndoableFTHandler(setAmount),
     },
+    options: {
+      clearFutureOnDo,
+    },
   });
 
   const { add, subtract, updateAmount } = undoables;
-
-  const prevHistoryRef = useRef(history);
-
-  useEffect(() => {
-    console.log("--- INIT 'logging history state changes' example ---");
-  }, []);
-
-  useEffect(() => {
-    console.log('history change', {
-      from: prevHistoryRef.current,
-      to: history,
-    });
-    prevHistoryRef.current = history;
-  }, [history]);
-
-  // You can wrap this in useCallback if you need:
-  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
-    console.log('timeTravel to index', args[0]);
-    timeTravel(...args);
-  };
 
   return (
     <div className={rootStyle}>
@@ -81,6 +71,14 @@ export const HistoryChangeExample: FC = () => {
             subtract
           </button>
         </div>
+        <div className={actionsStyle}>
+          <input
+            type="checkbox"
+            checked={clearFutureOnDo}
+            onChange={e => setClearFutureOnDo(e.target.checked)}
+          />
+          &nbsp;clearFutureOnDo
+        </div>
         <BranchNav
           history={history}
           switchToBranch={switchToBranch}
@@ -90,9 +88,10 @@ export const HistoryChangeExample: FC = () => {
       </div>
       <ActionList
         history={history}
-        timeTravel={timeTravelWithLog}
+        timeTravel={timeTravel}
         switchToBranch={switchToBranch}
       />
     </div>
   );
 };
+```

@@ -1,4 +1,4 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import {
   useUndoableEffects,
   makeUndoableFTHandler,
@@ -6,12 +6,21 @@ import {
   invertHandlers,
 } from 'use-flexible-undo';
 import { addUpdater, subtractUpdater } from '../examples-util';
-import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { ActionList } from '../components/action-list';
+import {
+  rootStyle,
+  topUIStyle,
+  countStyle,
+  actionsStyle,
+  getStackItemStyle,
+} from '../styles';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
 
-export const HistoryChangeExample: FC = () => {
+const assertNever = (action: never): never => {
+  throw new Error('Unexpected action: ' + action);
+};
+
+export const DescribeActionsInlineExample: FC = () => {
   const [count, setCount] = useState(0);
   const [amount, setAmount] = useState<number | null>(1);
 
@@ -37,25 +46,8 @@ export const HistoryChangeExample: FC = () => {
 
   const { add, subtract, updateAmount } = undoables;
 
-  const prevHistoryRef = useRef(history);
-
-  useEffect(() => {
-    console.log("--- INIT 'logging history state changes' example ---");
-  }, []);
-
-  useEffect(() => {
-    console.log('history change', {
-      from: prevHistoryRef.current,
-      to: history,
-    });
-    prevHistoryRef.current = history;
-  }, [history]);
-
-  // You can wrap this in useCallback if you need:
-  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
-    console.log('timeTravel to index', args[0]);
-    timeTravel(...args);
-  };
+  const { branches, currentBranchId, currentPosition } = history;
+  const { stack } = branches[currentBranchId];
 
   return (
     <div className={rootStyle}>
@@ -88,11 +80,32 @@ export const HistoryChangeExample: FC = () => {
           redo={redo}
         />
       </div>
-      <ActionList
-        history={history}
-        timeTravel={timeTravelWithLog}
-        switchToBranch={switchToBranch}
-      />
+      {stack
+        .slice()
+        .reverse()
+        .map((action, index) => (
+          <div
+            key={action.id}
+            onClick={() => timeTravel(stack.length - 1 - index)}
+            className={getStackItemStyle({
+              active: action.id === currentPosition.actionId,
+            })}
+          >
+            {// Types for actions (type, payload) are fully inferred,
+            //  but in practice you probably want to extract this code.
+            action.created.toLocaleString() +
+              ' - ' +
+              (action.type === 'add'
+                ? `Add ${action.payload} to count`
+                : action.type === 'subtract'
+                ? `Subtract ${action.payload} from count`
+                : action.type === 'updateAmount'
+                ? `Update amount from ${action.payload.from} to ${action.payload.to}`
+                : action.type === 'start'
+                ? 'Start'
+                : assertNever(action))}
+          </div>
+        ))}
     </div>
   );
 };

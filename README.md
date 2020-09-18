@@ -104,7 +104,12 @@ import {
   invertHandlers,
 } from 'use-flexible-undo';
 // following imports are not part of the library
-import { addUpdater, subtractUpdater } from '../examples-util';
+import {
+  addUpdater,
+  subtractUpdater,
+  assertNever,
+  getLastItem,
+} from '../examples-util';
 import {
   rootStyle,
   topUIStyle,
@@ -113,7 +118,6 @@ import {
   getStackItemStyle,
 } from '../styles';
 import { NumberInput } from '../components/number-input';
-import { getLastItem } from '../components/util';
 
 export const MyFunctionComponent: FC = () => {
   const [count, setCount] = useState(0);
@@ -206,20 +210,32 @@ export const MyFunctionComponent: FC = () => {
       </div>
       // we reverse the list so that we have the newest action on top
       {stack
-        .slice() // copy, because reverse is a mutable operation
-        .reverse() // alternatively, you could try to reverse with css :)
-        .map(({ id, type, payload }, index) => (
+        .slice() // copy, because reverse is a mutable operation. You could also
+        .reverse() // try to reverse with css or write your own mapReverse function.
+        .map((action, index) => (
           <div
-            key={id}
+            key={action.id}
             // We need to recalculate the index due to the reversal.
             // Or you can use 'timeTravelById' if you do not care about
             // the lookup cost.
             onClick={() => timeTravel(stack.length - 1 - index)}
             className={getStackItemStyle({
-              active: id === currentPosition.actionId,
+              active: action.id === currentPosition.actionId,
             })}
           >
-            {JSON.stringify({ type, payload })}
+            {// Types for actions (type, payload) are fully inferred,
+            //  but in practice you probably want to extract this code.
+            action.created.toLocaleString() +
+              ' - ' +
+              (action.type === 'add'
+                ? `Add ${action.payload} to count`
+                : action.type === 'subtract'
+                ? `Subtract ${action.payload} from count`
+                : action.type === 'updateAmount'
+                ? `Update amount from ${action.payload.from} to ${action.payload.to}`
+                : action.type === 'start'
+                ? 'Start'
+                : assertNever(action))}
           </div>
         ))}
     </div>

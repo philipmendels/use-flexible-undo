@@ -1,3 +1,8 @@
+### Describe actions: switch statement - Readme & Code
+
+You can use the generic type **HistoryItemUnion** to convert a record of payload by type to a union of history items. A history item has a type and payload, as well as a unique **id** and a **created** date. The history item with type 'start' is automatically defined, so you should not include this in you record of payload by type.
+
+```typescript
 import React, { FC, useState, ReactNode } from 'react';
 import {
   PayloadFromTo,
@@ -118,3 +123,4 @@ export const DescribeActionsSwitch: FC = () => {
     </div>
   );
 };
+```

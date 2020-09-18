@@ -56,7 +56,7 @@ export const RestoreStateFromHistoryExample: FC = () => {
         setHistory(hist);
         console.log('restore application state from history');
         // This will only give you the same results if the you
-        // keep the initial application state (count, amount)
+        // keep the initial application state for "count"
         // constant inbetween save and load:
         timeTravel(indexToRestore);
       }

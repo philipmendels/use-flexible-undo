@@ -1,49 +1,90 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { TimeTravelByIdExample } from './time-travel-by-id';
+
+import { OptionsExample } from './options';
+import OptionsIntro from './options.intro.md';
+import OptionsReadme from './options.md';
+
 import { TimeTravelByIndexExample } from './time-travel-by-index';
+import TimeTravelByIndexIntro from './time-travel-by-index.intro.md';
+import TimeTravelByIndexReadme from './time-travel-by-index.md';
+
+import { TimeTravelByIdExample } from './time-travel-by-id';
+import TimeTravelByIdIntro from './time-travel-by-id.intro.md';
+import TimeTravelByIdReadme from './time-travel-by-id.md';
+
 import { SwitchToBranchExample } from './switch-to-branch';
+import SwitchToBranchReadme from './switch-to-branch.md';
+import SwitchToBranchIntro from './switch-to-branch.intro.md';
+
+import { DescribeActionsInlineExample } from './describe-actions-inline';
+import DescribeActionsInlineReadme from './describe-actions-inline.md';
+import DescribeActionsInlineIntro from './describe-actions-inline.intro.md';
 
 import { DescribeActionsSwitch } from './describe-actions-switch';
-import { DescribeActionsMap } from './describe-actions-map';
+import DescribeActionsSwitchReadme from './describe-actions-switch.md';
+import DescribeActionsSwitchIntro from './describe-actions-switch.intro.md';
+
+import { DescribeActionsMapExample } from './describe-actions-map';
+import DescribeActionsMapReadme from './describe-actions-map.md';
+import DescribeActionsMapIntro from './describe-actions-map.intro.md';
+
 import { DescriptionInPayloadExample } from './description-in-payload';
+import DescriptionInPayloadReadme from './description-in-payload.md';
+import DescriptionInPayloadIntro from './description-in-payload.intro.md';
 
 storiesOf('useUndoableEffects/time travel', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
-  .add('time travel by id', () => <TimeTravelByIdExample />, {
+  .add('option to clear the future', () => <OptionsExample />, {
     readme: {
-      // content:
-      // sidebar: ReducerAndMakeUpdaterReadme,
+      content: OptionsIntro,
+      sidebar: OptionsReadme,
     },
   })
   .add('time travel by index', () => <TimeTravelByIndexExample />, {
     readme: {
-      // content:
-      // sidebar: ReducerAndMakeUpdaterReadme,
+      content: TimeTravelByIndexIntro,
+      sidebar: TimeTravelByIndexReadme,
+    },
+  })
+  .add('time travel by id', () => <TimeTravelByIdExample />, {
+    readme: {
+      content: TimeTravelByIdIntro,
+      sidebar: TimeTravelByIdReadme,
     },
   })
   .add('switch branch', () => <SwitchToBranchExample />, {
     readme: {
-      // content:
-      // sidebar: ReducerAndMakeUpdaterReadme,
+      content: SwitchToBranchIntro,
+      sidebar: SwitchToBranchReadme,
+    },
+  })
+  .add('describe-actions-inline', () => <DescribeActionsInlineExample />, {
+    readme: {
+      content: DescribeActionsInlineIntro,
+      sidebar: DescribeActionsInlineReadme,
     },
   })
   .add('describe-actions-switch', () => <DescribeActionsSwitch />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: DescribeActionsSwitchIntro,
+      sidebar: DescribeActionsSwitchReadme,
     },
   })
-  .add('describe-actions-map', () => <DescribeActionsMap />, {
+  .add('describe-actions-map', () => <DescribeActionsMapExample />, {
     readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
+      content: DescribeActionsMapIntro,
+      sidebar: DescribeActionsMapReadme,
     },
   })
-  .add('description-in-payload', () => <DescriptionInPayloadExample />, {
-    readme: {
-      // content: UsingReducerIntro,
-      // sidebar: UsingReducerReadme,
-    },
-  });
+  .add(
+    'describe-actions-custom-payload',
+    () => <DescriptionInPayloadExample />,
+    {
+      readme: {
+        content: DescriptionInPayloadIntro,
+        sidebar: DescriptionInPayloadReadme,
+      },
+    }
+  );

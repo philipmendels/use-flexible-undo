@@ -39,9 +39,14 @@ export const invertHandlers = <P, R>({
   undo,
 }: Undoable<PayloadHandler<P, R>>) => combineHandlers(undo, drdo);
 
-export const invertFTPayload = <P>({ from, to }: PayloadFromTo<P>) => ({
+export const invertFTPayload = <P>({
+  from,
+  to,
+  ...rest
+}: PayloadFromTo<P>) => ({
   from: to,
   to: from,
+  ...rest,
 });
 
 export const invertFTHandler = <P, R>(
@@ -157,11 +162,21 @@ export const convertHandler = <P, R>(handler: PayloadHandler<P, R>) => <P2 = P>(
   convertor: (p2: P2) => P
 ) => (payload: P2) => handler(convertor(payload));
 
-export const wrapFTHandler = <S, R>(
-  handler: PayloadHandler<PayloadFromTo<S>, R>,
+export const wrapFTHandler = <S, R, PFT extends PayloadFromTo<S>>(
+  handler: PayloadHandler<PFT, R>,
   state: S
-) => <P = S>(updater: UpdaterMaker<P, S>): PayloadHandler<P, R> => payload =>
-  handler({ from: state, to: updater(payload)(state) });
+) => {
+  type RestKeys = Exclude<keyof PFT, 'from' | 'to'>;
+  return <P = S>(updater: UpdaterMaker<P, S>) => (
+    payload: P,
+    rest: RestKeys extends never ? void : Pick<PFT, RestKeys>
+  ) =>
+    handler({
+      from: state,
+      to: updater(payload)(state),
+      ...(rest || {}),
+    } as PFT);
+};
 
 export const makeUnducer = <S, PBT extends PayloadByType>(
   stateUpdaters: UndoableStateUpdatersByType<S, PBT>

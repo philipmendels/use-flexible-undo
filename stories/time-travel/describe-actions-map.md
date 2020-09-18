@@ -1,23 +1,53 @@
-import React, { FC, useState, useRef, useEffect } from 'react';
+### Describe actions: object map - Readme & Code
+
+It can be useful to organize custom UI per action inside an object map (called "payloadDescribers" below). You can choose to add the "start" type to this map, or to handle it separately like we do in this example.
+
+```typescript
+import React, { FC, useState, ReactNode } from 'react';
 import {
+  PayloadFromTo,
   useUndoableEffects,
   makeUndoableFTHandler,
   makeUndoableHandler,
   invertHandlers,
+  HistoryItemUnion,
 } from 'use-flexible-undo';
-import { addUpdater, subtractUpdater } from '../examples-util';
 import { rootStyle, topUIStyle, countStyle, actionsStyle } from '../styles';
-import { ActionList } from '../components/action-list';
 import { NumberInput } from '../components/number-input';
 import { BranchNav } from '../components/branch-nav';
+import { ActionList } from '../components/action-list';
 
-export const HistoryChangeExample: FC = () => {
+type Nullber = number | null;
+
+interface PayloadByType {
+  add: number;
+  subtract: number;
+  updateAmount: PayloadFromTo<Nullber>;
+}
+
+type PayloadDescribers = {
+  [K in keyof PayloadByType]: (payload: PayloadByType[K]) => ReactNode;
+};
+
+const payloadDescribers: PayloadDescribers = {
+  add: amount => `Add ${amount} to count`,
+  subtract: amount => `Subtract ${amount} from count`,
+  updateAmount: ({ from, to }) => `Update amount from ${from} to ${to}`,
+};
+
+const describeAction = ({
+  type,
+  payload,
+}: HistoryItemUnion<PayloadByType>): ReactNode =>
+  type === 'start' ? 'Start' : (payloadDescribers[type] as any)(payload);
+
+export const DescribeActionsMapExample: FC = () => {
   const [count, setCount] = useState(0);
-  const [amount, setAmount] = useState<number | null>(1);
+  const [amount, setAmount] = useState<Nullber>(1);
 
   const undoableAddHandler = makeUndoableHandler(setCount)(
-    addUpdater,
-    subtractUpdater
+    amount => prev => prev + amount,
+    amount => prev => prev - amount
   );
 
   const {
@@ -27,7 +57,7 @@ export const HistoryChangeExample: FC = () => {
     history,
     timeTravel,
     switchToBranch,
-  } = useUndoableEffects({
+  } = useUndoableEffects<PayloadByType>({
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
@@ -36,26 +66,6 @@ export const HistoryChangeExample: FC = () => {
   });
 
   const { add, subtract, updateAmount } = undoables;
-
-  const prevHistoryRef = useRef(history);
-
-  useEffect(() => {
-    console.log("--- INIT 'logging history state changes' example ---");
-  }, []);
-
-  useEffect(() => {
-    console.log('history change', {
-      from: prevHistoryRef.current,
-      to: history,
-    });
-    prevHistoryRef.current = history;
-  }, [history]);
-
-  // You can wrap this in useCallback if you need:
-  const timeTravelWithLog = (...args: Parameters<typeof timeTravel>) => {
-    console.log('timeTravel to index', args[0]);
-    timeTravel(...args);
-  };
 
   return (
     <div className={rootStyle}>
@@ -90,9 +100,11 @@ export const HistoryChangeExample: FC = () => {
       </div>
       <ActionList
         history={history}
-        timeTravel={timeTravelWithLog}
+        timeTravel={timeTravel}
         switchToBranch={switchToBranch}
+        describeAction={describeAction}
       />
     </div>
   );
 };
+```
