@@ -1,3 +1,3 @@
 ### Describe actions: switch statement - Intro
 
-In this example we create custom descriptions for actions in the undo history, using a switch statement.
+In this example we define custom descriptions for the actions in the undo history, by means of a switch statement in a function outside of the component.

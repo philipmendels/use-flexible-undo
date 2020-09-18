@@ -1,6 +1,6 @@
 ### Restoring state from history - Readme & Code
 
-Perhaps not very practical, but nice as a proof-of-concept: You can rebuild your application state from your history state. You will however only get the same result if your initial application state remains constant between saving and loading. On the other hand, you can also change the initial state on purpose if you want to explore different outcomes 😬.
+Perhaps not very practical, but nice as a proof-of-concept: You can rebuild your application state from your history state. However, if you modelled (some of) your action payloads as relative values (deltas) then you will only get the same result if your initial application state remains constant between saving and loading. On the other hand, you can also change the initial state on purpose if you want to explore different outcomes 😬.
 
 ```typescript
 import React, { FC, useState, useEffect } from 'react';
@@ -61,7 +61,7 @@ export const RestoreStateFromHistoryExample: FC = () => {
         setHistory(hist);
         console.log('restore application state from history');
         // This will only give you the same results if the you
-        // keep the initial application state (count, amount)
+        // keep the initial application state for "count"
         // constant inbetween save and load:
         timeTravel(indexToRestore);
       }

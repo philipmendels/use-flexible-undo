@@ -78,9 +78,13 @@ storiesOf('useUndoableEffects/time travel', module)
       sidebar: DescribeActionsMapReadme,
     },
   })
-  .add('description-in-payload', () => <DescriptionInPayloadExample />, {
-    readme: {
-      content: DescriptionInPayloadIntro,
-      sidebar: DescriptionInPayloadReadme,
-    },
-  });
+  .add(
+    'describe-actions-custom-payload',
+    () => <DescriptionInPayloadExample />,
+    {
+      readme: {
+        content: DescriptionInPayloadIntro,
+        sidebar: DescriptionInPayloadReadme,
+      },
+    }
+  );

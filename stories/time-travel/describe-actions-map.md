@@ -1,5 +1,7 @@
 ### Describe actions: object map - Readme & Code
 
+It can be useful to organize custom UI per action inside an object map (called "payloadDescribers" below). You can choose to add the "start" type to this map, or to handle it separately like we do in this example.
+
 ```typescript
 import React, { FC, useState, ReactNode } from 'react';
 import {

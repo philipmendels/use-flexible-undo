@@ -1,5 +1,7 @@
 ### Describe actions: details in payload - Readme & Code
 
+The way that you model your actions for undo/redo purposes (e.g. absolute vs relative state values in the payload) may not necessarily be the best fit for describing the action from the user's point of view. In the case that a single action type (like "updateCount") is too generic for the user then you can either create separate undoable functions ("add", "subtract", etc.) that all re-use the same do/redo & undo handlers, or you can add additional info to the action payload like we do in this example. It's up to you how exact you want to be regarding undoing/redoing and describing the user's actions, and how small you need your action payloads to be.
+
 ```typescript
 import React, { FC, useState, ReactNode } from 'react';
 import {

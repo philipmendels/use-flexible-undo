@@ -55,6 +55,8 @@ export const DescribeActionsSwitch: FC = () => {
     history,
     timeTravel,
     switchToBranch,
+    // types can be inferred, but since we already have
+    // 'PayloadByType' defined, we can just as well add it.
   } = useUndoableEffects<PayloadByType>({
     handlers: {
       add: undoableAddHandler,

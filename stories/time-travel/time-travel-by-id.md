@@ -88,8 +88,8 @@ export const TimeTravelByIdExample: FC = () => {
       </div>
 
       {stack
-        .slice() // copy, because reverse is a mutable operation
-        .reverse() // alternatively, you could try to reverse with css :)
+        .slice() // copy, because reverse is a mutable operation. You could also
+        .reverse() // try to reverse with css or write your own mapReverse function.
         .map(({ id, type, payload }) => (
           <div
             key={id}

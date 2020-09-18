@@ -1,5 +1,7 @@
 ### Describe actions: inline - Readme & Code
 
+Inside your function component the the action types and payloads are fully typed, which helps when you want to customize the UI per action type. In practice you probably want to extract this code outside your component. You can see variations of how to do that in the next examples.
+
 ```typescript
 import React, { FC, useState } from 'react';
 import {

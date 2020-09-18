@@ -210,8 +210,8 @@ export const MyFunctionComponent: FC = () => {
       </div>
       // we reverse the list so that we have the newest action on top
       {stack
-        .slice() // copy, because reverse is a mutable operation
-        .reverse() // alternatively, you could try to reverse with css :)
+        .slice() // copy, because reverse is a mutable operation. You could also
+        .reverse() // try to reverse with css or write your own mapReverse function.
         .map((action, index) => (
           <div
             key={action.id}

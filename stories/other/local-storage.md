@@ -1,6 +1,6 @@
 ### setHistory from localStorage - Readme & Code
 
-You can use the **setHistory** function which is returned by the hook to dynamically restore (or update) the history state. Make sure to restore your application state as well to keep the state in sync. Alternatively you can recreate your application state from the history state (see next example), but that requires your initial application state to be constant inbetween save and load.
+You can use the **setHistory** function which is returned by the hook to dynamically restore (or update) the history state. Make sure to restore your application state as well to keep the state in sync. Alternatively you can recreate your application state from the history state (see next example), but that requires your initial application state to be constant inbetween save and load, if you modelled (some of) your action payloads as relative values (deltas).
 
 When your application state grows and you find it incovenient to access and update each slice of application state individually when saving and loading, you can opt to create a combined state object with useState (in this case combining "count" and "amount"). If you also want to integrate the history state then take a look at **useUndoableReducer**.
 
