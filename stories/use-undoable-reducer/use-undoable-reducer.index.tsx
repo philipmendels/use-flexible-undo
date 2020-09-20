@@ -13,7 +13,7 @@ storiesOf('useUndoableReducer', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
   .add(
-    'useUndoableReducer & makeUndoableReducer',
+    'makeUndoableReducer & useUndoableReducer',
     () => <UseUndoableReducerExample />,
     {
       readme: {
@@ -22,9 +22,13 @@ storiesOf('useUndoableReducer', module)
       },
     }
   )
-  .add('useUndoableUnducer', () => <UseUndoableUnducerExample />, {
-    readme: {
-      content: UseUndoableUnducerIntro,
-      sidebar: UseUndoableUnducerReadme,
-    },
-  });
+  .add(
+    'makeUndoableReducer with an unducer',
+    () => <UseUndoableUnducerExample />,
+    {
+      readme: {
+        content: UseUndoableUnducerIntro,
+        sidebar: UseUndoableUnducerReadme,
+      },
+    }
+  );
