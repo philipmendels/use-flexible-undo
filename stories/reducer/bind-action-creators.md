@@ -1,3 +1,9 @@
+### makeReducer & bindActionCreators - Readme & code
+
+The utility **makeReducer** takes an object with state updater functions by action type. It returns an object with a reducer and with action creators by action type. The reducer can be passed to useReducer.
+
+The utility **bindActionCreators** takes the dispatch function (returned by useReducer) and an object with action creators by action type, and returns an object with do/redo handlers by action type. This object can be passed to the "drdoHandlers" prop of **useUndoableEffects**.
+
 ```typescript
 import React, { FC, useReducer } from 'react';
 import {

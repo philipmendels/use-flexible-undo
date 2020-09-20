@@ -1,15 +1,17 @@
 # use-flexible-undo
 
-This library enables you to add a branching undo history to your React project. Because ... the very first thing every user will demand for any kind of app is a branching undo history!
-
+This lib gives you hooks and utilities for adding a _branching_ undo history to your React project, or in general for experimenting with undo-redo UI 😎 and/or implementation 🤓 in React.
+<br/><br/>
 <img src="https://github.com/philipmendels/use-flexible-undo/raw/master/assets/countfive.gif" width="426"/>
-
-All jokes aside, you might be interested in experimenting with undo-redo UI 😎 and/or implementation 🤓. This lib gives you two React hooks to do so. They work with a history of undoable actions (as opposed to a history of snapshots of app state). Both hooks offer identical functionality and an almost identical API, but they differ in how they integrate with your app state:
+<br/><br/>
+The library includes two main hooks that offer identical functionality and an almost identical API, but differ in how they integrate with your application state:
 
 - **useUndoableEffects** allows you to add undo/redo functionality independently of how you manage your app state. Updates to app state are modelled as a side-effect of updates to undo history state. You can use this hook together with (multiple calls to) useState, useReducer or a combination thereof. Quite nice for prototyping.
 - **useUndoableReducer** integrates your application state and the undo history state. This hook takes an undoable reducer which can be created with the included utility **makeUndoableReducer**.
 
-The library does not contain UI-components.
+Both hooks work with a history of undoable actions as opposed to a history of snapshots of global application state. This approach makes it possible to experiment with undo/redo without putting specific constraints on state management. Constraints _are_ often a good thing (e.g. using Redux with Redux-Undo works great 🙂), but this lib simply provides an alternative more explorative perspective.
+
+This library does not contain UI-components.
 
 ## Installation and usage
 
@@ -93,7 +95,7 @@ export const MyFunctionComponent: FC = () => {
 
 The library provides you with various utilities for generating your do/redo & undo handlers from your state setter functions. Using these utils has the added benefit that the payload types can be inferred. If you want you can of course still type the hook with a record of payload by action type, for some extra control.
 
-Apart from these utilities, the following example illustrates the usage of most of the return values of the hook: The **canUndo** and **canRedo** booleans, the **history** state, and the **undo**, **redo**, **timeTravel** and **switchToBranch** functions. The example includes some basic inline UI, but in your project you probably want to split this up in multiple (styled) components ;)
+Apart from these utilities, the following example illustrates the usage of most of the return values of the hook: The **canUndo** and **canRedo** booleans, the **history** state, and the **undo**, **redo**, **timeTravel** and **switchToBranch** functions. The example includes some basic inline UI, but in your project you probably want to split this up into multiple (styled) components.
 
 ```typescript
 import React, { FC, useState } from 'react';
@@ -110,13 +112,7 @@ import {
   assertNever,
   getLastItem,
 } from '../examples-util';
-import {
-  rootStyle,
-  topUIStyle,
-  countStyle,
-  actionsStyle,
-  getStackItemStyle,
-} from '../styles';
+import { getStackItemStyle } from '../styles';
 import { NumberInput } from '../components/number-input';
 
 export const MyFunctionComponent: FC = () => {
@@ -138,7 +134,7 @@ export const MyFunctionComponent: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableEffects({
-    // types are inferred from setCount / setAmount
+    // payload types are inferred from setCount / setAmount
     handlers: {
       add: undoableAddHandler,
       subtract: invertHandlers(undoableAddHandler),
@@ -164,50 +160,44 @@ export const MyFunctionComponent: FC = () => {
   );
 
   return (
-    <div className={rootStyle}>
-      <div className={topUIStyle}>
-        <div className={countStyle}>count &nbsp;= &nbsp;{count}</div>
-        <div className={actionsStyle}>
-          <label>
-            amount =&nbsp;
-            <NumberInput
-              // simple util component that converts string
-              // to number/null and vice versa
-              value={amount}
-              onChange={value =>
-                updateAmount({
-                  from: amount,
-                  to: value,
-                })
-              }
-            />
-          </label>
-          <button disabled={!amount} onClick={() => amount && add(amount)}>
-            add
-          </button>
-          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
-            subtract
-          </button>
-        </div>
-        <div className={actionsStyle}>
-          <select
-            value={currentBranchId}
-            onChange={e => switchToBranch(e.target.value, 'HEAD_OF_BRANCH')}
-          >
-            {branchList.map(b => (
-              <option key={b.id} value={b.id}>
-                Branch {b.number}
-              </option>
-            ))}
-          </select>
-          <button disabled={!canUndo} onClick={undo}>
-            undo
-          </button>
-          <button disabled={!canRedo} onClick={redo}>
-            redo
-          </button>
-        </div>
-      </div>
+    <>
+      <div>count = {count}</div>
+      <label>
+        amount =
+        <NumberInput
+          // simple util component that converts string
+          // to number/null and vice versa
+          value={amount}
+          onChange={value =>
+            updateAmount({
+              from: amount,
+              to: value,
+            })
+          }
+        />
+      </label>
+      <button disabled={!amount} onClick={() => amount && add(amount)}>
+        add
+      </button>
+      <button disabled={!amount} onClick={() => amount && subtract(amount)}>
+        subtract
+      </button>
+      <select
+        value={currentBranchId}
+        onChange={e => switchToBranch(e.target.value, 'HEAD_OF_BRANCH')}
+      >
+        {branchList.map(b => (
+          <option key={b.id} value={b.id}>
+            Branch {b.number}
+          </option>
+        ))}
+      </select>
+      <button disabled={!canUndo} onClick={undo}>
+        undo
+      </button>
+      <button disabled={!canRedo} onClick={redo}>
+        redo
+      </button>
       // we reverse the list so that we have the newest action on top
       {stack
         .slice() // copy, because reverse is a mutable operation. You could also
@@ -238,7 +228,7 @@ export const MyFunctionComponent: FC = () => {
                 : assertNever(action))}
           </div>
         ))}
-    </div>
+    </>
   );
 };
 ```
@@ -247,7 +237,7 @@ When using **useUndoableEffects** you have to make sure that you get your state 
 
 ### useUndoableReducer
 
-If you want to keep your undo-history state and you application state integrated, and/or if you want to extract your state update logic from your component(s) for performance or testability, then you can create a reducer (from scratch or with the included utils). You can pass this reducer together with an object map of undo action creators by action type to **makeUndoableReducer**. The resulting undoable reducer can be used directly with React's useReducer, or you can provide it to **useUndoableReducer**. This is a simple wrapper for useReducer, and it gives you a similar API as **useUndoableEffects**.
+If you want to keep your undo-history state and you application state integrated, and/or if you want to extract your state update logic from your component(s) for various reasons (e.g. performance, testing, seperation of concerns), then you can create a reducer from scratch or with the included utils. You can pass this reducer together with an object map of undo action creators by action type to **makeUndoableReducer**. The resulting undoable reducer can be used directly with React's useReducer, or you can provide it to **useUndoableReducer**. This is a simple wrapper for useReducer, and it gives you a similar API as **useUndoableEffects**.
 
 The following example also shows that you are free to get your state dependencies from the previous state instead of from the action payload. This however does have a possible downside: You will not have direct access to the previous state for each action in the undo history UI, so the user will only see the action types.
 
@@ -342,4 +332,4 @@ const undoableReducer = makeUndoableReducer(unducer);
 ## Roadmap
 
 - not-so-distant future: add tests
-- distant future: non-linear undo 🤓
+- distant future: non-linear / selective undo 🤓

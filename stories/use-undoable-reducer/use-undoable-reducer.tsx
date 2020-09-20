@@ -22,15 +22,20 @@ interface State {
 }
 
 interface PayloadByType {
-  add: void;
-  subtract: void;
+  add: number;
+  subtract: number;
   updateAmount: PayloadFromTo<Nullber>;
 }
+
+// Here we get "amount" from the payload. Alternatively you can get it
+// from the previous state, but then you will not have access to the
+// value when constructing the UI for the undo history.
+const selectDependency = (amount: number) => () => amount;
 
 const countUpdater = makeUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(() => state => state.amount || 0);
+)(selectDependency);
 
 const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   add: countUpdater(addUpdater),
@@ -83,10 +88,10 @@ export const UseUndoableReducerExample: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add()}>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => subtract()}>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
             subtract
           </button>
         </div>

@@ -1,3 +1,7 @@
+### useBindActionCreators - Readme & Code
+
+The hook **useBindActionCreators** is a basic wrapper for useReducer and bindActionCreators. It takes a reducer, the initial state and an object with action creators by action type. It returns (in a tuple) the current state and an object with do/redo handlers by action type. The returned object is memoized inside the hook, and can be passed to the "drdoHandlers" prop of **useUndoableEffects**.
+
 ```typescript
 import React, { FC } from 'react';
 import {

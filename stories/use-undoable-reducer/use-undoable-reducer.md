@@ -1,3 +1,9 @@
+### makeUndoableReducer & useUndoableReducer - Readme & code
+
+If you want to keep your undo-history state and you application state integrated, and/or if you want to extract your state update logic from your component(s) for various reasons (e.g. performance, testing, seperation of concerns), then you can create a reducer from scratch or with the included utils. You can pass this reducer together with an object map of undo action creators by action type to **makeUndoableReducer**. The resulting undoable reducer can be used directly with React's useReducer, or you can provide it to **useUndoableReducer**. This is a simple wrapper for useReducer, and it gives you a similar API as **useUndoableEffects**.
+
+See the documentation for **useUndoableEffects** for an explanation about the other utility functions, the return values of the hook, constructing the UI and various other topics.
+
 ```typescript
 import React, { FC } from 'react';
 import {
@@ -23,15 +29,20 @@ interface State {
 }
 
 interface PayloadByType {
-  add: void;
-  subtract: void;
+  add: number;
+  subtract: number;
   updateAmount: PayloadFromTo<Nullber>;
 }
+
+// Here we get "amount" from the payload. Alternatively you can get it
+// from the previous state, but then you will not have access to the
+// value when constructing the UI for the undo history.
+const selectDependency = (amount: number) => () => amount;
 
 const countUpdater = makeUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(() => state => state.amount || 0);
+)(selectDependency);
 
 const { reducer, actionCreators } = makeReducer<State, PayloadByType>({
   add: countUpdater(addUpdater),
@@ -55,7 +66,7 @@ export const UseUndoableReducerExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableReducer({
-    reducer: undoableReducer,
+    undoableReducer,
     initialState: {
       count: 0,
       amount: 1,
@@ -84,10 +95,10 @@ export const UseUndoableReducerExample: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add()}>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => subtract()}>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
             subtract
           </button>
         </div>

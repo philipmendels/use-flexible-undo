@@ -1,3 +1,19 @@
+### reducer & makeUpdater - Readme & Code
+
+If you want to extract your state update logic from your component(s) for various reasons (e.g. performance, testing, seperation of concerns), then you can create a reducer. Here we create the reducer from scratch. You can see in this example that there is some repetition between the definition of the reducer and the definition of the handlers (the action types are repeated). In the next examples we take a look at utilities for removing this repetition.
+
+In this example we use the curried utility function **makeUpdater**, which takes
+
+- a function for selecting slice B from state A.
+- a function for updating slice B in state A.  
+  ->
+- a function P -> A -> C for deriving a state change value C based on the action payload and/or the previous state A
+- an optional predicate function P -> A -> boolean, for conditionally applying the entire update  
+  ->
+- a curried updater function C -> B -> B for the do/redo handler or for the undo handler
+
+Again this may not be a one-size-fits-all utility. Feel free to write your own solution, for example using lenses and other functional utilities.
+
 ```typescript
 import React, { FC, useReducer } from 'react';
 import {
