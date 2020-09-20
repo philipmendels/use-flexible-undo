@@ -1,3 +1,9 @@
+### makeUndoableReducer with an unducer - Readme & Code
+
+A bit more experimental: You can also make a reducer that handles the undo cases internally, in this case based on the `{ meta: { isUndo: boolean }}` part of the actions. This means that you do not need to provide the undo action creators to **makeUndoableReducer**, but it has the possible downside that it is harder to see the difference between undo and redo in something like Redux-devtools.
+
+See the "combination with a reducer" chapter of the documentation for **useUndoableEffects** to see more examples of the difference between **makeReducer** and **makeUnducer**.
+
 ```typescript
 import React, { FC } from 'react';
 import {
@@ -23,17 +29,20 @@ interface State {
 }
 
 interface PayloadByType {
-  add: void;
-  subtract: void;
+  add: number;
+  subtract: number;
   updateAmount: PayloadFromTo<Nullber>;
 }
 
-const selectAmount = (_: void) => (state: State) => state.amount || 0;
+// Here we get "amount" from the payload. Alternatively you can get it
+// from the previous state, but then you will not have access to the
+// value when constructing the UI for the undo history.
+const selectDependency = (amount: number) => () => amount;
 
 const undoableAddUpdater = makeUndoableUpdater(
   (state: State) => state.count,
   count => merge({ count })
-)(selectAmount)(addUpdater, subtractUpdater);
+)(selectDependency)(addUpdater, subtractUpdater);
 
 const { unducer, actionCreators } = makeUnducer<State, PayloadByType>({
   add: undoableAddUpdater,
@@ -53,7 +62,7 @@ export const UseUndoableUnducerExample: FC = () => {
     timeTravel,
     switchToBranch,
   } = useUndoableReducer({
-    reducer: undoableReducer,
+    undoableReducer,
     initialState: {
       count: 0,
       amount: 1,
@@ -82,10 +91,10 @@ export const UseUndoableUnducerExample: FC = () => {
               }
             />
           </label>
-          <button disabled={!amount} onClick={() => add()}>
+          <button disabled={!amount} onClick={() => amount && add(amount)}>
             add
           </button>
-          <button disabled={!amount} onClick={() => subtract()}>
+          <button disabled={!amount} onClick={() => amount && subtract(amount)}>
             subtract
           </button>
         </div>

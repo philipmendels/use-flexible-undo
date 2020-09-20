@@ -1,8 +1,19 @@
-### Reducer & makeUndoableUpdater - Readme & Code
+### unducer & makeUndoableUpdater - Readme & Code
 
-The utility **makeUndoableUpdater** is similar to **makeUndoableSetter** which was explained in the previous chapter about "dependent state". The difference is that it does not take the initial state setter function, and consequently it does not set the state, but returns do/redo & undo state updater functions that you can use in a reducer. Again this may not be a one-size-fits-all solution. Feel free to write your own solution, for example using lenses and other functional utilities.
+A bit more experimental: You can also make a reducer that handles the undo cases internally, in this case based on the `{ meta: { isUndo: boolean }}` part of the actions. This means that you do not need to create separate handlers or action creators for "undo", but it has the possible downside that it is harder to see the difference between undo and redo in something like Redux-devtools. In this example there is still a lot of repetition in the code, but in the next examples we take a look at utilities for removing this.
 
-In this example you can see that manually writing a reducer and calling dispatch from the handlers involves writing a lot of repetitive code. We could optimize the code a bit by leaving out the "subtract" case from the reducer, and simply using the inverse of the "add" handler for the "subtract" handler (e.g. using the **invertHandlers** util which is explained in the first chapter). But this would only bring us so far. In the next examples we look at some utilities for removing more repetitive code.
+In this example we use the curried utility function **makeUndoableUpdater**, which takes
+
+- a function for selecting slice B from state A.
+- a function for updating slice B in state A.  
+  ->
+- a function P -> A -> C for deriving a state change value C based on the action payload and/or the previous state A
+- an optional predicate function P -> A -> boolean, for conditionally applying the entire update  
+  ->
+- a curried updater function C -> B -> B for the do/redo handler
+- a curried updater function C -> B -> B for the undo handler
+
+Again this may not be a one-size-fits-all utility. Feel free to write your own solution, for example using lenses and other functional utilities.
 
 ```typescript
 import React, { FC, useReducer } from 'react';

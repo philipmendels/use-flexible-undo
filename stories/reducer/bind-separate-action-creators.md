@@ -1,3 +1,7 @@
+### bindSeparateActionCreators - Readme & Code
+
+The utility **bindSeparateActionCreators** takes the dispatch function (returned by useReducer), an object with do/redo action creators by action type and a separate object with undo action creators by action type. It returns a single object with do/redo & undo handlers by action type, which can be passed to the "handlers" prop of **useUndoableEffects**.
+
 ```typescript
 import React, { FC, useReducer } from 'react';
 import {

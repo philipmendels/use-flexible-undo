@@ -2,14 +2,24 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 
 import { ReducerAndMakeUpdaterExample } from './use-reducer';
-// import ReducerAndMakeUndoableUpdaterIntro from './use-unducer-intro.md';
+import ReducerAndMakeUpdaterIntro from './use-reducer.intro.md';
 import ReducerAndMakeUpdaterReadme from './use-reducer.md';
 
 import { BindActionCreatorsExample } from './bind-action-creators';
+import BindActionCreatorsIntro from './bind-action-creators.intro.md';
 import BindActionCreatorsReadme from './bind-action-creators.md';
 
 import { UseBindActionCreatorsExample } from './use-bind-action-creators';
+import UseBindActionCreatorsIntro from './use-bind-action-creators.intro.md';
 import UseBindActionCreatorsReadme from './use-bind-action-creators.md';
+
+import { BindSeparateActionCreatorsExample } from './bind-separate-action-creators';
+import BindSeparateActionCreatorsIntro from './bind-separate-action-creators.intro.md';
+import BindSeparateActionCreatorsReadme from './bind-separate-action-creators.md';
+
+import { UseBindSeparateActionCreatorsExample } from './use-bind-seperate-action-creators';
+import UseBindSeparateActionCreatorsReadme from './use-bind-seperate-action-creators.md';
+import UseBindSeparateActionCreatorsIntro from './use-bind-seperate-action-creators.intro.md';
 
 import { UnducerAndMakeUndoableUpdaterExample } from './use-unducer';
 import UnducerAndMakeUndoableUpdaterIntro from './use-unducer-intro.md';
@@ -19,15 +29,9 @@ import { BindUndoableActionCreatorsExample } from './bind-undoable-action-creato
 import BindUndoableActionCreatorsIntro from './bind-undoable-action-creators-intro.md';
 import BindUndoableActionCreatorsReadme from './bind-undoable-action-creators.md';
 
-import { BindSeparateActionCreatorsExample } from './bind-separate-action-creators';
-import BindSeparateActionCreatorsReadme from './bind-separate-action-creators.md';
-
-import { UseBindUndoableActionCreatorsExample } from './use-bound-unducer';
-import UseBoundUnducerIntro from './use-bound-unducer-intro.md';
-import UseBoundUnducerReadme from './use-bound-unducer.md';
-
-import { UseBindSeparateActionCreatorsExample } from './use-bound-unducer-with-sep-action-creators';
-import UseBoundUnducerWithSepActionCreatorsReadme from './use-bound-unducer-with-sep-action-creators.md';
+import { UseBindUndoableActionCreatorsExample } from './use-bind-undoable-action-creators';
+import UseBindUndoableActionCreatorsIntro from './use-bind-undoable-action-creators.intro.md';
+import UseBindUndoableActionCreatorsReadme from './use-bind-undoable-action-creators.md';
 
 import { ReducerWithPreviousStateAndPayloadExample } from './reducer-with-previous-state-and-payload';
 import ReducerWithPreviousStateAndPayloadIntro from './reducer-with-previous-state-and-payload-intro.md';
@@ -42,7 +46,7 @@ storiesOf('useUndoableEffects/combination with a reducer', module)
   .addParameters({ options: { theme: {} } })
   .add('reducer & makeUpdater', () => <ReducerAndMakeUpdaterExample />, {
     readme: {
-      // content:
+      content: ReducerAndMakeUpdaterIntro,
       sidebar: ReducerAndMakeUpdaterReadme,
     },
   })
@@ -51,14 +55,14 @@ storiesOf('useUndoableEffects/combination with a reducer', module)
     () => <BindActionCreatorsExample />,
     {
       readme: {
-        // content:
+        content: BindActionCreatorsIntro,
         sidebar: BindActionCreatorsReadme,
       },
     }
   )
   .add('useBindActionCreators', () => <UseBindActionCreatorsExample />, {
     readme: {
-      // content:
+      content: UseBindActionCreatorsIntro,
       sidebar: UseBindActionCreatorsReadme,
     },
   })
@@ -67,7 +71,7 @@ storiesOf('useUndoableEffects/combination with a reducer', module)
     () => <BindSeparateActionCreatorsExample />,
     {
       readme: {
-        // content: ReducerAndUseStateIntro,
+        content: BindSeparateActionCreatorsIntro,
         sidebar: BindSeparateActionCreatorsReadme,
       },
     }
@@ -77,8 +81,8 @@ storiesOf('useUndoableEffects/combination with a reducer', module)
     () => <UseBindSeparateActionCreatorsExample />,
     {
       readme: {
-        // content: ReducerAndUseStateIntro,
-        sidebar: UseBoundUnducerWithSepActionCreatorsReadme,
+        content: UseBindSeparateActionCreatorsIntro,
+        sidebar: UseBindSeparateActionCreatorsReadme,
       },
     }
   )
@@ -108,14 +112,14 @@ storiesOf('useUndoableEffects/combination with a reducer', module)
     () => <UseBindUndoableActionCreatorsExample />,
     {
       readme: {
-        content: UseBoundUnducerIntro,
-        sidebar: UseBoundUnducerReadme,
+        content: UseBindUndoableActionCreatorsIntro,
+        sidebar: UseBindUndoableActionCreatorsReadme,
       },
     }
   )
 
   .add(
-    'previous state and payload',
+    'combining previous state and payload',
     () => <ReducerWithPreviousStateAndPayloadExample />,
     {
       readme: {
@@ -124,9 +128,13 @@ storiesOf('useUndoableEffects/combination with a reducer', module)
       },
     }
   )
-  .add('reducer and useState', () => <ReducerAndUseStateExample />, {
-    readme: {
-      content: ReducerAndUseStateIntro,
-      sidebar: ReducerAndUseStateReadme,
-    },
-  });
+  .add(
+    'combining useReducer and useState',
+    () => <ReducerAndUseStateExample />,
+    {
+      readme: {
+        content: ReducerAndUseStateIntro,
+        sidebar: ReducerAndUseStateReadme,
+      },
+    }
+  );
