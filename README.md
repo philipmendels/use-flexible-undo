@@ -31,7 +31,7 @@ This lib is written in TypeScript so types for TS are included.
 
 ## Examples
 
-Check out the <a href="https://philipmendels.github.io/use-flexible-undo" target="_blank">StoryBook</a> for interactive examples with documentation and source code. Check out the examples below for a quick overview.
+Check out the <a href="https://philipmendels.github.io/use-flexible-undo" target="_blank">StoryBook</a> for interactive examples with documentation and source code. See <a href="https://github.com/philipmendels/overboard" target="_blank">this repo</a> for a more advanced example of an interactive board (free spatial orginization). Check out the documentation and code below for a quick overview of the main hooks.
 
 ### useUndoableEffects
 
