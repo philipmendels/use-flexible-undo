@@ -79,6 +79,7 @@ export type ActionCreatorsByType<PBT extends PayloadByType> = {
 export type HistoryItem<T = string, P = any> = Action<T, P> & {
   created: Date;
   id: string;
+  skipped?: boolean;
 };
 
 export type HistoryItemUnion<PBT extends PayloadByType> =
@@ -162,7 +163,23 @@ export type UFUProps<PBT extends PayloadByType> = UFUCommonProps<PBT> &
         drdoHandlers: HandlersByType<PBT>;
         undoHandlers: HandlersByType<PBT>;
       }
-  );
+  ) & {
+    migrators?: {
+      [K in keyof PBT]?: PayloadHandler<
+        PBT[K],
+        {
+          [K2 in keyof PBT]?: PayloadHandler<
+            PBT[K2],
+            {
+              newPayload?: PBT[K2];
+              isInvalid?: boolean;
+              isReady?: boolean;
+            }
+          >;
+        }
+      >;
+    };
+  };
 
 export interface PositionOnBranch {
   globalIndex: number;

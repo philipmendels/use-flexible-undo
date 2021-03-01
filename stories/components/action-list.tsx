@@ -76,13 +76,14 @@ export const ActionList = <PBT extends PayloadByType>({
       <Indicator
         style={{ top: 2 + (stack.length - currentIndex - 1) * 32 + 'px' }}
       >
-        &#11157;
+        ⬅
       </Indicator>
     </div>
   );
 };
 
 const Indicator = styled.div`
+  transform: scaleX(-1);
   height: 32px;
   display: flex;
   align-items: center;
@@ -114,7 +115,7 @@ const StackItem = <PBT extends PayloadByType>({
   timeTravel,
   switchToBranch,
 }: StackItemProps<PBT>): ReactElement | null => {
-  const { created, type, payload } = action;
+  const { created, type, payload, skipped } = action as any;
   return (
     <StackItemRoot>
       <div
@@ -161,7 +162,14 @@ const StackItem = <PBT extends PayloadByType>({
         <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created, now)}
         </div>
-        <div className="description" style={{ flex: 1, whiteSpace: 'nowrap' }}>
+        <div
+          className="description"
+          style={{
+            flex: 1,
+            whiteSpace: 'nowrap',
+            textDecoration: skipped ? 'line-through' : 'none',
+          }}
+        >
           {describeAction
             ? describeAction(action)
             : JSON.stringify({ type, payload })}

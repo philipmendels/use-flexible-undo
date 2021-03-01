@@ -8,7 +8,7 @@ import {
   Updater,
   BranchSwitchModus,
 } from './index.types';
-import { mapObject } from './util-internal';
+import { mapObject, mergeDeepC } from './util-internal';
 import {
   getCurrentBranch,
   updatePath,
@@ -217,6 +217,71 @@ export const useUndoableEffects = <PBT extends PayloadByType>(
     [history, timeTravelCurrentBranch]
   );
 
+  const skip = useCallback(
+    (
+      actionId: string = history.currentPosition.actionId,
+      branchId: string = history.currentBranchId
+    ) => {
+      const branch = history.branches[branchId];
+      const index = branch.stack.findIndex(action => action.id === actionId);
+      if (index >= 0) {
+        const action = branch.stack[index];
+
+        // TODO: make the updaters pure
+        // TODO: undo (and redo if not current action)
+        // TODO: multi branch and isReady per branch
+        // TODO: skipped actions should be ignored during undo/redo/timetravel
+
+        const migratorMapFn = props.migrators && props.migrators[action.type];
+        const migratorMap = migratorMapFn && migratorMapFn(action.payload);
+        const readyMap = {} as any;
+        setHistory(
+          mergeDeepC({
+            branches: {
+              [branchId]: {
+                stack: branch.stack.map((a, i) => {
+                  const migratorFn = migratorMap && migratorMap[a.type];
+                  if (i === index) {
+                    return {
+                      ...a,
+                      skipped: true,
+                    };
+                  }
+                  if (i > index && migratorFn && !readyMap[a.type]) {
+                    const { newPayload, isReady } = migratorFn(a.payload);
+                    readyMap[a.type] = isReady;
+                    console.log(
+                      'migrated payload',
+                      a.type,
+                      a.payload,
+                      newPayload
+                    );
+                    return {
+                      ...a,
+                      payload: newPayload,
+                    };
+                  }
+                  return a;
+                }),
+              },
+            },
+          })
+        );
+      } else {
+        throw new Error(
+          `action with id ${actionId} not found on branch with id ${branchId}${
+            branchId === history.currentBranchId ? '(current branch)' : ''
+          }`
+        );
+      }
+    },
+    [
+      history.branches,
+      history.currentBranchId,
+      history.currentPosition.actionId,
+    ]
+  );
+
   return {
     undoables,
     canUndo,
@@ -228,5 +293,6 @@ export const useUndoableEffects = <PBT extends PayloadByType>(
     switchToBranch,
     history,
     setHistory,
+    skip,
   };
 };

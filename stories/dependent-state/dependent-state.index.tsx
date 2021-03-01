@@ -20,6 +20,7 @@ import MakeUndoableSetterReadme from './make-undoable-setter.md';
 import { PreviousStateAndPayloadExample } from './previous-state-and-payload';
 import PreviousStateAndPayloadIntro from './previous-state-and-payload-intro.md';
 import PreviousStateAndPayloadReadme from './previous-state-and-payload.md';
+import { MigratorsExample } from './migrators';
 
 storiesOf('useUndoableEffects/dependent state', module)
   //@ts-ignore
@@ -56,5 +57,11 @@ storiesOf('useUndoableEffects/dependent state', module)
     readme: {
       content: PreviousStateAndPayloadIntro,
       sidebar: PreviousStateAndPayloadReadme,
+    },
+  })
+  .add('migrators', () => <MigratorsExample />, {
+    readme: {
+      // content: PreviousStateAndPayloadIntro,
+      // sidebar: PreviousStateAndPayloadReadme,
     },
   });
