@@ -211,8 +211,8 @@ export const getSideEffectForUndo = <PBT extends PayloadByType>(
 export const getSideEffectForUndoAction = <PBT extends PayloadByType>(
   handlers: UndoableHandlersByType<PBT>
 ) => (action: HistoryItemUnion<PBT>) => {
-  const { type, payload } = action;
-  return () => handlers[type].undo(payload);
+  const { type, payload, skipped } = action;
+  return () => !skipped && handlers[type].undo(payload);
 };
 
 export const redoUpdater = <PBT extends PayloadByType>(prev: History<PBT>) => ({
@@ -243,8 +243,8 @@ export const getSideEffectForRedo = <PBT extends PayloadByType>(
 export const getSideEffectForRedoAction = <PBT extends PayloadByType>(
   handlers: UndoableHandlersByType<PBT>
 ) => (action: HistoryItemUnion<PBT>) => {
-  const { type, payload } = action;
-  return () => handlers[type].drdo(payload);
+  const { type, payload, skipped } = action;
+  return () => !skipped && handlers[type].drdo(payload);
 };
 
 export const getPathFromCommonAncestor = <PBT extends PayloadByType>(

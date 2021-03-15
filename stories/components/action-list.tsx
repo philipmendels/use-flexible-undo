@@ -161,7 +161,14 @@ const StackItem = <PBT extends PayloadByType>({
         <div className="time" style={{ minWidth: '120px' }}>
           {formatTime(created, now)}
         </div>
-        <div className="description" style={{ flex: 1, whiteSpace: 'nowrap' }}>
+        <div
+          className="description"
+          style={{
+            flex: 1,
+            whiteSpace: 'nowrap',
+            textDecoration: (action as any).skipped ? 'line-through' : 'none',
+          }}
+        >
           {describeAction
             ? describeAction(action)
             : JSON.stringify({ type, payload })}

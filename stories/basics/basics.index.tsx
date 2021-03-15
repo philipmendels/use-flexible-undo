@@ -33,6 +33,8 @@ import { InvertFTHandlerExample } from './invert-from-to-handler';
 import InvertFTHandlerIntro from './invert-from-to-handler-intro.md';
 import InvertFTHandlerReadme from './invert-from-to-handler.md';
 
+import { SkipExample } from './skip';
+
 storiesOf('useUndoableEffects/payload & handlers', module)
   //@ts-ignore
   .addParameters({ options: { theme: {} } })
@@ -95,4 +97,10 @@ storiesOf('useUndoableEffects/payload & handlers', module)
       content: InvertFTHandlerIntro,
       sidebar: InvertFTHandlerReadme,
     },
+  })
+  .add('skip', () => <SkipExample />, {
+    // readme: {
+    //   content: InvertFTHandlerIntro,
+    //   sidebar: InvertFTHandlerReadme,
+    // },
   });

@@ -1,4 +1,11 @@
-import { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useEffect,
+  useMemo,
+} from 'react';
 
 import {
   PayloadByType,
@@ -8,7 +15,7 @@ import {
   Updater,
   BranchSwitchModus,
 } from './index.types';
-import { mapObject } from './util-internal';
+import { mapObject, mergeDeepC } from './util-internal';
 import {
   getCurrentBranch,
   updatePath,
@@ -26,6 +33,7 @@ import {
   getNewPosition,
   getBranchSwitchProps,
   getTTActions,
+  getCurrentIndex,
 } from './helpers';
 import { defaultOptions } from './constants';
 import { combineHandlersByType } from './util';
@@ -78,14 +86,20 @@ export const useUndoableEffects = <PBT extends PayloadByType>(
     (
       isPossible: (history: History<PBT>) => boolean,
       getSideEffect: (history: History<PBT>) => () => void,
-      updater: Updater<History<PBT>>
+      updater: Updater<History<PBT>>,
+      queue: boolean
     ) => {
       let isSideEffectQueued = false;
       setHistory(prev => {
         if (isPossible(prev)) {
           if (!isSideEffectQueued) {
             isSideEffectQueued = true;
-            queuedSideEffectsRef.current.push(getSideEffect(prev));
+            const effect = getSideEffect(prev);
+            if (queue) {
+              queuedSideEffectsRef.current.push(getSideEffect(prev));
+            } else {
+              effect();
+            }
           }
           return updater(prev);
         } else {
@@ -96,21 +110,37 @@ export const useUndoableEffects = <PBT extends PayloadByType>(
     []
   );
 
+  const handleUndo = useCallback(
+    (queue: boolean) => {
+      handleUndoRedo(
+        isUndoPossible,
+        getSideEffectForUndo(convertedHandlers),
+        undoUpdater,
+        queue
+      );
+    },
+    [handleUndoRedo, convertedHandlers]
+  );
+
   const undo = useCallback(() => {
-    handleUndoRedo(
-      isUndoPossible,
-      getSideEffectForUndo(convertedHandlers),
-      undoUpdater
-    );
-  }, [handleUndoRedo, convertedHandlers]);
+    handleUndo(true);
+  }, [handleUndo]);
+
+  const handleRedo = useCallback(
+    (queue: boolean) => {
+      handleUndoRedo(
+        isRedoPossible,
+        getSideEffectForRedo(convertedHandlers),
+        redoUpdater,
+        queue
+      );
+    },
+    [handleUndoRedo, convertedHandlers]
+  );
 
   const redo = useCallback(() => {
-    handleUndoRedo(
-      isRedoPossible,
-      getSideEffectForRedo(convertedHandlers),
-      redoUpdater
-    );
-  }, [handleUndoRedo, convertedHandlers]);
+    handleRedo(true);
+  }, [handleRedo]);
 
   const timeTravelCurrentBranch = useCallback(
     (newIndex: number) => {
@@ -217,6 +247,88 @@ export const useUndoableEffects = <PBT extends PayloadByType>(
     [history, timeTravelCurrentBranch]
   );
 
+  const skipRef = useRef<{ index: number; branchId: string } | null>(null);
+
+  useEffect(() => {
+    if (skipRef.current) {
+      const branch = getCurrentBranch(history);
+      const index = getCurrentIndex(history);
+      if (index < branch.stack.length - 1) {
+        const action = branch.stack[index + 1];
+        const migrator = props.migrators![action.type];
+        if (migrator) {
+          const payload = migrator(action.payload);
+          setHistory(
+            mergeDeepC({
+              branches: {
+                [branch.id]: {
+                  stack: branch.stack.map((a, i) => {
+                    if (i === index + 1) {
+                      return {
+                        ...a,
+                        payload,
+                      };
+                    }
+                    return a;
+                  }),
+                },
+              },
+            })
+          );
+        }
+        handleRedo(false);
+      } else {
+        skipRef.current = null;
+      }
+    }
+  }, [history, props.migrators, handleRedo]);
+
+  const skip = useCallback(
+    (
+      actionId: string = history.currentPosition.actionId,
+      branchId: string = history.currentBranchId
+    ) => {
+      const branch = history.branches[branchId];
+      const index = branch.stack.findIndex(action => action.id === actionId);
+      if (index >= 0) {
+        handleUndo(false);
+        setHistory(
+          mergeDeepC({
+            branches: {
+              [branchId]: {
+                stack: branch.stack.map((a, i) => {
+                  if (i === index) {
+                    return {
+                      ...a,
+                      skipped: true,
+                    };
+                  }
+                  return a;
+                }),
+              },
+            },
+          })
+        );
+        skipRef.current = {
+          index,
+          branchId,
+        };
+      } else {
+        throw new Error(
+          `action with id ${actionId} not found on branch with id ${branchId}${
+            branchId === history.currentBranchId ? '(current branch)' : ''
+          }`
+        );
+      }
+    },
+    [
+      handleUndo,
+      history.branches,
+      history.currentBranchId,
+      history.currentPosition.actionId,
+    ]
+  );
+
   return {
     undoables,
     canUndo,
@@ -228,5 +340,6 @@ export const useUndoableEffects = <PBT extends PayloadByType>(
     switchToBranch,
     history,
     setHistory,
+    skip,
   };
 };
