@@ -1,8 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { vAdd, vScale } from 'vec-la-fp';
 
-import { initHistory } from 'undomundo';
-
 import { useFlexibleUndo } from '../src';
 
 type Vector2d = [number, number];
@@ -36,7 +34,6 @@ describe('use-flexible-undo', () => {
 
     const { result } = renderHook(() =>
       useFlexibleUndo<PayloadConfigByType>({
-        initialHistory: initHistory(),
         actionConfigs: {
           setColor: {
             updateState: _setColor,
@@ -98,7 +95,6 @@ describe('use-flexible-undo', () => {
 
     const { result } = renderHook(() =>
       useFlexibleUndo<PayloadConfigByType>({
-        initialHistory: initHistory(),
         actionConfigs: {
           setColor: {
             updateState: _setColor,

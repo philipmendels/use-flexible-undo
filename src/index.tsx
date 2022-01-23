@@ -7,6 +7,8 @@ import {
   CustomData,
   OmitStrict,
   History,
+  initHistory,
+  createEmptyHistory,
 } from 'undomundo';
 
 export const useFlexibleUndo = <
@@ -18,13 +20,14 @@ export const useFlexibleUndo = <
   initialHistory,
   initBranchData,
 }: OmitStrict<MakeUndoableEffectsProps<PBT, CBD>, 'onChange'>) => {
-  const [history, setHistory] = useState(initialHistory);
+  const [history, setHistory] = useState(
+    initialHistory ??
+      initHistory<PBT, CBD>(initBranchData?.(createEmptyHistory()))
+  );
 
   const { getCurrentHistory, ...returnValues } = useMemo(
     () =>
       makeUndoableEffects({
-        // Pass 'history' instead of 'initialHistory' so that the internal state
-        // of 'makeUndoableEffects' stays in sync with the history state.
         initialHistory: history,
         actionConfigs,
         initBranchData,
@@ -44,6 +47,7 @@ export const useFlexibleUndo = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
   return {
     ...returnValues,
     history,
