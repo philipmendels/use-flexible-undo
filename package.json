@@ -13,7 +13,7 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "tsdx test --passWithNoTests",
+    "test": "tsdx test --passWithNoTests --no-cache",
     "lint": "tsdx lint",
     "prepare": "tsdx build"
   },
@@ -51,14 +51,16 @@
   "description": "React hooks for creating a branching undo/redo history",
   "devDependencies": {
     "@babel/core": "^7.11.6",
+    "@testing-library/react-hooks": "^7.0.2",
     "@types/jest": "^24.0.24",
     "babel-loader": "^8.0.6",
-    "emotion": "^10.0.27",
     "husky": "^3.1.0",
+    "react": "^17.0.2",
+    "react-test-renderer": "^17.0.2",
     "ts-loader": "^8.0.3",
     "tsdx": "^0.13.3",
     "tslib": "^2.0.1",
-    "typescript": "^3.9.7"
-  },
-  "dependencies": {}
+    "typescript": "^3.9.7",
+    "vec-la-fp": "^1.9.0"
+  }
 }
