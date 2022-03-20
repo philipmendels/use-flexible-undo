@@ -46,7 +46,7 @@
     "hook",
     "typescript"
   ],
-  "description": "Hook that let's you use the branching undo/redo functionality of `undomundo` independently of how you structure your application state.",
+  "description": "React hook that lets you use undomundo's branching undo/redo functionality independently of how you structure your application state.",
   "devDependencies": {
     "@parcel/packager-ts": "^2.3.2",
     "@parcel/reporter-bundle-analyzer": "^2.3.2",

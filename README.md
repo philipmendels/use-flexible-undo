@@ -1,6 +1,6 @@
 # use-flexible-undo
 
-Experimental hook that let's you use the branching undo/redo functionality of `undomundo` independently of how you structure your application state. Note that for most use cases it's probably better to use undomundo directly, e.g. to use undomundo's `makeUndoableReducer` in combination with React's `useReducer`. That will integrate your app state with the undo history state and enables multi-user undo/redo. See `undomundo` for more details.
+React hook that lets you use undomundo's branching undo/redo functionality independently of how you structure your application state. Note that for most use cases it's probably better to use undomundo directly, e.g. to use undomundo's `makeUndoableReducer` in combination with React's `useReducer`. That will integrate your app state with the undo history state and enables multi-user undo/redo. See [undomundo](https://github.com/philipmendels/undomundo) for more details.
 
 ```TypeScript
 import { FC, useState } from 'react';
