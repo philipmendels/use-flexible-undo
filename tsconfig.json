@@ -1,24 +1,11 @@
 {
-  "include": ["src", "types"],
-  "files": ["typings.d.ts"],
+  "include": ["src/**/*", "test/**/*"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
-    "importHelpers": true,
-    "declaration": true,
-    "sourceMap": true,
-    "rootDirs": ["./src", "./stories", "./.storybook"],
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "jsx": "react",
     "esModuleInterop": true,
-    "baseUrl": "./",
-    "paths": {
-      "use-flexible-undo": ["./dist/index"]
-    }
   }
 }

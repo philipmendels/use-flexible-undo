@@ -13,7 +13,7 @@ import {
 
 export const useFlexibleUndo = <
   PBT extends PayloadConfigByType,
-  CBD extends CustomData = {}
+  CBD extends CustomData = Record<string, unknown>
 >({
   actionConfigs,
   options,
@@ -25,6 +25,7 @@ export const useFlexibleUndo = <
       initHistory<PBT, CBD>(initBranchData?.(createEmptyHistory()))
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { getCurrentHistory, ...returnValues } = useMemo(
     () =>
       makeUndoableEffects({
