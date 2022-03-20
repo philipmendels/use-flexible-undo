@@ -3,4 +3,5 @@
 node_modules
 .cache
 dist
-storybook-static
+.parcel-cache
+parcel-bundle-reports
