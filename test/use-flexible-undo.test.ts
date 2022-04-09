@@ -11,7 +11,7 @@ type PayloadConfigByType = {
   };
   moveBy: {
     payload: Vector2d;
-    isRelative: true;
+    isCustom: true;
   };
 };
 

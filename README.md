@@ -18,8 +18,8 @@ type PayloadConfigByType = {
   };
   moveBy: {
     payload: Vector2d;
-    // If you need to you can define relative actions.
-    isRelative: true;
+    // If you need to you can define custom/relative actions.
+    isCustom: true;
   };
 };
 
